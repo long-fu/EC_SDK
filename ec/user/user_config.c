@@ -6,10 +6,12 @@
 char log_buffer[512];
 #endif
 
-// MARK: 保存用户配置信息
+/// 保存用户配置信息
 void ICACHE_FLASH_ATTR
 CFG_Save()
 {
+	// TODO: 保存用户配置信息
+	
 	//  spi_flash_read((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
 	//                    (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
 
@@ -32,11 +34,12 @@ CFG_Save()
 	// }
 }
 
-// MARK: 加载用户配置信息
+/// 加载用户配置信息
 void ICACHE_FLASH_ATTR
 CFG_Load()
 {
-
+	// TODO: 读取用户配置信息
+	
 	// ec_log("\r\nload ...\r\n");
 	// spi_flash_read((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
 	// 			   (uint32 *)&saveFlag, sizeof(SAVE_FLAG));

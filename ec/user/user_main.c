@@ -5,6 +5,7 @@
 #include "user_config.h"
 
 #if AT_CUSTOM
+/// MAKR: AT测试代码
 // test :AT+TEST=1,"abc"<,3>
 void ICACHE_FLASH_ATTR
 at_setupCmdTest(uint8_t id, char *pPara)
