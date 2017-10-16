@@ -13,6 +13,8 @@
 
 #define ESPCONN_DEBUG_ON 1
 
+#define WIFI_DEBUG_ON 1
+
 /// 用户信息存储起始位置
 #define CFG_LOCATION 0xD0
 
