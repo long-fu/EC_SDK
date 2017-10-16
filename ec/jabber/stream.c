@@ -373,12 +373,12 @@ int iks_connect_with(iksparser *prs, const char *server, int port, const char *s
 	if (!trans->connect)
 		return IKS_NET_NOTSUPP;
 
-	if (!data->buf)
-	{
-		data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
-		if (NULL == data->buf)
-			return IKS_NOMEM;
-	}
+	// if (!data->buf)
+	// {
+	// 	data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
+	// 	if (NULL == data->buf)
+	// 		return IKS_NOMEM;
+	// }
 
 	ret = trans->connect(prs, &data->sock, server, port);
 	if (ret)
@@ -386,7 +386,8 @@ int iks_connect_with(iksparser *prs, const char *server, int port, const char *s
 
 	data->trans = trans;
 
-	return iks_send_header(prs, server_name);
+	// return iks_send_header(prs, server_name);
+	return IKS_OK;
 }
 
 int iks_connect_async(iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func)

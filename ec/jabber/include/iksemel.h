@@ -279,6 +279,8 @@ int iks_start_sasl (iksparser *prs, enum ikssasltype type, char *username, char 
 #define IKS_NS_XMPP_SASL  "urn:ietf:params:xml:ns:xmpp-sasl"
 #define IKS_NS_XMPP_BIND  "urn:ietf:params:xml:ns:xmpp-bind"
 #define IKS_NS_XMPP_SESSION  "urn:ietf:params:xml:ns:xmpp-session"
+#define IKS_NS_XMPP_PING   "urn:xmpp:ping"
+#define IKS_NS_XMPP_PONG   "urn:xmpp:pong"
 
 #define IKS_ID_USER 1
 #define IKS_ID_SERVER 2

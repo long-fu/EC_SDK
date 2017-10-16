@@ -2,6 +2,7 @@
 #define e_soc_h
 
 #include "c_types.h"
+
 typedef void (* soc_connect_status_callback)(int status);
 typedef void (* soc_recv_callback)(char *data, unsigned short len);
 

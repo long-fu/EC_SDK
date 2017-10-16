@@ -207,7 +207,7 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
         }
     }
 
-    body_len = (int)os_strlen(http_body);
+    body_len = (int)os_strlenhttp_body);
     if (body_len > 0)
     {
         os_sprintf(content_length, "Content-Length: %d", body_len);
@@ -238,7 +238,7 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
 
 // 创建连接部分 初始化部分 请求解析部分
 int ICACHE_FLASH_ATTR
-e_http_request(const char *url,
+http_request(const char *url,
                int type, // type 表示请求类型
                const char *body,
                http_success_callback success_handl,

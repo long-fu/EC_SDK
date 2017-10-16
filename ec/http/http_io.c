@@ -26,7 +26,7 @@ static uint32 espconn_data_len = 0;
 // TRUE 表示数据可以立即进行发送
 static bool espconn_flag = FALSE;
 
-static ip_addr_t ip = { 0 };
+static ip_addr_t espconn_ip = { 0 };
 static struct espconn *espconn_ptr = NULL;
 
 static void ICACHE_FLASH_ATTR
@@ -185,13 +185,13 @@ e_soc_send(const char *data, int len)
 
 // 创建连接
 void ICACHE_FLASH_ATTR
-e_soc_creat(char *host, 
+e_soc_creat(char *host,
     int port, 
-    soc_connect_status_callback connect_status, 
+    soc_connect_status_callback connect_status_handler, 
     soc_recv_callback recv_handler)
 {
     uint32 ipi = 0;
-    if ((host == NULL) || (os_strlen(host) <= 0) || connect_status == NULL) 
+    if ((host == NULL) || os_strlen(host) <= 0 || connect_status_handler == NULL) 
     {
         return ;
     }
@@ -216,28 +216,32 @@ e_soc_creat(char *host,
     // 2. 连接失败重连回调
     // 注册 TCP 连接发生异常断开时的回调函数，可以在回调函数中进行重连。
     espconn_regist_reconcb(espconn_ptr, espconn_on_recon_cb);
-        ipi = ipaddr_addr("192.168.11.223");  /// 测试代码
-        os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
-        // MARK: 进行连接
-        // TODO: 对返回值进行判断
-        espconn_connect(espconn_ptr);
+
+    espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
+    
+    //    ipi = ipaddr_addr("192.168.11.223");  /// 测试代码
+    //     os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
+    //     // MARK: 进行连接
+    //     // TODO: 对返回值进行判断
+    //     espconn_connect(espconn_ptr);
+    
+    
 
     // MARK: 需要对ip地址进行判断
     // if (ip.addr != 0)
     // {
     //     // MARK: 直接进行连接
-    //     //   ip = ipaddr_addr("192.168.11.223");  /// 测试代码
-    //     os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ip, sizeof(ip));
+    //     os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ip.addr, sizeof(ip.addr));
     //     // MARK: 进行连接
     //     // TODO: 对返回值进行判断
     //     espconn_connect(espconn_ptr);
     // }
     // else
     // {
-
-    //     INFO("on gethostbyname %s\r\n",host);
+    //     // MARK: 进行域名解析
+    //     // INFO("on gethostbyname %s\r\n",host);
     //     // MARK: 进行域名解析 - 解析后会回调结果
     //     // TODO: 对返回值进行判断
-    //     espconn_gethostbyname(espconn_ptr, host, &ip, espconn_on_dns_cb);
+    //     espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
     // }
 }

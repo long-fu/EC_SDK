@@ -84,11 +84,28 @@ at_funcationType at_custom_cmd[] = {
 };
 #endif
 
-void wifiConnectCb(uint8_t status)
+
+static void ICACHE_FLASH_ATTR 
+http_success(char *data, int len)
+{
+	ec_log("HTTP SUCCESS %d: [%s]\r\n", len, data);
+}
+
+static void ICACHE_FLASH_ATTR 
+http_failure(int error) 
+{
+	ec_log("HTTP ERROR %d \r\n",error);
+}
+
+void ICACHE_FLASH_ATTR
+wifiConnectCb(uint8_t status)
 {
     if(status == STATION_GOT_IP)
     {
         // TODO: 发起网络连接
+        // 1. HTTP
+        // 2. XMPP
+        xmpp_init();
     } 
     else 
     {
@@ -109,6 +126,17 @@ system_on_done_cb(void)
     else
     {
         // TODO: 完整的流程
+        // 1. 获取到配置信息 http xmpp wifi
+        server_init(80);
+        // 2. 连接wifi
+        wifi_connect(NULL, NULL, wifiConnectCb);
+
+        // 2. 通过http 注册xmpp
+        http_request("",0,"",http_success,http_failure);
+        // 3. 连接xmpp
+        
+        
+        
     }
 }
 
