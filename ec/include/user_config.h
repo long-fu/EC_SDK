@@ -16,4 +16,8 @@
 /// 用户信息存储起始位置
 #define CFG_LOCATION 0xD0
 
+void CFG_Save(void);
+void CFG_Load(void);
+int user_isRegisrer(void);
+
 #endif

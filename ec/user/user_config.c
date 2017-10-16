@@ -8,10 +8,10 @@ char log_buffer[512];
 
 /// 保存用户配置信息
 void ICACHE_FLASH_ATTR
-CFG_Save()
+CFG_Save(void)
 {
 	// TODO: 保存用户配置信息
-	
+
 	//  spi_flash_read((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
 	//                    (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
 
@@ -36,10 +36,10 @@ CFG_Save()
 
 /// 加载用户配置信息
 void ICACHE_FLASH_ATTR
-CFG_Load()
+CFG_Load(void)
 {
 	// TODO: 读取用户配置信息
-	
+
 	// ec_log("\r\nload ...\r\n");
 	// spi_flash_read((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
 	// 			   (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
@@ -52,7 +52,6 @@ CFG_Load()
 	// }
 	// if(sysCfg.cfg_holder != CFG_HOLDER){
 	// 	os_memset(&sysCfg, 0x00, sizeof sysCfg);
-
 
 	// 	sysCfg.cfg_holder = CFG_HOLDER;
 
@@ -75,5 +74,10 @@ CFG_Load()
 
 	// 	CFG_Save();
 	// }
+}
 
+/// 判断客户端是否被用户注册(也就是绑定) - 复位的时候才会发生值的一个变化
+int ICACHE_FLASH_ATTR
+user_isRegisrer(void)
+{
 }
