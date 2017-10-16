@@ -4,6 +4,7 @@
 #include "user_interface.h"
 #include "user_config.h"
 #include "user_debug.h"
+#include "wifi.h"
 
 #if AT_CUSTOM
 /// MAKR: AT测试代码
@@ -83,6 +84,18 @@ at_funcationType at_custom_cmd[] = {
 };
 #endif
 
+void wifiConnectCb(uint8_t status)
+{
+    if(status == STATION_GOT_IP)
+    {
+        // TODO: 发起网络连接
+    } 
+    else 
+    {
+        // TODO: 断开网络连接
+    }
+}
+
 void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
@@ -90,6 +103,8 @@ system_on_done_cb(void)
     if (user_isRegisrer())
     {
         // TODO: 进入XMPP
+        // MARK: station model 连接wifi
+        wifi_connect(NULL, NULL, wifiConnectCb);
     }
     else
     {

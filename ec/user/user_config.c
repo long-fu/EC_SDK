@@ -80,4 +80,6 @@ CFG_Load(void)
 int ICACHE_FLASH_ATTR
 user_isRegisrer(void)
 {
+	return 1;
 }
+
