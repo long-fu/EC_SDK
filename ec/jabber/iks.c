@@ -75,7 +75,7 @@ iks_new_within (const char *name, ikstack *s)
 	if (name) len = sizeof (struct iks_tag); else len = sizeof (struct iks_cdata);
 	x = iks_stack_alloc (s, len);
 	if (!x) return NULL;
-	memset (x, 0, len);
+	os_memset (x, 0, len);
 	x->s = s;
 	x->type = IKS_TAG;
 	if (name) {
@@ -110,7 +110,7 @@ iks_insert_cdata (iks *x, const char *data, size_t len)
 	iks *y;
 
 	if(!x || !data) return NULL;
-	if(len == 0) len = strlen (data);
+	if(len == 0) len = os_strlen (data);
 
 	y = IKS_TAG_LAST_CHILD (x);
 	if (y && y->type == IKS_CDATA) {
@@ -136,14 +136,14 @@ iks_insert_attrib (iks *x, const char *name, const char *value)
 
 	y = IKS_TAG_ATTRIBS (x);
 	while (y) {
-		if (strcmp (name, IKS_ATTRIB_NAME (y)) == 0) break;
+		if (os_strcmp (name, IKS_ATTRIB_NAME (y)) == 0) break;
 		y = y->next;
 	}
 	if (NULL == y) {
 		if (!value) return NULL;
 		y = iks_stack_alloc (x->s, sizeof (struct iks_attrib));
 		if (!y) return NULL;
-		memset (y, 0, sizeof (struct iks_attrib));
+		os_memset (y, 0, sizeof (struct iks_attrib));
 		y->type = IKS_ATTRIBUTE;
 		y->s = x->s;
 		IKS_ATTRIB_NAME (y) = iks_stack_strdup (x->s, name, 0);
@@ -233,7 +233,7 @@ iks_append_cdata (iks *x, const char *data, size_t len)
 	iks *y;
 
 	if (!x || !data) return NULL;
-	if (len == 0) len = strlen (data);
+	if (len == 0) len = os_strlen (data);
 
 	y = iks_new_within (NULL, x->s);
 	if (!y) return NULL;
@@ -261,7 +261,7 @@ iks_prepend_cdata (iks *x, const char *data, size_t len)
 	iks *y;
 
 	if (!x || !data) return NULL;
-	if (len == 0) len = strlen (data);
+	if (len == 0) len = os_strlen (data);
 
 	y = iks_new_within (NULL, x->s);
 	if (!y) return NULL;
@@ -399,7 +399,7 @@ iks_find (iks *x, const char *name)
 	if (!x) return NULL;
 	y = IKS_TAG_CHILDREN (x);
 	while (y) {
-		if (IKS_TAG == y->type && IKS_TAG_NAME (y) && strcmp (IKS_TAG_NAME (y), name) == 0) return y;
+		if (IKS_TAG == y->type && IKS_TAG_NAME (y) && os_strcmp (IKS_TAG_NAME (y), name) == 0) return y;
 		y = y->next;
 	}
 	return NULL;
@@ -426,7 +426,7 @@ iks_find_attrib (iks *x, const char *name)
 
 	y = IKS_TAG_ATTRIBS (x);
 	while (y) {
-		if (IKS_ATTRIB_NAME (y) && strcmp (IKS_ATTRIB_NAME (y), name) == 0)
+		if (IKS_ATTRIB_NAME (y) && os_strcmp (IKS_ATTRIB_NAME (y), name) == 0)
 			return IKS_ATTRIB_VALUE (y);
 		y = y->next;
 	}
@@ -443,7 +443,7 @@ iks_find_with_attrib (iks *x, const char *tagname, const char *attrname, const c
 	if (tagname) {
 		for (y = IKS_TAG_CHILDREN (x); y; y = y->next) {
 			if (IKS_TAG == y->type
-				&& strcmp (IKS_TAG_NAME (y), tagname) == 0
+				&& os_strcmp (IKS_TAG_NAME (y), tagname) == 0
 				&& iks_strcmp (iks_find_attrib (y, attrname), value) == 0) {
 					return y;
 			}
@@ -547,8 +547,8 @@ escape_size (char *src, size_t len)
 static char * ICACHE_FLASH_ATTR
 my_strcat (char *dest, char *src, size_t len)
 {
-	if (0 == len) len = strlen (src);
-	memcpy (dest, src, len);
+	if (0 == len) len = os_strlen (src);
+	os_memcpy (dest, src, len);
 	return dest + len;
 }
 
@@ -592,7 +592,7 @@ iks_string (ikstack *s, iks *x)
 			return iks_stack_strdup (s, IKS_CDATA_CDATA (x), IKS_CDATA_LEN (x));
 		} else {
 			ret = iks_malloc (IKS_CDATA_LEN (x) + 1);
-			memcpy (ret, IKS_CDATA_CDATA (x), IKS_CDATA_LEN (x) + 1);
+			os_memcpy (ret, IKS_CDATA_CDATA (x), IKS_CDATA_LEN (x) + 1);
 			return ret;
 		}
 	}
@@ -605,10 +605,10 @@ iks_string (ikstack *s, iks *x)
 		if (dir==0) {
 			if (y->type == IKS_TAG) {
 				size++;
-				size += strlen (IKS_TAG_NAME (y));
+				size += os_strlen (IKS_TAG_NAME (y));
 				for (z = IKS_TAG_ATTRIBS (y); z; z = z->next) {
-					size += 4 + strlen (IKS_ATTRIB_NAME (z))
-						+ escape_size (IKS_ATTRIB_VALUE (z), strlen (IKS_ATTRIB_VALUE (z)));
+					size += 4 + os_strlen (IKS_ATTRIB_NAME (z))
+						+ escape_size (IKS_ATTRIB_VALUE (z), os_strlen (IKS_ATTRIB_VALUE (z)));
 				}
 				if (IKS_TAG_CHILDREN (y)) {
 					size++;
@@ -625,7 +625,7 @@ iks_string (ikstack *s, iks *x)
 		z = y->next;
 		if (z) {
 			if (0 == level) {
-				if (IKS_TAG_CHILDREN (y)) size += 3 + strlen (IKS_TAG_NAME (y));
+				if (IKS_TAG_CHILDREN (y)) size += 3 + os_strlen (IKS_TAG_NAME (y));
 				break;
 			}
 			y = z;
@@ -633,7 +633,7 @@ iks_string (ikstack *s, iks *x)
 		} else {
 			y = y->parent;
 			level--;
-			if (level >= 0) size += 3 + strlen (IKS_TAG_NAME (y));
+			if (level >= 0) size += 3 + os_strlen (IKS_TAG_NAME (y));
 			if (level < 1) break;
 			dir = 1;
 		}
@@ -658,7 +658,7 @@ iks_string (ikstack *s, iks *x)
 					t = my_strcat (t, IKS_ATTRIB_NAME (y), 0);
 					*t++ = '=';
 					*t++ = '\'';
-					t = escape (t, IKS_ATTRIB_VALUE (y), strlen (IKS_ATTRIB_VALUE (y)));
+					t = escape (t, IKS_ATTRIB_VALUE (y), os_strlen (IKS_ATTRIB_VALUE (y)));
 					*t++ = '\'';
 					y = y->next;
 				}

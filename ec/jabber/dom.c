@@ -111,7 +111,7 @@ iks_tree(const char *xml_str, size_t len, int *err)
 	int e;
 
 	if (0 == len)
-		len = strlen(xml_str);
+		len = os_strlen(xml_str);
 	prs = iks_dom_new(&x);
 	if (!prs)
 	{

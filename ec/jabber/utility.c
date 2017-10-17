@@ -55,8 +55,8 @@ iks_strcat(char *dest, const char *src)
 	if (!src)
 		return dest;
 
-	len = strlen(src);
-	memcpy(dest, src, len);
+	len = os_strlen(src);
+	os_memcpy(dest, src, len);
 	dest[len] = '\0';
 	return dest + len;
 }
@@ -66,7 +66,7 @@ iks_strcmp(const char *a, const char *b)
 {
 	if (!a || !b)
 		return -1;
-	return strcmp(a, b);
+	return os_strcmp(a, b);
 }
 
 int ICACHE_FLASH_ATTR
@@ -82,7 +82,7 @@ iks_strncmp(const char *a, const char *b, size_t n)
 {
 	if (!a || !b)
 		return -1;
-	return strncmp(a, b, n);
+	return os_strncmp(a, b, n);
 }
 
 int ICACHE_FLASH_ATTR
@@ -98,7 +98,7 @@ iks_strlen(const char *src)
 {
 	if (!src)
 		return 0;
-	return strlen(src);
+	return os_strlen(src);
 }
 
 /*****  XML Escaping  *****/
@@ -112,7 +112,7 @@ iks_escape(ikstack *s, char *src, size_t len)
 	if (!src || !s)
 		return NULL;
 	if (len == -1)
-		len = strlen(src);
+		len = os_strlen(src);
 
 	nlen = len;
 	for (i = 0; i < len; i++)
@@ -148,23 +148,23 @@ iks_escape(ikstack *s, char *src, size_t len)
 		switch (src[i])
 		{
 		case '&':
-			memcpy(&ret[j], "&amp;", 5);
+			os_memcpy(&ret[j], "&amp;", 5);
 			j += 5;
 			break;
 		case '\'':
-			memcpy(&ret[j], "&apos;", 6);
+			os_memcpy(&ret[j], "&apos;", 6);
 			j += 6;
 			break;
 		case '"':
-			memcpy(&ret[j], "&quot;", 6);
+			os_memcpy(&ret[j], "&quot;", 6);
 			j += 6;
 			break;
 		case '<':
-			memcpy(&ret[j], "&lt;", 4);
+			os_memcpy(&ret[j], "&lt;", 4);
 			j += 4;
 			break;
 		case '>':
-			memcpy(&ret[j], "&gt;", 4);
+			os_memcpy(&ret[j], "&gt;", 4);
 			j += 4;
 			break;
 		default:
@@ -187,7 +187,7 @@ iks_unescape(ikstack *s, char *src, size_t len)
 	if (!strchr(src, '&'))
 		return src;
 	if (len == -1)
-		len = strlen(src);
+		len = os_strlen(src);
 
 	ret = iks_stack_alloc(s, len + 1);
 	if (!ret)
@@ -198,27 +198,27 @@ iks_unescape(ikstack *s, char *src, size_t len)
 		if (src[i] == '&')
 		{
 			i++;
-			if (strncmp(&src[i], "amp;", 4) == 0)
+			if (os_strncmp(&src[i], "amp;", 4) == 0)
 			{
 				ret[j] = '&';
 				i += 3;
 			}
-			else if (strncmp(&src[i], "quot;", 5) == 0)
+			else if (os_strncmp(&src[i], "quot;", 5) == 0)
 			{
 				ret[j] = '"';
 				i += 4;
 			}
-			else if (strncmp(&src[i], "apos;", 5) == 0)
+			else if (os_strncmp(&src[i], "apos;", 5) == 0)
 			{
 				ret[j] = '\'';
 				i += 4;
 			}
-			else if (strncmp(&src[i], "lt;", 3) == 0)
+			else if (os_strncmp(&src[i], "lt;", 3) == 0)
 			{
 				ret[j] = '<';
 				i += 2;
 			}
-			else if (strncmp(&src[i], "gt;", 3) == 0)
+			else if (os_strncmp(&src[i], "gt;", 3) == 0)
 			{
 				ret[j] = '>';
 				i += 2;

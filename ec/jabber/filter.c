@@ -36,7 +36,7 @@ iks_filter_new(void)
 	f = iks_malloc(sizeof(iksfilter));
 	if (!f)
 		return NULL;
-	memset(f, 0, sizeof(iksfilter));
+	os_memset(f, 0, sizeof(iksfilter));
 
 	return f;
 }
@@ -53,7 +53,7 @@ iks_filter_add_rule(iksfilter *f, iksFilterHook *filterHook, void *user_data, ..
 	if (!s)
 		return NULL;
 	rule = iks_stack_alloc(s, sizeof(iksrule));
-	memset(rule, 0, sizeof(iksrule));
+	os_memset(rule, 0, sizeof(iksrule));
 	rule->s = s;
 	rule->user_data = user_data;
 	rule->filterHook = filterHook;

@@ -80,7 +80,7 @@ iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook)
 
 	prs = iks_malloc (sizeof (iksparser));
 	if (NULL == prs) return NULL;
-	memset (prs, 0, sizeof (iksparser));
+	os_memset (prs, 0, sizeof (iksparser));
 	prs->user_data = user_data;
 	prs->tagHook = tagHook;
 	prs->cdataHook = cdataHook;
@@ -94,7 +94,7 @@ iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *
 
 	prs = iks_stack_alloc (s, sizeof (iksparser));
 	if (NULL == prs) return NULL;
-	memset (prs, 0, sizeof (iksparser));
+	os_memset (prs, 0, sizeof (iksparser));
 	prs->s = s;
 	prs->user_data = user_data;
 	prs->tagHook = tagHook;
@@ -156,7 +156,7 @@ stack_expand (iksparser *prs, int len)
 	tmp = iks_malloc (need);
 	if (!tmp) return 0;
 	diff = tmp - prs->stack;
-	memcpy (tmp, prs->stack, prs->stack_max);
+	os_memcpy (tmp, prs->stack, prs->stack_max);
 	iks_free (prs->stack);
 	prs->stack = tmp;
 	prs->stack_max = need;
@@ -183,7 +183,7 @@ stack_expand (iksparser *prs, int len)
 	if (prs->stack_max - prs->stack_pos <= slen) { \
 		if (0 == stack_expand (prs, slen)) return IKS_NOMEM; \
 	} \
-	memcpy (prs->stack + prs->stack_pos, sbuf, slen); \
+	os_memcpy (prs->stack + prs->stack_pos, sbuf, slen); \
 	prs->stack_pos += slen; \
 }
 
@@ -364,7 +364,7 @@ sax_core (iksparser *prs, char *buf, int len)
 					prs->attmax = 12;
 					prs->atts = iks_malloc (sizeof(char *) * 2 * 12);
 					if (!prs->atts) return IKS_NOMEM;
-					memset (prs->atts, 0, sizeof(char *) * 2 * 12);
+					os_memset (prs->atts, 0, sizeof(char *) * 2 * 12);
 					prs->attcur = 0;
 				} else {
 					if (prs->attcur >= ((prs->attmax - 1) * 2)) {
@@ -372,8 +372,8 @@ sax_core (iksparser *prs, char *buf, int len)
 						prs->attmax += 12;
 						tmp = iks_malloc (sizeof(char *) * 2 * prs->attmax);
 						if (!tmp) return IKS_NOMEM;
-						memset (tmp, 0, sizeof(char *) * 2 * prs->attmax);
-						memcpy (tmp, prs->atts, sizeof(char *) * prs->attcur);
+						os_memset (tmp, 0, sizeof(char *) * 2 * prs->attmax);
+						os_memcpy (tmp, prs->atts, sizeof(char *) * prs->attcur);
 						free (prs->atts);
 						prs->atts = tmp;
 					}
@@ -469,15 +469,15 @@ sax_core (iksparser *prs, char *buf, int len)
 					char hede[2];
 					char t = '?';
 					prs->entity[prs->entpos] = '\0';
-					if (strcmp(prs->entity, "amp") == 0)
+					if (os_strcmp(prs->entity, "amp") == 0)
 						t = '&';
-					else if (strcmp(prs->entity, "quot") == 0)
+					else if (os_strcmp(prs->entity, "quot") == 0)
 						t = '"';
-					else if (strcmp(prs->entity, "apos") == 0)
+					else if (os_strcmp(prs->entity, "apos") == 0)
 						t = '\'';
-					else if (strcmp(prs->entity, "lt") == 0)
+					else if (os_strcmp(prs->entity, "lt") == 0)
 						t = '<';
-					else if (strcmp(prs->entity, "gt") == 0)
+					else if (os_strcmp(prs->entity, "gt") == 0)
 						t = '>';
 					old = pos + 1;
 					hede[0] = t;
@@ -635,7 +635,7 @@ int ICACHE_FLASH_ATTR
 iks_parse (iksparser *prs, const char *data, size_t len, int finish)
 {
 	if (!data) return IKS_OK;
-	if (len == 0) len = strlen (data);
+	if (len == 0) len = os_strlen (data);
 	return sax_core (prs, (char *) data, len);
 }
 

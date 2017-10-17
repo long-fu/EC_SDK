@@ -28,7 +28,7 @@ iks_base64_decode(const char *buf)
 	save = res = iks_malloc(len);
 	if (!save)
 		return NULL;
-	memset(res, 0, len);
+	os_memset(res, 0, len);
 
 	index = 0;
 	end = buf + iks_strlen(buf);

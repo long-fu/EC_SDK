@@ -64,7 +64,7 @@ tls_handshake(struct ikstls_data **datap, ikstransport *trans, void *sock)
 	data = iks_malloc(sizeof(*data));
 	if (!data)
 		return IKS_NOMEM;
-	memset(data, 0, sizeof(*data));
+	os_memset(data, 0, sizeof(*data));
 	data->trans = trans;
 	data->sock = sock;
 	data->timeout = -1;

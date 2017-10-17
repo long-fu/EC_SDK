@@ -91,7 +91,7 @@ my_bio_gets(BIO *b, char *buf, int len)
 static int ICACHE_FLASH_ATTR
 my_bio_puts(BIO *b, const char *str)
 {
-	return my_bio_write(b, str, strlen(str));
+	return my_bio_write(b, str, os_strlen(str));
 }
 
 static BIO_METHOD my_bio_method = {
@@ -116,7 +116,7 @@ tls_handshake(struct ikstls_data **datap, ikstransport *trans, void *sock)
 	data = iks_malloc(sizeof(*data));
 	if (!data)
 		return IKS_NOMEM;
-	memset(data, 0, sizeof(*data));
+	os_memset(data, 0, sizeof(*data));
 	data->trans = trans;
 	data->sock = sock;
 	data->timeout = -1;

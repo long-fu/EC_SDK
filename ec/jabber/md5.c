@@ -66,7 +66,7 @@ static void iks_md5_compute(iksmd5 *md5);
 void ICACHE_FLASH_ATTR
 iks_md5_reset(iksmd5 *md5)
 {
-	memset(md5, 0, sizeof(iksmd5));
+	os_memset(md5, 0, sizeof(iksmd5));
 	md5->state[0] = 0x67452301;
 	md5->state[1] = 0xEFCDAB89;
 	md5->state[2] = 0x98BADCFE;
@@ -92,7 +92,7 @@ iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finish)
 
 	i = (64 - md5->blen);
 	j = (len < i) ? (len) : (i);
-	memcpy(md5->buffer + md5->blen, data, j);
+	os_memcpy(md5->buffer + md5->blen, data, j);
 	md5->blen += j;
 	len -= j;
 	data += j;
@@ -102,7 +102,7 @@ iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finish)
 		md5->total[0] += 8*64;
 		md5->total[1] += (md5->total[0] < 8*64);
 		j = (len < 64) ? (len) : (64);
-		memcpy(md5->buffer, data, j);
+		os_memcpy(md5->buffer, data, j);
 		md5->blen = j;
 		len -= j;
 		data += j;
@@ -162,7 +162,7 @@ iks_md5(const char *data, char *buf)
 {
 	iksmd5 *md5 = iks_md5_new();
 
-	iks_md5_hash(md5, (const unsigned char*)data, strlen(data), 1);
+	iks_md5_hash(md5, (const unsigned char*)data, os_strlen(data), 1);
 	iks_md5_print(md5, buf);
 	iks_md5_delete(md5);
 }

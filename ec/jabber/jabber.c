@@ -21,10 +21,10 @@ iks_id_new(ikstack *s, const char *jid)
 	id = iks_stack_alloc(s, sizeof(iksid));
 	if (!id)
 		return NULL;
-	memset(id, 0, sizeof(iksid));
+	os_memset(id, 0, sizeof(iksid));
 
 	/* skip scheme */
-	if (strncmp("jabber:", jid, 7) == 0)
+	if (os_strncmp("jabber:", jid, 7) == 0)
 		jid += 7;
 
 	id->full = iks_stack_strdup(s, jid, 0);
@@ -84,7 +84,7 @@ iks_packet(iks *x)
 	pak = iks_stack_alloc(s, sizeof(ikspak));
 	if (!pak)
 		return NULL;
-	memset(pak, 0, sizeof(ikspak));
+	os_memset(pak, 0, sizeof(ikspak));
 	pak->x = x;
 	tmp = iks_find_attrib(x, "from");
 	if (tmp)
@@ -92,46 +92,46 @@ iks_packet(iks *x)
 	pak->id = iks_find_attrib(x, "id");
 
 	tmp = iks_find_attrib(x, "type");
-	if (strcmp(iks_name(x), "message") == 0)
+	if (os_strcmp(iks_name(x), "message") == 0)
 	{
 		pak->type = IKS_PAK_MESSAGE;
 		if (tmp)
 		{
-			if (strcmp(tmp, "chat") == 0)
+			if (os_strcmp(tmp, "chat") == 0)
 				pak->subtype = IKS_TYPE_CHAT;
-			else if (strcmp(tmp, "groupchat") == 0)
+			else if (os_strcmp(tmp, "groupchat") == 0)
 				pak->subtype = IKS_TYPE_GROUPCHAT;
-			else if (strcmp(tmp, "headline") == 0)
+			else if (os_strcmp(tmp, "headline") == 0)
 				pak->subtype = IKS_TYPE_HEADLINE;
-			else if (strcmp(tmp, "error") == 0)
+			else if (os_strcmp(tmp, "error") == 0)
 				pak->subtype = IKS_TYPE_ERROR;
 		}
 	}
-	else if (strcmp(iks_name(x), "presence") == 0)
+	else if (os_strcmp(iks_name(x), "presence") == 0)
 	{
 		pak->type = IKS_PAK_S10N;
 		if (tmp)
 		{
-			if (strcmp(tmp, "unavailable") == 0)
+			if (os_strcmp(tmp, "unavailable") == 0)
 			{
 				pak->type = IKS_PAK_PRESENCE;
 				pak->subtype = IKS_TYPE_UNAVAILABLE;
 				pak->show = IKS_SHOW_UNAVAILABLE;
 			}
-			else if (strcmp(tmp, "probe") == 0)
+			else if (os_strcmp(tmp, "probe") == 0)
 			{
 				pak->type = IKS_PAK_PRESENCE;
 				pak->subtype = IKS_TYPE_PROBE;
 			}
-			else if (strcmp(tmp, "subscribe") == 0)
+			else if (os_strcmp(tmp, "subscribe") == 0)
 				pak->subtype = IKS_TYPE_SUBSCRIBE;
-			else if (strcmp(tmp, "subscribed") == 0)
+			else if (os_strcmp(tmp, "subscribed") == 0)
 				pak->subtype = IKS_TYPE_SUBSCRIBED;
-			else if (strcmp(tmp, "unsubscribe") == 0)
+			else if (os_strcmp(tmp, "unsubscribe") == 0)
 				pak->subtype = IKS_TYPE_UNSUBSCRIBE;
-			else if (strcmp(tmp, "unsubscribed") == 0)
+			else if (os_strcmp(tmp, "unsubscribed") == 0)
 				pak->subtype = IKS_TYPE_UNSUBSCRIBED;
-			else if (strcmp(tmp, "error") == 0)
+			else if (os_strcmp(tmp, "error") == 0)
 				pak->subtype = IKS_TYPE_ERROR;
 		}
 		else
@@ -142,30 +142,30 @@ iks_packet(iks *x)
 			pak->show = IKS_SHOW_AVAILABLE;
 			if (tmp)
 			{
-				if (strcmp(tmp, "chat") == 0)
+				if (os_strcmp(tmp, "chat") == 0)
 					pak->show = IKS_SHOW_CHAT;
-				else if (strcmp(tmp, "away") == 0)
+				else if (os_strcmp(tmp, "away") == 0)
 					pak->show = IKS_SHOW_AWAY;
-				else if (strcmp(tmp, "xa") == 0)
+				else if (os_strcmp(tmp, "xa") == 0)
 					pak->show = IKS_SHOW_XA;
-				else if (strcmp(tmp, "dnd") == 0)
+				else if (os_strcmp(tmp, "dnd") == 0)
 					pak->show = IKS_SHOW_DND;
 			}
 		}
 	}
-	else if (strcmp(iks_name(x), "iq") == 0)
+	else if (os_strcmp(iks_name(x), "iq") == 0)
 	{
 		iks *q;
 		pak->type = IKS_PAK_IQ;
 		if (tmp)
 		{
-			if (strcmp(tmp, "get") == 0)
+			if (os_strcmp(tmp, "get") == 0)
 				pak->subtype = IKS_TYPE_GET;
-			else if (strcmp(tmp, "set") == 0)
+			else if (os_strcmp(tmp, "set") == 0)
 				pak->subtype = IKS_TYPE_SET;
-			else if (strcmp(tmp, "result") == 0)
+			else if (os_strcmp(tmp, "result") == 0)
 				pak->subtype = IKS_TYPE_RESULT;
-			else if (strcmp(tmp, "error") == 0)
+			else if (os_strcmp(tmp, "error") == 0)
 				pak->subtype = IKS_TYPE_ERROR;
 		}
 		for (q = iks_child(x); q; q = iks_next(q))
@@ -202,8 +202,8 @@ iks_make_auth(iksid *id, const char *pass, const char *sid)
 		char buf[41];
 		iksha *sha;
 		sha = iks_sha_new();
-		iks_sha_hash(sha, (const unsigned char *)sid, strlen(sid), 0);
-		iks_sha_hash(sha, (const unsigned char *)pass, strlen(pass), 1);
+		iks_sha_hash(sha, (const unsigned char *)sid, os_strlen(sid), 0);
+		iks_sha_hash(sha, (const unsigned char *)pass, os_strlen(pass), 1);
 		iks_sha_print(sha, buf);
 		iks_sha_delete(sha);
 		iks_insert_cdata(iks_insert(y, "digest"), buf, 40);

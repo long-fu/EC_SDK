@@ -54,10 +54,10 @@ parse_digest(char *message, const char *key, char **value_ptr, char **value_end_
 	*value_ptr = NULL;
 	*value_end_ptr = NULL;
 
-	t = strstr(message, key);
+	t = os_strstr(message, key);
 	if (t)
 	{
-		t += strlen(key);
+		t += os_strlen(key);
 		*value_ptr = t;
 		while (t[0] != '\0')
 		{
@@ -186,7 +186,7 @@ iks_sasl_challenge(struct stream_data *data, iks *challenge)
 		return;
 
 	/* reply the challenge */
-	if (strstr(message, "rspauth"))
+	if (os_strstr(message, "rspauth"))
 	{
 		x = iks_new("response");
 	}
@@ -215,7 +215,7 @@ tagHook(struct stream_data *data, char *name, char **atts, int type)
 	case IKS_SINGLE:
 		if (data->flags & SF_TRY_SECURE)
 		{
-			if (strcmp(name, "proceed") == 0)
+			if (os_strcmp(name, "proceed") == 0)
 			{
 				err = iks_default_tls.handshake(&data->tlsdata,
 												data->trans, data->sock);
@@ -227,7 +227,7 @@ tagHook(struct stream_data *data, char *name, char **atts, int type)
 				}
 				return err;
 			}
-			else if (strcmp(name, "failure") == 0)
+			else if (os_strcmp(name, "failure") == 0)
 			{
 				return IKS_NET_TLSFAIL;
 			}
@@ -323,7 +323,7 @@ iks_stream_new(char *name_space, void *user_data, iksStreamHook *streamHook)
 	if (NULL == s)
 		return NULL;
 	data = iks_stack_alloc(s, sizeof(struct stream_data));
-	memset(data, 0, sizeof(struct stream_data));
+	os_memset(data, 0, sizeof(struct stream_data));
 	data->s = s;
 	data->prs = iks_sax_extend(s, data, (iksTagHook *)tagHook, (iksCDataHook *)cdataHook, (iksDeleteHook *)deleteHook);
 	data->name_space = name_space;
@@ -505,7 +505,7 @@ iks_send_header(iksparser *prs, const char *to)
 	char *msg;
 	int len, err;
 
-	len = 91 + strlen(data->name_space) + 6 + strlen(to) + 16 + 1;
+	len = 91 + os_strlen(data->name_space) + 6 + os_strlen(to) + 16 + 1;
 	msg = iks_malloc(len);
 	if (!msg)
 		return IKS_NOMEM;
@@ -535,17 +535,17 @@ iks_send_raw(iksparser *prs, const char *xmlstr)
 
 	if (data->flags & SF_SECURE)
 	{
-		if (iks_default_tls.send(data->tlsdata, xmlstr, strlen(xmlstr)) != IKS_OK)
+		if (iks_default_tls.send(data->tlsdata, xmlstr, os_strlen(xmlstr)) != IKS_OK)
 			return IKS_NET_RWERR;
 	}
 	else
 	{
-		ret = data->trans->send(data->sock, xmlstr, strlen(xmlstr));
+		ret = data->trans->send(data->sock, xmlstr, os_strlen(xmlstr));
 		if (ret)
 			return ret;
 	}
 	if (data->logHook)
-		data->logHook(data->user_data, xmlstr, strlen(xmlstr), 0);
+		data->logHook(data->user_data, xmlstr, os_strlen(xmlstr), 0);
 	return IKS_OK;
 }
 

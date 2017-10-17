@@ -123,7 +123,7 @@ iks_stack_strdup(ikstack *s, const char *src, size_t len)
 	if (!src)
 		return NULL;
 	if (0 == len)
-		len = strlen(src);
+		len = os_strlen(src);
 
 	c = find_space(s, s->data, len + 1);
 	if (!c)
@@ -131,7 +131,7 @@ iks_stack_strdup(ikstack *s, const char *src, size_t len)
 	dest = c->data + c->used;
 	c->last = c->used;
 	c->used += len + 1;
-	memcpy(dest, src, len);
+	os_memcpy(dest, src, len);
 	dest[len] = '\0';
 	return dest;
 }
@@ -147,9 +147,9 @@ iks_stack_strcat(ikstack *s, char *old, size_t old_len, const char *src, size_t 
 		return iks_stack_strdup(s, src, src_len);
 	}
 	if (0 == old_len)
-		old_len = strlen(old);
+		old_len = os_strlen(old);
 	if (0 == src_len)
-		src_len = strlen(src);
+		src_len = os_strlen(src);
 
 	for (c = s->data; c; c = c->next)
 	{
@@ -164,8 +164,8 @@ iks_stack_strcat(ikstack *s, char *old, size_t old_len, const char *src, size_t 
 		ret = c->data + c->used;
 		c->last = c->used;
 		c->used += old_len + src_len + 1;
-		memcpy(ret, old, old_len);
-		memcpy(ret + old_len, src, src_len);
+		os_memcpy(ret, old, old_len);
+		os_memcpy(ret + old_len, src, src_len);
 		ret[old_len + src_len] = '\0';
 		return ret;
 	}
@@ -173,7 +173,7 @@ iks_stack_strcat(ikstack *s, char *old, size_t old_len, const char *src, size_t 
 	if (c->size - c->used > src_len)
 	{
 		ret = c->data + c->last;
-		memcpy(ret + old_len, src, src_len);
+		os_memcpy(ret + old_len, src, src_len);
 		c->used += src_len;
 		ret[old_len + src_len] = '\0';
 	}
@@ -185,9 +185,9 @@ iks_stack_strcat(ikstack *s, char *old, size_t old_len, const char *src, size_t 
 			return NULL;
 		c->last = c->used;
 		ret = c->data + c->used;
-		memcpy(ret, old, old_len);
+		os_memcpy(ret, old, old_len);
 		c->used += old_len;
-		memcpy(c->data + c->used, src, src_len);
+		os_memcpy(c->data + c->used, src, src_len);
 		c->used += src_len;
 		c->data[c->used] = '\0';
 		c->used++;

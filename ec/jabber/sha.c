@@ -31,7 +31,7 @@ iks_sha_new (void)
 void
 iks_sha_reset (iksha *sha)
 {
-	memset (sha, 0, sizeof (iksha));
+	os_memset (sha, 0, sizeof (iksha));
 	sha->hash[0] = 0x67452301;
 	sha->hash[1] = 0xefcdab89;
 	sha->hash[2] = 0x98badcfe;
@@ -91,7 +91,7 @@ iks_sha (const char *data, char *hash)
 	iksha *sha;
 
 	sha = iks_sha_new ();
-	iks_sha_hash (sha, (const unsigned char*)data, strlen (data), 1);
+	iks_sha_hash (sha, (const unsigned char*)data, os_strlen (data), 1);
 	iks_sha_print (sha, hash);
 	iks_free (sha);
 }
