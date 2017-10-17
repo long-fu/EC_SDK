@@ -229,3 +229,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/c,python,visualstudiocode,windows,linux,macos
+bin/eagle.dump
+bin/eagle.flash.bin
+bin/eagle.S
+bin/eagle.irom0text.bin
