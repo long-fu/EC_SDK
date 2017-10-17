@@ -3,6 +3,9 @@
         "user_config.h": "c",
         "espconn.h": "c",
         "user_debug.h": "c",
-        "http_parser.h": "c"
+        "http_parser.h": "c",
+        "jabber_config.h": "c",
+        "spi_flash.h": "c",
+        "iksemel.h": "c"
     }
 }
