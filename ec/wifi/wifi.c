@@ -88,10 +88,42 @@ wifi_connect(uint8_t *ssid, uint8_t *pass, WifiCallback cb)
 	wifi_station_connect();
 }
 
+int ICACHE_FLASH_ATTR
+get_random_string(int length, char *ouput)
+{
+	int flag, i;
+	srand((unsigned)time(NULL));
+	for (i = 0; i < length - 1; i++)
+	{
+		flag = rand() % 3;
+		switch (flag)
+		{
+		case 0:
+			ouput[i] = 'A' + rand() % 26;
+			break;
+		case 1:
+			ouput[i] = 'a' + rand() % 26;
+			break;
+		case 2:
+			ouput[i] = '0' + rand() % 10;
+			break;
+		default:
+			ouput[i] = 'x';
+			break;
+		}
+	}
+	return 0;
+}
+
 void ICACHE_FLASH_ATTR
 wifi_ap_set(uint8_t *ssid, uint8_t *pass)
 {
+	char tmp_name[8] = {0};
+	char wifi_name[16] = {0};
 	struct softap_config config;
+
+	get_random_string(AP_DEFINE_NAME_RAND_LEN, tmp_name);
+	os_sprintf(wifi_name, "%s%s", AP_DEFINE_NAME, tmp_name);
 
 	wifi_set_opmode(SOFTAP_MODE);
 	wifi_softap_get_config(&config);
@@ -99,7 +131,7 @@ wifi_ap_set(uint8_t *ssid, uint8_t *pass)
 	os_memset(config.ssid, 0, 32);
 	os_memset(config.password, 0, 64);
 
-	os_memcpy(config.ssid, "E_E", 7);
+	os_memcpy(config.ssid, wifi_name, os_strlen(wifi_name));
 	os_memcpy(config.password, AP_DEFINE_PASSWORD, os_strlen(AP_DEFINE_PASSWORD));
 	config.authmode = AUTH_WPA_WPA2_PSK;
 	config.ssid_len = 0;

@@ -1,10 +1,13 @@
 
 #include "user_config.h"
 #include "user_debug.h"
+#include "jabber_config.h"
 
 #ifdef HTTP_DEBUG_ON
 char log_buffer[512];
 #endif
+
+static int user_isRegisrer;
 
 /// 保存用户配置信息
 void ICACHE_FLASH_ATTR
@@ -12,26 +15,20 @@ CFG_Save(void)
 {
 	// TODO: 保存用户配置信息
 
-	//  spi_flash_read((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
-	//                    (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
+	spi_flash_erase_sector(CFG_LOCATION + 0);
+	spi_flash_erase_sector(CFG_LOCATION + 1);
 
-	// if (saveFlag.flag == 0) {
-	// 	spi_flash_erase_sector(CFG_LOCATION + 1);
-	// 	spi_flash_write((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
-	// 					(uint32 *)&sysCfg, sizeof(SYSCFG));
-	// 	saveFlag.flag = 1;
-	// 	spi_flash_erase_sector(CFG_LOCATION + 3);
-	// 	spi_flash_write((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
-	// 					(uint32 *)&saveFlag, sizeof(SAVE_FLAG));
-	// } else {
-	// 	spi_flash_erase_sector(CFG_LOCATION + 0);
-	// 	spi_flash_write((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
-	// 					(uint32 *)&sysCfg, sizeof(SYSCFG));
-	// 	saveFlag.flag = 0;
-	// 	spi_flash_erase_sector(CFG_LOCATION + 3);
-	// 	spi_flash_write((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
-	// 					(uint32 *)&saveFlag, sizeof(SAVE_FLAG));
-	// }
+	// MARK: 保存注册信息
+	// MARK: 保存XMPP配置信息
+
+	if (user_isRegisrer == 1)
+	{
+		spi_flash_write((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
+						(uint32 *)&user_isRegisrer, sizeof(user_isRegisrer));
+
+		spi_flash_write((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
+						(uint32 *)&j_config, sizeof(j_config));
+	}
 }
 
 /// 加载用户配置信息
@@ -39,47 +36,19 @@ void ICACHE_FLASH_ATTR
 CFG_Load(void)
 {
 	// TODO: 读取用户配置信息
-
-	// ec_log("\r\nload ...\r\n");
-	// spi_flash_read((CFG_LOCATION + 3) * SPI_FLASH_SEC_SIZE,
-	// 			   (uint32 *)&saveFlag, sizeof(SAVE_FLAG));
-	// if (saveFlag.flag == 0) {
-	// 	spi_flash_read((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
-	// 				   (uint32 *)&sysCfg, sizeof(SYSCFG));
-	// } else {
-	// 	spi_flash_read((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
-	// 				   (uint32 *)&sysCfg, sizeof(SYSCFG));
-	// }
-	// if(sysCfg.cfg_holder != CFG_HOLDER){
-	// 	os_memset(&sysCfg, 0x00, sizeof sysCfg);
-
-	// 	sysCfg.cfg_holder = CFG_HOLDER;
-
-	// 	os_sprintf(sysCfg.device_id, MQTT_CLIENT_ID, system_get_chip_id());
-	// 	sysCfg.device_id[sizeof(sysCfg.device_id) - 1] = '\0';
-	// 	os_strncpy(sysCfg.sta_ssid, STA_SSID, sizeof(sysCfg.sta_ssid) - 1);
-	// 	os_strncpy(sysCfg.sta_pwd, STA_PASS, sizeof(sysCfg.sta_pwd) - 1);
-	// 	sysCfg.sta_type = STA_TYPE;
-
-	// 	os_strncpy(sysCfg.mqtt_host, MQTT_HOST, sizeof(sysCfg.mqtt_host) - 1);
-	// 	sysCfg.mqtt_port = MQTT_PORT;
-	// 	os_strncpy(sysCfg.mqtt_user, MQTT_USER, sizeof(sysCfg.mqtt_user) - 1);
-	// 	os_strncpy(sysCfg.mqtt_pass, MQTT_PASS, sizeof(sysCfg.mqtt_pass) - 1);
-
-	// 	sysCfg.security = DEFAULT_SECURITY;	/* default non ssl */
-
-	// 	sysCfg.mqtt_keepalive = MQTT_KEEPALIVE;
-
-	// 	ec_log(" default configuration\r\n");
-
-	// 	CFG_Save();
-	// }
+	user_isRegisrer = 0;
+	spi_flash_read((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
+				   (uint32 *)&user_isRegisrer, sizeof(user_isRegisrer));
+   
+	os_memset(&j_config, 0x0, sizeof(j_config));
+	spi_flash_read((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
+				   (uint32 *)&j_config, sizeof(j_config));
 }
 
 /// 判断客户端是否被用户注册(也就是绑定) - 复位的时候才会发生值的一个变化
 int ICACHE_FLASH_ATTR
-user_isRegisrer(void)
+user_get_is_regisrer(void)
 {
-	return 1;
-}
 
+	return user_isRegisrer;
+}

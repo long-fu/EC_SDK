@@ -1,6 +1,10 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
+#define AP_DEFINE_NAME_RAND_LEN 5
+#define AP_DEFINE_NAME "WSLP_"
+#define AP_DEFINE_PASSWORD "12345678"
+
 /// 支持AT指令
 #define AT_CUSTOM 1
 

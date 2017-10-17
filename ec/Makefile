@@ -22,7 +22,12 @@ GEN_IMAGES= eagle.app.v6.out
 GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
-	user
+	user \
+	http \
+	jabber \
+	server \
+	wifi
+
 ifdef AT_OPEN_SRC
 SUBDIRS +=    \
 	at
@@ -49,8 +54,12 @@ ifeq ($(FLAVOR),release)
 endif
 
 COMPONENTS_eagle.app.v6 = \
-	user/libuser.a
-	
+	user/libuser.a \
+	http/libhttp.a \
+	jabber/libjabber.a \
+	server/libserver.a \
+	wifi/libwifi.a
+
 ifdef AT_OPEN_SRC
 COMPONENTS_eagle.app.v6 += \
 	at/libat.a
@@ -81,7 +90,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lwps		\
 	-lsmartconfig	\
 	-lairkiss		\
-	$(DEP_LIBS_eagle.app.v6)					
+	$(DEP_LIBS_eagle.app.v6)
 
 ifndef AT_OPEN_SRC
 LINKFLAGS_eagle.app.v6 +=    \
@@ -145,7 +154,7 @@ DDEFINES +=				\
 # Required for each makefile to inherit from the parent
 #
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include
+INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/http -I $(PDIR)include/jabber -I $(PDIR)include/server -I $(PDIR)include/wifi
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile
 

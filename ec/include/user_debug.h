@@ -1,5 +1,6 @@
 #ifndef __USER_DEBUG_H__
 #define __USER_DEBUG_H__
+
 #include "user_config.h"
 
 #if DEBUG_ON
