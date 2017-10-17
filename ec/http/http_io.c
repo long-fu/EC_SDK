@@ -1,6 +1,6 @@
 
 #include "http_parser.h"
-#include "debug.h"
+#include "user_debug.h"
 #include "ip_addr.h"
 #include "osapi.h"
 #include "mem.h"
@@ -19,7 +19,7 @@
 static soc_connect_status_callback soc_connect_status_handler = NULL;
 static soc_recv_callback soc_recv_handler = NULL;
 
-#define  ESPCONN_BUFFER_SIZE (2920) 
+#define  ESPCONN_BUFFER_SIZE (2920)
 static uint8 espconn_buffer[ESPCONN_BUFFER_SIZE];
 static uint32 espconn_data_len = 0;
 // FALSE 表示发送的数据追加到发送buffer中
