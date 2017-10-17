@@ -9,7 +9,7 @@
 
 #ifdef HAVE_GNUTLS
 
-#include <gnutls/gnutls.h>
+// #include <gnutls/gnutls.h>
 
 /* issues here:
 ** 1. handle GNUTLS_E_AGAIN in handshake

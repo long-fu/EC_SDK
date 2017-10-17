@@ -6,12 +6,12 @@
 
 #ifndef IKSEMEL_H
 #define IKSEMEL_H 1
-
+#include "c_types.h"
 #ifdef __cplusplus
-#include <cstddef>	/* size_t for C++ */
+// #include <cstddef>	/* size_t for C++ */
 extern "C" {
 #else
-#include <stddef.h>	/* size_t for C */
+// #include <stddef.h>	/* size_t for C */
 #endif
 
 /*****  object stack  *****/
@@ -32,12 +32,12 @@ void *iks_malloc (size_t size);
 void iks_free (void *ptr);
 void iks_set_mem_funcs (void *(*malloc_func)(size_t size), void (*free_func)(void *ptr));
 
-char *iks_strdup (const char *src);
+// char *iks_strdup (const char *src);
 char *iks_strcat (char *dest, const char *src);
 int iks_strcmp (const char *a, const char *b);
 int iks_strcasecmp (const char *a, const char *b);
 int iks_strncmp (const char *a, const char *b, size_t n);
-int iks_strncasecmp (const char *a, const char *b, size_t n);
+// int iks_strncasecmp (const char *a, const char *b, size_t n);
 size_t iks_strlen (const char *src);
 char *iks_escape (ikstack *s, char *src, size_t len);
 char *iks_unescape (ikstack *s, char *src, size_t len);
@@ -133,8 +133,8 @@ enum iksfileerror {
 iksparser *iks_dom_new (iks **iksptr);
 void iks_set_size_hint (iksparser *prs, size_t approx_size);
 iks *iks_tree (const char *xml_str, size_t len, int *err);
-int iks_load (const char *fname, iks **xptr);
-int iks_save (const char *fname, iks *x);
+// int iks_load (const char *fname, iks **xptr);
+// int iks_save (const char *fname, iks *x);
 
 /*****  transport layer  *****/
 

@@ -9,7 +9,7 @@
 
 #ifdef HAVE_OPENSSL
 
-#include <openssl/ssl.h>
+// #include <openssl/ssl.h>
 
 struct ikstls_data
 {

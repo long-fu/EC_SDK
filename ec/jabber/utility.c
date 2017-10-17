@@ -41,13 +41,13 @@ iks_set_mem_funcs(void *(*malloc_func)(size_t size), void (*free_func)(void *ptr
 
 /*****  NULL-safe Functions  *****/
 
-char * ICACHE_FLASH_ATTR
-iks_strdup(const char *src)
-{
-	if (src)
-		return strdup(src);
-	return NULL;
-}
+// char * ICACHE_FLASH_ATTR
+// iks_strdup(const char *src)
+// {
+// 	if (src)
+// 		return strdup(src);
+// 	return NULL;
+// }
 
 char *ICACHE_FLASH_ATTR
 iks_strcat(char *dest, const char *src)
@@ -87,13 +87,13 @@ iks_strncmp(const char *a, const char *b, size_t n)
 	return os_strncmp(a, b, n);
 }
 
-int ICACHE_FLASH_ATTR
-iks_strncasecmp(const char *a, const char *b, size_t n)
-{
-	if (!a || !b)
-		return -1;
-	return strncasecmp(a, b, n);
-}
+// int ICACHE_FLASH_ATTR
+// iks_strncasecmp(const char *a, const char *b, size_t n)
+// {
+// 	if (!a || !b)
+// 		return -1;
+// 	return strncasecmp(a, b, n);
+// }
 
 size_t ICACHE_FLASH_ATTR
 iks_strlen(const char *src)
