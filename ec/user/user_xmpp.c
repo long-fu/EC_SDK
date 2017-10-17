@@ -329,7 +329,7 @@ xmpp_init(struct jabber_config *config)
 		char full_jid[32] = {0};
 
 		os_memset(&j_config, 0x0, sizeof(&j_config));
-		os_memcpy(&j_config, config);
+		os_memcpy(&j_config, config, sizeof(&j_config));
 
 		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, config->resources);
 		j_connect(full_jid, config->password, 0, config->username, config->host_name);

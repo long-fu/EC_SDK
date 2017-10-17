@@ -74,7 +74,7 @@ iks_sha_print (iksha *sha, char *hash)
 
 	for (i=0; i<5; i++)
 	{
-		sprintf (hash, "%08x", sha->hash[i]);
+		os_sprintf (hash, "%08x", sha->hash[i]);
 		hash += 8;
 	}
 }

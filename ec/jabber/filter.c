@@ -41,6 +41,8 @@ iks_filter_new(void)
 	return f;
 }
 
+#include "stdarg.h"
+
 iksrule * ICACHE_FLASH_ATTR
 iks_filter_add_rule(iksfilter *f, iksFilterHook *filterHook, void *user_data, ...)
 {

@@ -144,7 +144,7 @@ static int ICACHE_FLASH_ATTR
 stack_expand (iksparser *prs, int len)
 {
 	size_t need;
-	off_t diff;
+	int diff;
 	char *tmp;
 	need = len - (prs->stack_max - prs->stack_pos);
 	if (need < prs->stack_max) {
@@ -374,7 +374,7 @@ sax_core (iksparser *prs, char *buf, int len)
 						if (!tmp) return IKS_NOMEM;
 						os_memset (tmp, 0, sizeof(char *) * 2 * prs->attmax);
 						os_memcpy (tmp, prs->atts, sizeof(char *) * prs->attcur);
-						free (prs->atts);
+						os_free (prs->atts);
 						prs->atts = tmp;
 					}
 				}

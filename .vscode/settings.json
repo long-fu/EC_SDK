@@ -6,6 +6,10 @@
         "http_parser.h": "c",
         "jabber_config.h": "c",
         "spi_flash.h": "c",
-        "iksemel.h": "c"
+        "iksemel.h": "c",
+        "common.h": "c",
+        "osapi.h": "c",
+        "user_interface.h": "c",
+        "queue.h": "c"
     }
 }

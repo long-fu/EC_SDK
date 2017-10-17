@@ -1,4 +1,5 @@
 
+#include "user_interface.h"
 #include "user_debug.h"
 #include "espconn.h"
 #include "http_parser.h"
@@ -99,7 +100,7 @@ server_recv(void *arg, char *pusrdata, unsigned short length)
     size_t parsed;
     ec_log("server_recv %d [%s]\r\n", length, pusrdata);
     // 解析数据
-    parsed = http_parser_execute(&parser, &settings, pusrdata, len);
+    parsed = http_parser_execute(&parser, &settings, pusrdata, length);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -149,6 +150,6 @@ server_init(uint32 port)
     esp_conn.proto.tcp->local_port = port;
     server_parser_init();
     espconn_regist_connectcb(&esp_conn, server_listen);
-    espconn_regist_reconcb(pesp_conn, server_recon);
+    espconn_regist_reconcb(&esp_conn, server_recon);
     espconn_accept(&esp_conn);
 }

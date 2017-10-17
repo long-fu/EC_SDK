@@ -106,7 +106,7 @@ make_sasl_response(struct stream_data *data, char *message)
 
 	/* generate random client challenge */
 	for (i = 0; i < CNONCE_LEN; ++i)
-		sprintf(cnonce + i * 8, "%08x", rand());
+		os_sprintf(cnonce + i * 8, "%08x", rand());
 
 	md5 = iks_md5_new();
 	if (!md5)
@@ -151,7 +151,7 @@ make_sasl_response(struct stream_data *data, char *message)
 	if (!response)
 		return NULL;
 
-	sprintf(response, "username=\"%s\",realm=\"%s\",nonce=\"%s\""
+	os_sprintf(response, "username=\"%s\",realm=\"%s\",nonce=\"%s\""
 					  ",cnonce=\"%s\",nc=00000001,qop=auth,digest-uri=\""
 					  "xmpp/%s\",response=%s,charset=utf-8",
 			data->auth_username, realm, nonce, cnonce,
@@ -509,7 +509,7 @@ iks_send_header(iksparser *prs, const char *to)
 	msg = iks_malloc(len);
 	if (!msg)
 		return IKS_NOMEM;
-	sprintf(msg, "<?xml version='1.0'?>"
+	os_sprintf(msg, "<?xml version='1.0'?>"
 				 "<stream:stream xmlns:stream='http://etherx.jabber.org/streams' xmlns='"
 				 "%s' to='%s' version='1.0'>",
 			data->name_space, to);
@@ -605,7 +605,7 @@ iks_start_sasl(iksparser *prs, enum ikssasltype type, char *username, char *pass
 		char *base64;
 
 		iks_insert_attrib(x, "mechanism", "PLAIN");
-		sprintf(s, "%c%s%c%s", 0, username, 0, pass);
+		os_sprintf(s, "%c%s%c%s", 0, username, 0, pass);
 		base64 = iks_base64_encode(s, len);
 		iks_insert_cdata(x, base64, 0);
 		iks_free(base64);

@@ -6,15 +6,16 @@
 
 #include "common.h"
 #include "iksemel.h"
-
-
+#include "espconn.h"
+#include "ip_addr.h"
+#include "jabber_config.h"
 
 static struct espconn *espconn_ptr = NULL;
 static ip_addr_t espconn_ip;
 
 #define ESPCONN_BUFFER_SIZE (2920)
 
-static uint8 espconn_buffer[AT_ESPCONN_DEMO_BUFFER_SIZE];
+static uint8 espconn_buffer[ESPCONN_BUFFER_SIZE];
 static uint32 espconn_data_len = 0;
 static bool espconn_flag = FALSE;
 
@@ -91,32 +92,34 @@ on_send_cb(void *arg)
 static void ICACHE_FLASH_ATTR
 on_recv(void *arg, char *pusrdata, unsigned short len)
 {
+	struct stream_data *data;
+	int ret;
 	struct espconn *esp = (struct espconn *)arg;
 
 	iksparser *prs = (iksparser *)esp->reverse;
 
-	struct stream_data *data = iks_user_data(prs);
+	data = (struct stream_data *)iks_user_data(prs);
 
 	if (len < 0)
 		return;
 	if (len == 0)
-		break;
+		return;
 	pusrdata[len] = '\0';
-	if (data->logHook)
-	{
-		data->logHook(data->user_data, pusrdata, len, 1);
-	}
+	// if (data->logHook)
+	// {
+	// 	data->logHook(data->user_data, pusrdata, len, 1);
+	// }
 	ret = iks_parse(prs, pusrdata, len, 0);
 	if (ret != IKS_OK)
 	{
 		return;
 	}
 
-	if (!data->trans)
-	{
-		/* stream hook called iks_disconnect */
-		return;
-	}
+	// if (!data->trans)
+	// {
+	// 	/* stream hook called iks_disconnect */
+	// 	return;
+	// }
 	// ec_log();
 }
 
@@ -135,19 +138,19 @@ on_connect_cb(void *arg)
 	espconn_regist_sentcb(esp, on_send_cb);
 	
 	// TODO: 可以发送消息
-	iks_send_header(prs, server_name);
+	iks_send_header(prs, j_config.domain);
 	
 }
 
 static void
 io_close(void *socket)
 {
-	struct espconn *esp = (struct espconn *)arg;
+	struct espconn *esp = (struct espconn *)socket;
 }
 
 static int
 io_connect(iksparser *prs,
-		   void *socketptr,
+		   void **socketptr,
 		   const char *server,
 		   int port)
 {
@@ -168,7 +171,7 @@ io_connect(iksparser *prs,
 	}
 	else
 	{
-		os_memcpy(espconn_ptr->proto.tcp->remote_ip, ip, 4);
+		os_memcpy(espconn_ptr->proto.tcp->remote_ip, &j_config.ip.addr, 4);
 		espconn_connect(espconn_ptr);
 	}
 
@@ -176,7 +179,7 @@ io_connect(iksparser *prs,
 	if (ret)
 	{
 		// TODO: 连接成功
-		socketptr = espconn_ptr;
+		*socketptr = (void*)espconn_ptr;
 		return IKS_OK;
 	}
 	else

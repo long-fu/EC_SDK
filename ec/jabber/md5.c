@@ -152,7 +152,7 @@ iks_md5_print(iksmd5 *md5, char *buf)
 
 	iks_md5_digest(md5, digest);
 	for (i = 0; i < 16; i++) {
-		sprintf (buf, "%02x", digest[i]);
+		os_sprintf (buf, "%02x", digest[i]);
 		buf += 2;
 	}
 }

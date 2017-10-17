@@ -19,6 +19,7 @@ iks_malloc(size_t size)
 	// 	return my_malloc_func(size);
 	// else
 	// 	return malloc(size);
+	os_malloc(size);
 }
 
 void ICACHE_FLASH_ATTR
@@ -28,6 +29,7 @@ iks_free(void *ptr)
 	// 	my_free_func(ptr);
 	// else
 	// 	free(ptr);
+	os_free(ptr);
 }
 
 void ICACHE_FLASH_ATTR
