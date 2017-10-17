@@ -24,6 +24,6 @@
 
 void CFG_Save(void);
 void CFG_Load(void);
-int user_isRegisrer(void);
+int user_get_is_regisrer(void);
 
 #endif

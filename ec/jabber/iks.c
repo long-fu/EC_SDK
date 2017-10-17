@@ -50,7 +50,7 @@ struct iks_attrib {
 
 /*****  Node Creating & Deleting  *****/
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_new (const char *name)
 {
 	ikstack *s;
@@ -66,7 +66,7 @@ iks_new (const char *name)
 	return x;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_new_within (const char *name, ikstack *s)
 {
 	iks *x;
@@ -85,7 +85,7 @@ iks_new_within (const char *name, ikstack *s)
 	return x;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_insert (iks *x, const char *name)
 {
 	iks *y;
@@ -104,7 +104,7 @@ iks_insert (iks *x, const char *name)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_insert_cdata (iks *x, const char *data, size_t len)
 {
 	iks *y;
@@ -127,7 +127,7 @@ iks_insert_cdata (iks *x, const char *data, size_t len)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_insert_attrib (iks *x, const char *name, const char *value)
 {
 	iks *y;
@@ -170,7 +170,7 @@ iks_insert_attrib (iks *x, const char *name, const char *value)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_insert_node (iks *x, iks *y)
 {
 	y->parent = x;
@@ -183,7 +183,7 @@ iks_insert_node (iks *x, iks *y)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_append (iks *x, const char *name)
 {
 	iks *y;
@@ -205,7 +205,7 @@ iks_append (iks *x, const char *name)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_prepend (iks *x, const char *name)
 {
 	iks *y;
@@ -227,7 +227,7 @@ iks_prepend (iks *x, const char *name)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_append_cdata (iks *x, const char *data, size_t len)
 {
 	iks *y;
@@ -255,7 +255,7 @@ iks_append_cdata (iks *x, const char *data, size_t len)
 	return y;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_prepend_cdata (iks *x, const char *data, size_t len)
 {
 	iks *y;
@@ -283,7 +283,7 @@ iks_prepend_cdata (iks *x, const char *data, size_t len)
 	return y;
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_hide (iks *x)
 {
 	iks *y;
@@ -299,7 +299,7 @@ iks_hide (iks *x)
 	}
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_delete (iks *x)
 {
 	if (x) iks_stack_delete (x->s);
@@ -307,14 +307,14 @@ iks_delete (iks *x)
 
 /*****  Node Traversing  *****/
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_next (iks *x)
 {
 	if (x) return x->next;
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_next_tag (iks *x)
 {
 	if (x) {
@@ -327,14 +327,14 @@ iks_next_tag (iks *x)
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_prev (iks *x)
 {
 	if (x) return x->prev;
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_prev_tag (iks *x)
 {
 	if (x) {
@@ -347,14 +347,14 @@ iks_prev_tag (iks *x)
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_parent (iks *x)
 {
 	if (x) return x->parent;
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_root (iks *x)
 {
 	if (x) {
@@ -364,14 +364,14 @@ iks_root (iks *x)
 	return x;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_child (iks *x)
 {
 	if (x && IKS_TAG == x->type) return IKS_TAG_CHILDREN (x);
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_first_tag (iks *x)
 {
 	if (x) {
@@ -384,14 +384,14 @@ iks_first_tag (iks *x)
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_attrib (iks *x)
 {
 	if (x) return IKS_TAG_ATTRIBS (x);
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_find (iks *x, const char *name)
 {
 	iks *y;
@@ -405,7 +405,7 @@ iks_find (iks *x, const char *name)
 	return NULL;
 }
 
-char *
+char *ICACHE_FLASH_ATTR
 iks_find_cdata (iks *x, const char *name)
 {
 	iks *y;
@@ -417,7 +417,7 @@ iks_find_cdata (iks *x, const char *name)
 	return IKS_CDATA_CDATA (y);
 }
 
-char *
+char *ICACHE_FLASH_ATTR
 iks_find_attrib (iks *x, const char *name)
 {
 	iks *y;
@@ -433,7 +433,7 @@ iks_find_attrib (iks *x, const char *name)
 	return NULL;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_find_with_attrib (iks *x, const char *tagname, const char *attrname, const char *value)
 {
 	iks *y;
@@ -461,21 +461,21 @@ iks_find_with_attrib (iks *x, const char *tagname, const char *attrname, const c
 
 /*****  Node Information  *****/
 
-ikstack *
+ikstack *ICACHE_FLASH_ATTR
 iks_stack (iks *x)
 {
 	if (x) return x->s;
 	return NULL;
 }
 
-enum ikstype
+enum ikstype ICACHE_FLASH_ATTR
 iks_type (iks *x)
 {
 	if (x) return x->type;
 	return IKS_NONE;
 }
 
-char *
+char * ICACHE_FLASH_ATTR
 iks_name (iks *x)
 {
 	if (x) {
@@ -487,7 +487,7 @@ iks_name (iks *x)
 	return NULL;
 }
 
-char *
+char * ICACHE_FLASH_ATTR
 iks_cdata (iks *x)
 {
 	if (x) {
@@ -499,21 +499,21 @@ iks_cdata (iks *x)
 	return NULL;
 }
 
-size_t
+size_t ICACHE_FLASH_ATTR
 iks_cdata_size (iks *x)
 {
 	if (x) return IKS_CDATA_LEN (x);
 	return 0;
 }
 
-int
+int ICACHE_FLASH_ATTR
 iks_has_children (iks *x)
 {
 	if (x && IKS_TAG == x->type && IKS_TAG_CHILDREN (x)) return 1;
 	return 0;
 }
 
-int
+int ICACHE_FLASH_ATTR
 iks_has_attribs (iks *x)
 {
 	if (x && IKS_TAG == x->type && IKS_TAG_ATTRIBS (x)) return 1;
@@ -522,7 +522,7 @@ iks_has_attribs (iks *x)
 
 /*****  Serializing  *****/
 
-static size_t
+static size_t ICACHE_FLASH_ATTR
 escape_size (char *src, size_t len)
 {
 	size_t sz;
@@ -544,7 +544,7 @@ escape_size (char *src, size_t len)
 	return sz;
 }
 
-static char *
+static char * ICACHE_FLASH_ATTR
 my_strcat (char *dest, char *src, size_t len)
 {
 	if (0 == len) len = strlen (src);
@@ -552,7 +552,7 @@ my_strcat (char *dest, char *src, size_t len)
 	return dest + len;
 }
 
-static char *
+static char * ICACHE_FLASH_ATTR
 escape (char *dest, char *src, size_t len)
 {
 	char c;
@@ -577,7 +577,7 @@ escape (char *dest, char *src, size_t len)
 	return dest;
 }
 
-char *
+char * ICACHE_FLASH_ATTR
 iks_string (ikstack *s, iks *x)
 {
 	size_t size;
@@ -708,7 +708,7 @@ iks_string (ikstack *s, iks *x)
 
 /*****  Copying  *****/
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_copy_within (iks *x, ikstack *s)
 {
 	int level=0, dir=0;
@@ -755,7 +755,7 @@ iks_copy_within (iks *x, ikstack *s)
 	return copy;
 }
 
-iks *
+iks *ICACHE_FLASH_ATTR
 iks_copy (iks *x)
 {
 	return iks_copy_within (x, iks_stack_new (sizeof (struct iks_tag) * 6, 256));

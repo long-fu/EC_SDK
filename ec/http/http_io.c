@@ -6,7 +6,7 @@
 #include "mem.h"
 #include "espconn.h"
 #include "http_io.h"
-
+#include "ip_addr.h"
 // soc 连接状态回调
 // 0 进行连接中
 // 1 连接成功 -- 在这里才能可以进行网络数据的发送
@@ -121,7 +121,7 @@ espconn_on_dns_cb(const char *name, ip_addr_t *ipaddr, void *arg)
          *((uint8 *)&ipaddr->addr + 2),
          *((uint8 *)&ipaddr->addr + 3));
 
-    if (ip.addr == 0 && ipaddr->addr != 0)
+    if (espconn_ip.addr == 0 && ipaddr->addr != 0)
     {
         // MARK: 域名解析成功进行连接
         os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipaddr->addr, sizeof(ipaddr->addr));
@@ -203,7 +203,7 @@ e_soc_creat(char *host,
     espconn_ptr->proto.tcp->local_port = espconn_port();
     espconn_ptr->proto.tcp->remote_port = port;
 
-    soc_connect_status_handler = connect_status;
+    soc_connect_status_handler = connect_status_handler;
     soc_recv_handler = recv_handler;
     espconn_flag = FALSE;
     espconn_data_len = 0;

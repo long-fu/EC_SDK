@@ -30,7 +30,7 @@ struct stream_data
 	struct ikstls_data *tlsdata;
 };
 
-static void
+static void ICACHE_FLASH_ATTR
 insert_attribs(iks *x, char **atts)
 {
 	if (atts)
@@ -46,7 +46,7 @@ insert_attribs(iks *x, char **atts)
 
 #define CNONCE_LEN 4
 
-static void
+static void ICACHE_FLASH_ATTR
 parse_digest(char *message, const char *key, char **value_ptr, char **value_end_ptr)
 {
 	char *t;
@@ -72,7 +72,7 @@ parse_digest(char *message, const char *key, char **value_ptr, char **value_end_
 	}
 }
 
-static iks *
+static iks * ICACHE_FLASH_ATTR
 make_sasl_response(struct stream_data *data, char *message)
 {
 	iks *x = NULL;
@@ -169,7 +169,7 @@ make_sasl_response(struct stream_data *data, char *message)
 	return x;
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 iks_sasl_challenge(struct stream_data *data, iks *challenge)
 {
 	char *message;
@@ -203,7 +203,7 @@ iks_sasl_challenge(struct stream_data *data, iks *challenge)
 	iks_free(message);
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 tagHook(struct stream_data *data, char *name, char **atts, int type)
 {
 	iks *x;
@@ -288,7 +288,7 @@ tagHook(struct stream_data *data, char *name, char **atts, int type)
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 cdataHook(struct stream_data *data, char *cdata, size_t len)
 {
 	if (data->current)
@@ -296,7 +296,7 @@ cdataHook(struct stream_data *data, char *cdata, size_t len)
 	return IKS_OK;
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 deleteHook(struct stream_data *data)
 {
 	if (data->flags & SF_SECURE)
@@ -313,7 +313,7 @@ deleteHook(struct stream_data *data)
 	data->flags = 0;
 }
 
-iksparser *
+iksparser * ICACHE_FLASH_ATTR
 iks_stream_new(char *name_space, void *user_data, iksStreamHook *streamHook)
 {
 	ikstack *s;
@@ -332,7 +332,7 @@ iks_stream_new(char *name_space, void *user_data, iksStreamHook *streamHook)
 	return data->prs;
 }
 
-void *
+void * ICACHE_FLASH_ATTR
 iks_stream_user_data(iksparser *prs)
 {
 	struct stream_data *data = iks_user_data(prs);
@@ -340,14 +340,16 @@ iks_stream_user_data(iksparser *prs)
 	return data->user_data;
 }
 
-void iks_set_log_hook(iksparser *prs, iksLogHook *logHook)
+void ICACHE_FLASH_ATTR
+iks_set_log_hook(iksparser *prs, iksLogHook *logHook)
 {
 	struct stream_data *data = iks_user_data(prs);
 
 	data->logHook = logHook;
 }
 
-int iks_connect_tcp(iksparser *prs, const char *server, int port)
+int ICACHE_FLASH_ATTR
+iks_connect_tcp(iksparser *prs, const char *server, int port)
 {
 #ifdef USE_DEFAULT_IO
 	return iks_connect_with(prs, server, port, server, &iks_default_transport);
@@ -356,7 +358,8 @@ int iks_connect_tcp(iksparser *prs, const char *server, int port)
 #endif
 }
 
-int iks_connect_via(iksparser *prs, const char *server, int port, const char *server_name)
+int ICACHE_FLASH_ATTR
+iks_connect_via(iksparser *prs, const char *server, int port, const char *server_name)
 {
 #ifdef USE_DEFAULT_IO
 	return iks_connect_with(prs, server, port, server_name, &iks_default_transport);
@@ -365,7 +368,8 @@ int iks_connect_via(iksparser *prs, const char *server, int port, const char *se
 #endif
 }
 
-int iks_connect_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans)
+int ICACHE_FLASH_ATTR
+iks_connect_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans)
 {
 	struct stream_data *data = iks_user_data(prs);
 	int ret;
@@ -390,7 +394,8 @@ int iks_connect_with(iksparser *prs, const char *server, int port, const char *s
 	return IKS_OK;
 }
 
-int iks_connect_async(iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func)
+int ICACHE_FLASH_ATTR
+iks_connect_async(iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func)
 {
 #ifdef USE_DEFAULT_IO
 	return iks_connect_async_with(prs, server, port, server, &iks_default_transport, notify_data, notify_func);
@@ -399,7 +404,8 @@ int iks_connect_async(iksparser *prs, const char *server, int port, void *notify
 #endif
 }
 
-int iks_connect_async_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans, void *notify_data, iksAsyncNotify *notify_func)
+int ICACHE_FLASH_ATTR
+iks_connect_async_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans, void *notify_data, iksAsyncNotify *notify_func)
 {
 	struct stream_data *data = iks_user_data(prs);
 	int ret;
@@ -424,7 +430,8 @@ int iks_connect_async_with(iksparser *prs, const char *server, int port, const c
 	return IKS_OK;
 }
 
-int iks_connect_fd(iksparser *prs, int fd)
+int ICACHE_FLASH_ATTR
+iks_connect_fd(iksparser *prs, int fd)
 {
 #ifdef USE_DEFAULT_IO
 	struct stream_data *data = iks_user_data(prs);
@@ -446,14 +453,16 @@ int iks_connect_fd(iksparser *prs, int fd)
 #endif
 }
 
-int iks_fd(iksparser *prs)
+int ICACHE_FLASH_ATTR
+iks_fd(iksparser *prs)
 {
 	struct stream_data *data = iks_user_data(prs);
 
 	return (int)data->sock;
 }
 
-int iks_recv(iksparser *prs, int timeout)
+int ICACHE_FLASH_ATTR
+iks_recv(iksparser *prs, int timeout)
 {
 	struct stream_data *data = iks_user_data(prs);
 	int len, ret;
@@ -489,7 +498,8 @@ int iks_recv(iksparser *prs, int timeout)
 	return IKS_OK;
 }
 
-int iks_send_header(iksparser *prs, const char *to)
+int ICACHE_FLASH_ATTR
+iks_send_header(iksparser *prs, const char *to)
 {
 	struct stream_data *data = iks_user_data(prs);
 	char *msg;
@@ -511,12 +521,14 @@ int iks_send_header(iksparser *prs, const char *to)
 	return IKS_OK;
 }
 
-int iks_send(iksparser *prs, iks *x)
+int ICACHE_FLASH_ATTR
+iks_send(iksparser *prs, iks *x)
 {
 	return iks_send_raw(prs, iks_string(iks_stack(x), x));
 }
 
-int iks_send_raw(iksparser *prs, const char *xmlstr)
+int ICACHE_FLASH_ATTR
+iks_send_raw(iksparser *prs, const char *xmlstr)
 {
 	struct stream_data *data = iks_user_data(prs);
 	int ret;
@@ -537,26 +549,30 @@ int iks_send_raw(iksparser *prs, const char *xmlstr)
 	return IKS_OK;
 }
 
-void iks_disconnect(iksparser *prs)
+void ICACHE_FLASH_ATTR
+iks_disconnect(iksparser *prs)
 {
 	iks_parser_reset(prs);
 }
 
 /*****  tls api  *****/
 
-int iks_has_tls(void)
+int ICACHE_FLASH_ATTR
+iks_has_tls(void)
 {
 	return iks_default_tls.handshake != NULL;
 }
 
-int iks_is_secure(iksparser *prs)
+int ICACHE_FLASH_ATTR
+iks_is_secure(iksparser *prs)
 {
 	struct stream_data *data = iks_user_data(prs);
 
 	return data->flags & SF_SECURE;
 }
 
-int iks_start_tls(iksparser *prs)
+int ICACHE_FLASH_ATTR
+iks_start_tls(iksparser *prs)
 {
 	int ret;
 	struct stream_data *data = iks_user_data(prs);
@@ -573,7 +589,8 @@ int iks_start_tls(iksparser *prs)
 
 /*****  sasl  *****/
 
-int iks_start_sasl(iksparser *prs, enum ikssasltype type, char *username, char *pass)
+int ICACHE_FLASH_ATTR
+iks_start_sasl(iksparser *prs, enum ikssasltype type, char *username, char *pass)
 {
 	iks *x;
 

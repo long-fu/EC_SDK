@@ -26,7 +26,7 @@ struct ikstls_data
 	int timeout;
 };
 
-static size_t
+static size_t ICACHE_FLASH_ATTR
 tls_push(struct ikstls_data *data, const char *buffer, size_t len)
 {
 	int ret;
@@ -37,7 +37,7 @@ tls_push(struct ikstls_data *data, const char *buffer, size_t len)
 	return len;
 }
 
-static size_t
+static size_t ICACHE_FLASH_ATTR
 tls_pull(struct ikstls_data *data, char *buffer, size_t len)
 {
 	int ret;
@@ -48,7 +48,7 @@ tls_pull(struct ikstls_data *data, char *buffer, size_t len)
 	return ret;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 tls_handshake(struct ikstls_data **datap, ikstransport *trans, void *sock)
 {
 	const int protocol_priority[] = {GNUTLS_TLS1, GNUTLS_SSL3, 0};
@@ -112,7 +112,7 @@ tls_handshake(struct ikstls_data **datap, ikstransport *trans, void *sock)
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 tls_send(struct ikstls_data *data, const char *buf, size_t size)
 {
 	if (gnutls_record_send(data->sess, buf, size) < 0)
@@ -120,14 +120,14 @@ tls_send(struct ikstls_data *data, const char *buf, size_t size)
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 tls_recv(struct ikstls_data *data, char *buf, size_t size, int timeout)
 {
 	data->timeout = timeout;
 	return gnutls_record_recv(data->sess, buf, size);
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 tls_terminate(struct ikstls_data *data)
 {
 	gnutls_bye(data->sess, GNUTLS_SHUT_WR);

@@ -13,6 +13,7 @@ void ICACHE_FLASH_ATTR
 at_setupCmdTest(uint8_t id, char *pPara)
 {
     int result = 0, err = 0, flag = 0;
+    char buffer[32] = { 0 };
     pPara++; // skip '='
 
     //get the first parameter
@@ -116,7 +117,7 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
-    if (user_isRegisrer())
+    if (user_get_is_regisrer())
     {
         // TODO: 进入XMPP
         // MARK: station model 连接wifi

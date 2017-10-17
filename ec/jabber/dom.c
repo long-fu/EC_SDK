@@ -14,7 +14,7 @@ struct dom_data
 	size_t chunk_size;
 };
 
-static int
+static int ICACHE_FLASH_ATTR
 tagHook(struct dom_data *data, char *name, char **atts, int type)
 {
 	iks *x;
@@ -58,7 +58,7 @@ tagHook(struct dom_data *data, char *name, char **atts, int type)
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 cdataHook(struct dom_data *data, char *cdata, size_t len)
 {
 	if (data->current)
@@ -66,7 +66,7 @@ cdataHook(struct dom_data *data, char *cdata, size_t len)
 	return IKS_OK;
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 deleteHook(struct dom_data *data)
 {
 	if (data->current)
@@ -74,7 +74,7 @@ deleteHook(struct dom_data *data)
 	data->current = NULL;
 }
 
-iksparser *
+iksparser * ICACHE_FLASH_ATTR
 iks_dom_new(iks **iksptr)
 {
 	ikstack *s;
@@ -91,7 +91,8 @@ iks_dom_new(iks **iksptr)
 	return iks_sax_extend(s, data, (iksTagHook *)tagHook, (iksCDataHook *)cdataHook, (iksDeleteHook *)deleteHook);
 }
 
-void iks_set_size_hint(iksparser *prs, size_t approx_size)
+void ICACHE_FLASH_ATTR
+iks_set_size_hint(iksparser *prs, size_t approx_size)
 {
 	size_t cs;
 	struct dom_data *data = iks_user_data(prs);
@@ -102,7 +103,8 @@ void iks_set_size_hint(iksparser *prs, size_t approx_size)
 	data->chunk_size = cs;
 }
 
-iks *iks_tree(const char *xml_str, size_t len, int *err)
+iks * ICACHE_FLASH_ATTR
+iks_tree(const char *xml_str, size_t len, int *err)
 {
 	iksparser *prs;
 	iks *x;
@@ -124,88 +126,89 @@ iks *iks_tree(const char *xml_str, size_t len, int *err)
 	return x;
 }
 
-int iks_load(const char *fname, iks **xptr)
-{
-	iksparser *prs;
-	char *buf;
-	FILE *f;
-	int len, done = 0;
-	int ret;
+// int ICACHE_FLASH_ATTR
+// iks_load(const char *fname, iks **xptr)
+// {
+// 	iksparser *prs;
+// 	char *buf;
+// 	FILE *f;
+// 	int len, done = 0;
+// 	int ret;
 
-	*xptr = NULL;
+// 	*xptr = NULL;
 
-	buf = iks_malloc(FILE_IO_BUF_SIZE);
-	if (!buf)
-		return IKS_NOMEM;
-	ret = IKS_NOMEM;
-	prs = iks_dom_new(xptr);
-	if (prs)
-	{
-		f = fopen(fname, "r");
-		if (f)
-		{
-			while (0 == done)
-			{
-				len = fread(buf, 1, FILE_IO_BUF_SIZE, f);
-				if (len < FILE_IO_BUF_SIZE)
-				{
-					if (0 == feof(f))
-					{
-						ret = IKS_FILE_RWERR;
-						break;
-					}
-					if (0 == len)
-						ret = IKS_OK;
-					done = 1;
-				}
-				if (len > 0)
-				{
-					int e;
-					e = iks_parse(prs, buf, len, done);
-					if (IKS_OK != e)
-					{
-						ret = e;
-						break;
-					}
-					if (done)
-						ret = IKS_OK;
-				}
-			}
-			fclose(f);
-		}
-		else
-		{
-			if (ENOENT == errno)
-				ret = IKS_FILE_NOFILE;
-			else
-				ret = IKS_FILE_NOACCESS;
-		}
-		iks_parser_delete(prs);
-	}
-	iks_free(buf);
-	return ret;
-}
+// 	buf = iks_malloc(FILE_IO_BUF_SIZE);
+// 	if (!buf)
+// 		return IKS_NOMEM;
+// 	ret = IKS_NOMEM;
+// 	prs = iks_dom_new(xptr);
+// 	if (prs)
+// 	{
+// 		f = fopen(fname, "r");
+// 		if (f)
+// 		{
+// 			while (0 == done)
+// 			{
+// 				len = fread(buf, 1, FILE_IO_BUF_SIZE, f);
+// 				if (len < FILE_IO_BUF_SIZE)
+// 				{
+// 					if (0 == feof(f))
+// 					{
+// 						ret = IKS_FILE_RWERR;
+// 						break;
+// 					}
+// 					if (0 == len)
+// 						ret = IKS_OK;
+// 					done = 1;
+// 				}
+// 				if (len > 0)
+// 				{
+// 					int e;
+// 					e = iks_parse(prs, buf, len, done);
+// 					if (IKS_OK != e)
+// 					{
+// 						ret = e;
+// 						break;
+// 					}
+// 					if (done)
+// 						ret = IKS_OK;
+// 				}
+// 			}
+// 			fclose(f);
+// 		}
+// 		else
+// 		{
+// 			if (ENOENT == errno)
+// 				ret = IKS_FILE_NOFILE;
+// 			else
+// 				ret = IKS_FILE_NOACCESS;
+// 		}
+// 		iks_parser_delete(prs);
+// 	}
+// 	iks_free(buf);
+// 	return ret;
+// }
 
-int iks_save(const char *fname, iks *x)
-{
-	FILE *f;
-	char *data;
-	int ret;
+// int iks_save(const char *fname, iks *x)
+// {
+// 	FILE *f;
+// 	char *data;
+// 	int ret;
 
-	ret = IKS_NOMEM;
-	data = iks_string(NULL, x);
-	if (data)
-	{
-		ret = IKS_FILE_NOACCESS;
-		f = fopen(fname, "w");
-		if (f)
-		{
-			ret = IKS_FILE_RWERR;
-			if (fputs(data, f) >= 0)
-				ret = IKS_OK;
-			fclose(f);
-		}
-		iks_free(data);
-	}
-	return ret;
-}
+// 	ret = IKS_NOMEM;
+// 	data = iks_string(NULL, x);
+// 	if (data)
+// 	{
+// 		ret = IKS_FILE_NOACCESS;
+// 		f = fopen(fname, "w");
+// 		if (f)
+// 		{
+// 			ret = IKS_FILE_RWERR;
+// 			if (fputs(data, f) >= 0)
+// 				ret = IKS_OK;
+// 			fclose(f);
+// 		}
+// 		iks_free(data);
+// 	}
+// 	return ret;
+// }

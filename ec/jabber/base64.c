@@ -10,7 +10,8 @@
 static const char base64_charset[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-char *iks_base64_decode(const char *buf)
+char * ICACHE_FLASH_ATTR
+iks_base64_decode(const char *buf)
 {
 	char *res, *save;
 	char val;
@@ -63,7 +64,8 @@ char *iks_base64_decode(const char *buf)
 	return save;
 }
 
-char *iks_base64_encode(const char *buf, int len)
+char * ICACHE_FLASH_ATTR
+iks_base64_encode(const char *buf, int len)
 {
 	char *res, *save;
 	int k, t;

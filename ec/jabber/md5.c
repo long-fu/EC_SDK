@@ -63,7 +63,8 @@ static const unsigned long int T[] =
 
 static void iks_md5_compute(iksmd5 *md5);
 
-void iks_md5_reset(iksmd5 *md5)
+void ICACHE_FLASH_ATTR
+iks_md5_reset(iksmd5 *md5)
 {
 	memset(md5, 0, sizeof(iksmd5));
 	md5->state[0] = 0x67452301;
@@ -72,7 +73,8 @@ void iks_md5_reset(iksmd5 *md5)
 	md5->state[3] = 0x10325476;
 }
 
-iksmd5 *iks_md5_new(void)
+iksmd5 *ICACHE_FLASH_ATTR
+iks_md5_new(void)
 {
 	iksmd5 *md5 = iks_malloc(sizeof(iksmd5));
 
@@ -82,7 +84,8 @@ iksmd5 *iks_md5_new(void)
 	return md5;
 }
 
-void iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finish)
+void ICACHE_FLASH_ATTR
+iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finish)
 {
 	int i, j;
 	int len = slen;
@@ -126,12 +129,14 @@ void iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finis
 	}
 }
 
-void iks_md5_delete(iksmd5 *md5)
+void ICACHE_FLASH_ATTR
+iks_md5_delete(iksmd5 *md5)
 {
 	iks_free(md5);
 }
 
-void iks_md5_digest(iksmd5 *md5, unsigned char *digest)
+void ICACHE_FLASH_ATTR
+iks_md5_digest(iksmd5 *md5, unsigned char *digest)
 {
 	PUT_UINT32(md5->state[0], digest,  0);
 	PUT_UINT32(md5->state[1], digest,  4);
@@ -139,7 +144,8 @@ void iks_md5_digest(iksmd5 *md5, unsigned char *digest)
 	PUT_UINT32(md5->state[3], digest, 12);
 }
 
-void iks_md5_print(iksmd5 *md5, char *buf)
+void ICACHE_FLASH_ATTR
+iks_md5_print(iksmd5 *md5, char *buf)
 {
 	int i;
 	unsigned char digest[16];
@@ -151,7 +157,8 @@ void iks_md5_print(iksmd5 *md5, char *buf)
 	}
 }
 
-void iks_md5(const char *data, char *buf)
+void ICACHE_FLASH_ATTR
+iks_md5(const char *data, char *buf)
 {
 	iksmd5 *md5 = iks_md5_new();
 
@@ -160,7 +167,8 @@ void iks_md5(const char *data, char *buf)
 	iks_md5_delete(md5);
 }
 
-static void iks_md5_compute(iksmd5 *md5)
+static void ICACHE_FLASH_ATTR
+iks_md5_compute(iksmd5 *md5)
 {
 	unsigned long int X[16], R[4];
 	unsigned char RS1[] = { 7, 12 ,17, 22 };

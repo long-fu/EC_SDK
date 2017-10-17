@@ -22,7 +22,7 @@ struct ikstls_data
 
 static int init_done;
 
-static int
+static int ICACHE_FLASH_ATTR
 my_bio_create(BIO *b)
 {
 	b->init = 1;
@@ -32,7 +32,7 @@ my_bio_create(BIO *b)
 	return 1;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 my_bio_destroy(BIO *b)
 {
 	if (b == 0)
@@ -44,7 +44,7 @@ my_bio_destroy(BIO *b)
 	return 1;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 my_bio_read(BIO *b, char *buf, int len)
 {
 	struct ikstls_data *data = (struct ikstls_data *)b->ptr;
@@ -58,7 +58,7 @@ my_bio_read(BIO *b, char *buf, int len)
 	return ret;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 my_bio_write(BIO *b, const char *buf, int len)
 {
 	struct ikstls_data *data = (struct ikstls_data *)b->ptr;
@@ -72,7 +72,7 @@ my_bio_write(BIO *b, const char *buf, int len)
 	return ret;
 }
 
-static long
+static long ICACHE_FLASH_ATTR
 my_bio_ctrl(BIO *b, int cmd, long num, void *ptr)
 {
 	if (cmd == BIO_CTRL_FLUSH)
@@ -82,13 +82,13 @@ my_bio_ctrl(BIO *b, int cmd, long num, void *ptr)
 	return 0;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 my_bio_gets(BIO *b, char *buf, int len)
 {
 	return -1;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 my_bio_puts(BIO *b, const char *str)
 {
 	return my_bio_write(b, str, strlen(str));
@@ -105,7 +105,7 @@ static BIO_METHOD my_bio_method = {
 	my_bio_create,
 	my_bio_destroy};
 
-static int
+static int ICACHE_FLASH_ATTR
 tls_handshake(struct ikstls_data **datap, ikstransport *trans, void *sock)
 {
 	struct ikstls_data *data;
@@ -157,7 +157,7 @@ tls_handshake(struct ikstls_data **datap, ikstransport *trans, void *sock)
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 tls_send(struct ikstls_data *data, const char *buf, size_t size)
 {
 	int r;
@@ -172,7 +172,7 @@ tls_send(struct ikstls_data *data, const char *buf, size_t size)
 	}
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 tls_recv(struct ikstls_data *data, char *buf, size_t size, int timeout)
 {
 	int r;
@@ -188,7 +188,7 @@ tls_recv(struct ikstls_data *data, char *buf, size_t size, int timeout)
 	}
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 tls_terminate(struct ikstls_data *data)
 {
 	SSL_free(data->ssl);

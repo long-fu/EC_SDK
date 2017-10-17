@@ -1,6 +1,8 @@
 #ifndef __JABBER_CONFIG_H__
 #define __JABBER_CONFIG_H__
 
+#include "ip_addr.h"
+
 struct jabber_config
 {
 	int port;

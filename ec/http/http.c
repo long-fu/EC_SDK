@@ -1,10 +1,10 @@
-#include "debug.h"
+#include "user_debug.h"
 #include "http_parser.h"
-#include "e_http.h"
+#include "http.h"
 #include "os_type.h"
 #include "osapi.h"
 #include "mem.h"
-#include "e_soc.h"
+#include "http_io.h"
 
 static char recv_buf[1024] = {0};
 static char http_body[128] = {0};
@@ -207,7 +207,7 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
         }
     }
 
-    body_len = (int)os_strlenhttp_body);
+    body_len = (int)os_strlen(http_body);
     if (body_len > 0)
     {
         os_sprintf(content_length, "Content-Length: %d", body_len);

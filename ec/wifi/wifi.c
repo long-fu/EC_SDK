@@ -13,7 +13,8 @@
 static ETSTimer WiFiLinker;
 WifiCallback wifiCb = NULL;
 static uint8_t wifiStatus = STATION_IDLE, lastWifiStatus = STATION_IDLE;
-static void ICACHE_FLASH_ATTR wifi_check_ip(void *arg)
+static void ICACHE_FLASH_ATTR
+wifi_check_ip(void *arg)
 {
 	struct ip_info ipConfig;
 

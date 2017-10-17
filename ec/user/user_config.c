@@ -2,10 +2,11 @@
 #include "user_config.h"
 #include "user_debug.h"
 #include "jabber_config.h"
+#include "spi_flash.h"
 
-#ifdef HTTP_DEBUG_ON
+// #ifdef HTTP_DEBUG_ON
 char log_buffer[512];
-#endif
+// #endif
 
 static int user_isRegisrer;
 

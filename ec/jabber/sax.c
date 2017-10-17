@@ -73,7 +73,7 @@ struct iksparser_struct {
 	unsigned int uni_char;
 };
 
-iksparser *
+iksparser *ICACHE_FLASH_ATTR
 iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook)
 {
 	iksparser *prs;
@@ -87,7 +87,7 @@ iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook)
 	return prs;
 }
 
-iksparser *
+iksparser *ICACHE_FLASH_ATTR
 iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook, iksDeleteHook *deleteHook)
 {
 	iksparser *prs;
@@ -103,25 +103,25 @@ iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *
 	return prs;
 }
 
-ikstack *
+ikstack *ICACHE_FLASH_ATTR
 iks_parser_stack (iksparser *prs)
 {
 	return prs->s;
 }
 
-void *
+void *ICACHE_FLASH_ATTR
 iks_user_data (iksparser *prs)
 {
 	return prs->user_data;
 }
 
-unsigned long
+unsigned long ICACHE_FLASH_ATTR
 iks_nr_bytes (iksparser *prs)
 {
 	return prs->nr_bytes;
 }
 
-unsigned long
+unsigned long ICACHE_FLASH_ATTR
 iks_nr_lines (iksparser *prs)
 {
 	return prs->nr_lines;
@@ -130,7 +130,7 @@ iks_nr_lines (iksparser *prs)
 #define IS_WHITESPACE(x) ' ' == (x) || '\t' == (x) || '\r' == (x) || '\n' == (x)
 #define NOT_WHITESPACE(x) ' ' != (x) && '\t' != (x) && '\r' != (x) && '\n' != (x)
 
-static int
+static int ICACHE_FLASH_ATTR
 stack_init (iksparser *prs)
 {
 	prs->stack = iks_malloc (128);
@@ -140,7 +140,7 @@ stack_init (iksparser *prs)
 	return 1;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 stack_expand (iksparser *prs, int len)
 {
 	size_t need;
@@ -196,7 +196,7 @@ stack_expand (iksparser *prs, int len)
 	prs->stack_pos++; \
 }
 
-static enum ikserror
+static enum ikserror ICACHE_FLASH_ATTR
 sax_core (iksparser *prs, char *buf, int len)
 {
 	enum ikserror err;
@@ -631,7 +631,7 @@ cont:
 	return err;
 }
 
-int
+int ICACHE_FLASH_ATTR
 iks_parse (iksparser *prs, const char *data, size_t len, int finish)
 {
 	if (!data) return IKS_OK;
@@ -639,7 +639,7 @@ iks_parse (iksparser *prs, const char *data, size_t len, int finish)
 	return sax_core (prs, (char *) data, len);
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_parser_reset (iksparser *prs)
 {
 	if (prs->deleteHook) prs->deleteHook (prs->user_data);
@@ -658,7 +658,7 @@ iks_parser_reset (iksparser *prs)
 	prs->uni_char = 0;
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_parser_delete (iksparser *prs)
 {
 	if (prs->deleteHook) prs->deleteHook (prs->user_data);

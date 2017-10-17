@@ -4,36 +4,36 @@
 #include "user_config.h"
 
 #if DEBUG_ON
-
+extern char log_buffer[512];
 #ifdef HTTP_DEBUG_ON
-    extern char log_buffer[512];
-    ec_log(format, ...) os_sprintf(Log_Buff, format, ##__VA_ARGS__); at_port_print(Log_Buff)
+    // extern char log_buffer[512];
+#define ec_log(format, ...) os_sprintf(log_buffer, format, ##__VA_ARGS__); at_port_print(log_buffer)
 #else
-    ec_log(format, ...)
+#define ec_log(format, ...)
 #endif
 
 #ifdef XMPP_DEBUG_ON
-    extern char log_buffer[512];
-    ec_log(format, ...) os_sprintf(Log_Buff, format, ##__VA_ARGS__); at_port_print(Log_Buff)
+    // extern char log_buffer[512];
+#define ec_log(format, ...) os_sprintf(log_buffer, format, ##__VA_ARGS__); at_port_print(log_buffer)
 #else
-    ec_log(format, ...)
+#define ec_log(format, ...)
 #endif
 
 #ifdef ESPCONN_DEBUG_ON
-    extern char log_buffer[512];
-    ec_log(format, ...) os_sprintf(Log_Buff, format, ##__VA_ARGS__); at_port_print(Log_Buff)
+    // extern char log_buffer[512];
+#define ec_log(format, ...) os_sprintf(log_buffer, format, ##__VA_ARGS__); at_port_print(log_buffer)
 #else
-        ec_log(format, ...)
+#define ec_log(format, ...)
 #endif
 
 #if WIFI_DEBUG_ON
-    ec_log(format, ...) os_sprintf(Log_Buff, format, ##__VA_ARGS__); at_port_print(Log_Buff)
+#define ec_log(format, ...) os_sprintf(log_buffer, format, ##__VA_ARGS__); at_port_print(log_buffer)
 #else
-    ec_log(format, ...)
+#define ec_log(format, ...)
 #endif
 
 #else
-ec_log(format, ...)
+#define ec_log(format, ...)
 #endif
 
 #endif

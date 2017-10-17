@@ -34,7 +34,7 @@ struct ikstack_struct
 	ikschunk *data;
 };
 
-static ikschunk *
+static ikschunk * ICACHE_FLASH_ATTR
 find_space(ikstack *s, ikschunk *c, size_t size)
 {
 	/* FIXME: dont use *2 after over allocated chunks */
@@ -62,7 +62,7 @@ find_space(ikstack *s, ikschunk *c, size_t size)
 	return NULL;
 }
 
-ikstack *
+ikstack *ICACHE_FLASH_ATTR
 iks_stack_new(size_t meta_chunk, size_t data_chunk)
 {
 	ikstack *s;
@@ -95,7 +95,7 @@ iks_stack_new(size_t meta_chunk, size_t data_chunk)
 	return s;
 }
 
-void *
+void *ICACHE_FLASH_ATTR
 iks_stack_alloc(ikstack *s, size_t size)
 {
 	ikschunk *c;
@@ -114,7 +114,7 @@ iks_stack_alloc(ikstack *s, size_t size)
 	return mem;
 }
 
-char *
+char *ICACHE_FLASH_ATTR
 iks_stack_strdup(ikstack *s, const char *src, size_t len)
 {
 	ikschunk *c;
@@ -136,7 +136,7 @@ iks_stack_strdup(ikstack *s, const char *src, size_t len)
 	return dest;
 }
 
-char *
+char *ICACHE_FLASH_ATTR
 iks_stack_strcat(ikstack *s, char *old, size_t old_len, const char *src, size_t src_len)
 {
 	char *ret;
@@ -195,7 +195,8 @@ iks_stack_strcat(ikstack *s, char *old, size_t old_len, const char *src, size_t 
 	return ret;
 }
 
-void iks_stack_stat(ikstack *s, size_t *allocated, size_t *used)
+void ICACHE_FLASH_ATTR
+iks_stack_stat(ikstack *s, size_t *allocated, size_t *used)
 {
 	ikschunk *c;
 
@@ -217,7 +218,8 @@ void iks_stack_stat(ikstack *s, size_t *allocated, size_t *used)
 	}
 }
 
-void iks_stack_delete(ikstack *s)
+void ICACHE_FLASH_ATTR
+iks_stack_delete(ikstack *s)
 {
 	ikschunk *c, *tmp;
 

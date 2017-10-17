@@ -7,7 +7,7 @@
 #include "common.h"
 #include "iksemel.h"
 
-iksid *
+iksid *ICACHE_FLASH_ATTR
 iks_id_new(ikstack *s, const char *jid)
 {
 	iksid *id;
@@ -56,7 +56,8 @@ iks_id_new(ikstack *s, const char *jid)
 	return id;
 }
 
-int iks_id_cmp(iksid *a, iksid *b, int parts)
+int ICACHE_FLASH_ATTR
+iks_id_cmp(iksid *a, iksid *b, int parts)
 {
 	int diff;
 
@@ -72,7 +73,7 @@ int iks_id_cmp(iksid *a, iksid *b, int parts)
 	return diff;
 }
 
-ikspak *
+ikspak *ICACHE_FLASH_ATTR
 iks_packet(iks *x)
 {
 	ikspak *pak;
@@ -185,7 +186,8 @@ iks_packet(iks *x)
 	return pak;
 }
 
-iks *iks_make_auth(iksid *id, const char *pass, const char *sid)
+iks *ICACHE_FLASH_ATTR
+iks_make_auth(iksid *id, const char *pass, const char *sid)
 {
 	iks *x, *y;
 
@@ -213,7 +215,8 @@ iks *iks_make_auth(iksid *id, const char *pass, const char *sid)
 	return x;
 }
 
-iks *iks_make_msg(enum iksubtype type, const char *to, const char *body)
+iks *ICACHE_FLASH_ATTR
+iks_make_msg(enum iksubtype type, const char *to, const char *body)
 {
 	iks *x;
 	char *t = NULL;
@@ -242,7 +245,8 @@ iks *iks_make_msg(enum iksubtype type, const char *to, const char *body)
 	return x;
 }
 
-iks *iks_make_s10n(enum iksubtype type, const char *to, const char *msg)
+iks *ICACHE_FLASH_ATTR
+iks_make_s10n(enum iksubtype type, const char *to, const char *msg)
 {
 	iks *x;
 	char *t;
@@ -278,7 +282,8 @@ iks *iks_make_s10n(enum iksubtype type, const char *to, const char *msg)
 	return x;
 }
 
-iks *iks_make_pres(enum ikshowtype show, const char *status)
+iks *ICACHE_FLASH_ATTR
+iks_make_pres(enum ikshowtype show, const char *status)
 {
 	iks *x;
 	char *t;
@@ -313,7 +318,8 @@ iks *iks_make_pres(enum ikshowtype show, const char *status)
 	return x;
 }
 
-iks *iks_make_iq(enum iksubtype type, const char *xmlns)
+iks *ICACHE_FLASH_ATTR
+iks_make_iq(enum iksubtype type, const char *xmlns)
 {
 	iks *x;
 	char *t = NULL;
@@ -343,7 +349,8 @@ iks *iks_make_iq(enum iksubtype type, const char *xmlns)
 	return x;
 }
 
-iks *iks_make_resource_bind(iksid *id)
+iks *ICACHE_FLASH_ATTR
+iks_make_resource_bind(iksid *id)
 {
 	iks *x, *y, *z;
 
@@ -359,7 +366,8 @@ iks *iks_make_resource_bind(iksid *id)
 	return x;
 }
 
-iks *iks_make_session(void)
+iks *ICACHE_FLASH_ATTR
+iks_make_session(void)
 {
 	iks *x, *y;
 
@@ -370,7 +378,7 @@ iks *iks_make_session(void)
 	return x;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 iks_sasl_mechanisms(iks *x)
 {
 	int sasl_mech = 0;
@@ -386,7 +394,8 @@ iks_sasl_mechanisms(iks *x)
 	return sasl_mech;
 }
 
-int iks_stream_features(iks *x)
+int ICACHE_FLASH_ATTR
+iks_stream_features(iks *x)
 {
 	int features = 0;
 

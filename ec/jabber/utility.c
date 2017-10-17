@@ -12,24 +12,26 @@
 static void *(*my_malloc_func)(size_t size);
 static void (*my_free_func)(void *ptr);
 
-void *
+void * ICACHE_FLASH_ATTR
 iks_malloc(size_t size)
 {
-	if (my_malloc_func)
-		return my_malloc_func(size);
-	else
-		return malloc(size);
+	// if (my_malloc_func)
+	// 	return my_malloc_func(size);
+	// else
+	// 	return malloc(size);
 }
 
-void iks_free(void *ptr)
+void ICACHE_FLASH_ATTR
+iks_free(void *ptr)
 {
-	if (my_free_func)
-		my_free_func(ptr);
-	else
-		free(ptr);
+	// if (my_free_func)
+	// 	my_free_func(ptr);
+	// else
+	// 	free(ptr);
 }
 
-void iks_set_mem_funcs(void *(*malloc_func)(size_t size), void (*free_func)(void *ptr))
+void ICACHE_FLASH_ATTR
+iks_set_mem_funcs(void *(*malloc_func)(size_t size), void (*free_func)(void *ptr))
 {
 	my_malloc_func = malloc_func;
 	my_free_func = free_func;
@@ -37,7 +39,7 @@ void iks_set_mem_funcs(void *(*malloc_func)(size_t size), void (*free_func)(void
 
 /*****  NULL-safe Functions  *****/
 
-char *
+char * ICACHE_FLASH_ATTR
 iks_strdup(const char *src)
 {
 	if (src)
@@ -45,7 +47,7 @@ iks_strdup(const char *src)
 	return NULL;
 }
 
-char *
+char *ICACHE_FLASH_ATTR
 iks_strcat(char *dest, const char *src)
 {
 	size_t len;
@@ -59,35 +61,39 @@ iks_strcat(char *dest, const char *src)
 	return dest + len;
 }
 
-int iks_strcmp(const char *a, const char *b)
+int ICACHE_FLASH_ATTR
+iks_strcmp(const char *a, const char *b)
 {
 	if (!a || !b)
 		return -1;
 	return strcmp(a, b);
 }
 
-int iks_strcasecmp(const char *a, const char *b)
+int ICACHE_FLASH_ATTR
+iks_strcasecmp(const char *a, const char *b)
 {
 	if (!a || !b)
 		return -1;
 	return strcasecmp(a, b);
 }
 
-int iks_strncmp(const char *a, const char *b, size_t n)
+int ICACHE_FLASH_ATTR
+iks_strncmp(const char *a, const char *b, size_t n)
 {
 	if (!a || !b)
 		return -1;
 	return strncmp(a, b, n);
 }
 
-int iks_strncasecmp(const char *a, const char *b, size_t n)
+int ICACHE_FLASH_ATTR
+iks_strncasecmp(const char *a, const char *b, size_t n)
 {
 	if (!a || !b)
 		return -1;
 	return strncasecmp(a, b, n);
 }
 
-size_t
+size_t ICACHE_FLASH_ATTR
 iks_strlen(const char *src)
 {
 	if (!src)
@@ -97,7 +103,7 @@ iks_strlen(const char *src)
 
 /*****  XML Escaping  *****/
 
-char *
+char * ICACHE_FLASH_ATTR
 iks_escape(ikstack *s, char *src, size_t len)
 {
 	char *ret;
@@ -170,7 +176,7 @@ iks_escape(ikstack *s, char *src, size_t len)
 	return ret;
 }
 
-char *
+char * ICACHE_FLASH_ATTR
 iks_unescape(ikstack *s, char *src, size_t len)
 {
 	int i, j;

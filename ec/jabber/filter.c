@@ -28,7 +28,7 @@ struct iksfilter_struct
 	iksrule *last_rule;
 };
 
-iksfilter *
+iksfilter * ICACHE_FLASH_ATTR
 iks_filter_new(void)
 {
 	iksfilter *f;
@@ -41,7 +41,7 @@ iks_filter_new(void)
 	return f;
 }
 
-iksrule *
+iksrule * ICACHE_FLASH_ATTR
 iks_filter_add_rule(iksfilter *f, iksFilterHook *filterHook, void *user_data, ...)
 {
 	ikstack *s;
@@ -98,7 +98,8 @@ iks_filter_add_rule(iksfilter *f, iksFilterHook *filterHook, void *user_data, ..
 	return rule;
 }
 
-void iks_filter_remove_rule(iksfilter *f, iksrule *rule)
+void ICACHE_FLASH_ATTR
+iks_filter_remove_rule(iksfilter *f, iksrule *rule)
 {
 	if (rule->prev)
 		rule->prev->next = rule->next;
@@ -111,7 +112,8 @@ void iks_filter_remove_rule(iksfilter *f, iksrule *rule)
 	iks_stack_delete(rule->s);
 }
 
-void iks_filter_remove_hook(iksfilter *f, iksFilterHook *filterHook)
+void ICACHE_FLASH_ATTR
+iks_filter_remove_hook(iksfilter *f, iksFilterHook *filterHook)
 {
 	iksrule *rule, *tmp;
 
@@ -125,7 +127,8 @@ void iks_filter_remove_hook(iksfilter *f, iksFilterHook *filterHook)
 	}
 }
 
-void iks_filter_packet(iksfilter *f, ikspak *pak)
+void ICACHE_FLASH_ATTR
+iks_filter_packet(iksfilter *f, ikspak *pak)
 {
 	iksrule *rule, *max_rule;
 	int fail, score, max_score;
@@ -209,7 +212,8 @@ void iks_filter_packet(iksfilter *f, ikspak *pak)
 	}
 }
 
-void iks_filter_delete(iksfilter *f)
+void ICACHE_FLASH_ATTR
+iks_filter_delete(iksfilter *f)
 {
 	iksrule *rule, *tmp;
 
