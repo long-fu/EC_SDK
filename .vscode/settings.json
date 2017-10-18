@@ -10,6 +10,7 @@
         "common.h": "c",
         "osapi.h": "c",
         "user_interface.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "jsonparse.h": "c"
     }
 }

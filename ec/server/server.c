@@ -5,6 +5,8 @@
 #include "http_parser.h"
 #include "mem.h"
 
+char http_respoons_buff[512] = "";
+
 static http_parser parser = {0};
 static http_parser_settings settings = {0};
 static char http_respons_buf[256] = {0};
@@ -31,6 +33,16 @@ on_headers_complete(http_parser *_)
     return 0;
 }
 
+#include "json/jsonparse.h"
+static jsonparse_state json_state = { 0 };
+static void ICACHE_FLASH_ATTR
+on_json_data(char *data) 
+{
+    memset(&json_state,0x0,sizeof(json_state));
+    jsonparse_setup(&json_state, data, os_strlen(data));
+}
+
+
 static int ICACHE_FLASH_ATTR
 on_message_complete(http_parser *_)
 {
@@ -44,6 +56,7 @@ on_message_complete(http_parser *_)
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
     ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
     
+        
     // MARK: 数据接收完成
     // TODO: 这里进行数据的回复
     return 0;
