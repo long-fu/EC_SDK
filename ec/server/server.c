@@ -19,7 +19,7 @@ static int ICACHE_FLASH_ATTR
 on_message_begin(http_parser *_)
 {
     (void)_;
-
+    ec_log("on_message_begin \r\n");
     return 0;
 }
 
@@ -27,7 +27,7 @@ static int ICACHE_FLASH_ATTR
 on_headers_complete(http_parser *_)
 {
     (void)_;
-
+    ec_log("on_headers_complete\r\n");
     return 0;
 }
 
@@ -53,7 +53,7 @@ static int ICACHE_FLASH_ATTR
 on_url(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-
+    ec_log("on_url  %s \r\n",at);
     return 0;
 }
 
@@ -61,7 +61,7 @@ static int ICACHE_FLASH_ATTR
 on_header_field(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-
+    ec_log("on_header_field  %s \r\n",at);
     return 0;
 }
 
@@ -69,7 +69,7 @@ static int ICACHE_FLASH_ATTR
 on_header_value(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-
+    ec_log("on_header_value  %s \r\n",at);
     return 0;
 }
 
@@ -77,6 +77,7 @@ static int ICACHE_FLASH_ATTR
 on_body(http_parser *_, const char *at, size_t length)
 {
     (void)_;
+    ec_log("on_body  %s \r\n",at);
     strncat(http_respons_buf, at, length);
     return 0;
 }
@@ -89,7 +90,7 @@ server_parser_init()
     // memset(soc_send_buf, 0x0, sizeof(soc_send_buf));
     os_memset(http_respons_buf, 0x0, sizeof(http_respons_buf));
 
-    http_parser_init(&parser, HTTP_RESPONSE);
+    http_parser_init(&parser, HTTP_REQUEST);
 
     os_memset(&settings, 0, sizeof(settings));
     settings.on_message_begin = on_message_begin;
@@ -107,6 +108,7 @@ server_recv(void *arg, char *pusrdata, unsigned short length)
     size_t parsed;
     ec_log("server_recv %d [%s]\r\n", length, pusrdata);
     // 解析数据
+    server_parser_init();
     parsed = http_parser_execute(&parser, &settings, pusrdata, length);
 }
 
@@ -115,7 +117,7 @@ server_recon(void *arg, sint8 err)
 {
     struct espconn *pesp_conn = arg;
 
-    ec_log("server's %d.%d.%d.%d:%d err %d reconnect\n", pesp_conn->proto.tcp->remote_ip[0],
+    ec_log("server_recon server's %d.%d.%d.%d:%d err %d reconnect\r\n", pesp_conn->proto.tcp->remote_ip[0],
            pesp_conn->proto.tcp->remote_ip[1], pesp_conn->proto.tcp->remote_ip[2],
            pesp_conn->proto.tcp->remote_ip[3], pesp_conn->proto.tcp->remote_port, err);
 }
@@ -125,7 +127,7 @@ server_discon(void *arg)
 {
     struct espconn *pesp_conn = arg;
 
-    ec_log("server's %d.%d.%d.%d:%d disconnect\n", pesp_conn->proto.tcp->remote_ip[0],
+    ec_log("server_discon server's %d.%d.%d.%d:%d disconnect\r\n", pesp_conn->proto.tcp->remote_ip[0],
            pesp_conn->proto.tcp->remote_ip[1], pesp_conn->proto.tcp->remote_ip[2],
            pesp_conn->proto.tcp->remote_ip[3], pesp_conn->proto.tcp->remote_port);
 }
@@ -134,7 +136,7 @@ static void ICACHE_FLASH_ATTR
 server_send_cb(void *arg)
 {
     // TODO: 这里可以断开连接 发送任务
-    system_os_post(USER_TASK_PRIO_0, 0, 0);
+    // system_os_post(USER_TASK_PRIO_0, 0, 0);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -165,7 +167,7 @@ server_init(uint32 port)
     esp_conn.proto.tcp = &esptcp;
     esp_conn.proto.tcp->local_port = port;
     ec_log("server _ init \r\n");
-    server_parser_init();
+    
     espconn_regist_connectcb(&esp_conn, server_listen);
     
     espconn_accept(&esp_conn);
