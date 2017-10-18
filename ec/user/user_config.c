@@ -53,5 +53,5 @@ int ICACHE_FLASH_ATTR
 user_get_is_regisrer(void)
 {
 	ec_log("user get register %d\r\n", user_isRegisrer);
-	return user_isRegisrer = 0;
+	return user_isRegisrer = 1;
 }

@@ -3,10 +3,17 @@
 #include "user_debug.h"
 #include "espconn.h"
 #include "http_parser.h"
+#include "mem.h"
 
 static http_parser parser;
 static http_parser_settings settings;
 static char http_respons_buf[256] = {0};
+
+const static TASK_QUEUE_LEN = 4;
+static os_event_t *task_queue;
+
+LOCAL struct espconn esp_conn;
+LOCAL esp_tcp esptcp;
 
 static int ICACHE_FLASH_ATTR
 on_message_begin(http_parser *_)
@@ -38,7 +45,7 @@ on_message_complete(http_parser *_)
     ec_log("\r\n>>>%s<<<\r\n", http_respons_buf);
 
     // MARK: 数据接收完成
-
+    
     return 0;
 }
 
@@ -126,6 +133,8 @@ server_discon(void *arg)
 static void ICACHE_FLASH_ATTR
 server_send_cb(void *arg)
 {
+    // TODO: 这里可以断开连接 发送任务
+    system_os_post(USER_TASK_PRIO_0, 0, 0);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -139,10 +148,16 @@ server_listen(void *arg)
 }
 
 void ICACHE_FLASH_ATTR
+on_task(os_event_t * e) 
+{
+    // TODO: 断开连接
+    espconn_disconnect(&esp_conn);
+    espconn_delete(&esp_conn);
+}
+
+void ICACHE_FLASH_ATTR
 server_init(uint32 port)
 {
-    LOCAL struct espconn esp_conn;
-    LOCAL esp_tcp esptcp;
 
     esp_conn.type = ESPCONN_TCP;
     esp_conn.state = ESPCONN_NONE;
@@ -152,4 +167,10 @@ server_init(uint32 port)
     espconn_regist_connectcb(&esp_conn, server_listen);
     espconn_regist_reconcb(&esp_conn, server_recon);
     espconn_accept(&esp_conn);
+
+    // TODO: 创建任务
+    task_queue = (os_event_t *) os_malloc(sizeof(os_event_t) * TASK_QUEUE_LEN);
+    // MARK: 
+    // 注册任务
+    system_os_task(on_task, USER_TASK_PRIO_0, task_queue, TASK_QUEUE_LEN);
 }

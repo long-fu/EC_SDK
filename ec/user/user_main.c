@@ -208,5 +208,6 @@ user_init(void)
 #endif
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
+    ec_log("user init ok main ----\r\n");
     system_init_done_cb(system_on_done_cb);
 }

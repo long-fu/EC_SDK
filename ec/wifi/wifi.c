@@ -137,7 +137,7 @@ wifi_ap_set(uint8_t *ssid, uint8_t *pass)
 	config.authmode = AUTH_WPA_WPA2_PSK;
 	config.ssid_len = 0;
 	config.beacon_interval = 100;
-	config.max_connection = 1;
+	config.max_connection = 4;
 
 	wifi_softap_set_config(&config);
 }
