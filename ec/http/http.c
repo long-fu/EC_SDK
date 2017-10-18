@@ -135,7 +135,6 @@ e_http_recv(char *data, unsigned short len)
 
     size_t parsed;
     ec_log("jie shou dao de shu ju [%s]\r\n", data);
-    // os_memset(recv_buf, 0x0, 512);
     os_memcpy(recv_buf, data, len);
     parsed = http_parser_execute(&parser, &settings, recv_buf, len);
 }
