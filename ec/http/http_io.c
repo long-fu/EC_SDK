@@ -18,7 +18,7 @@
 
 static soc_connect_status_callback soc_connect_status_handler = NULL;
 static soc_recv_callback soc_recv_handler = NULL;
-
+static char soc_recv_buffer[512];
 #define  ESPCONN_BUFFER_SIZE (2920)
 static uint8 espconn_buffer[ESPCONN_BUFFER_SIZE];
 static uint32 espconn_data_len = 0;
@@ -33,7 +33,7 @@ static void ICACHE_FLASH_ATTR
 espconn_on_recon_cb(void *arg, sint8 errType)
 {
     struct espconn *espconn_ptr = (struct espconn *)arg;
-    INFO("espconn reconnect\r\n");
+    ec_log("espconn reconnect\r\n");
     espconn_flag = FALSE;
     soc_connect_status_handler(-2);
     espconn_connect(espconn_ptr);
@@ -46,17 +46,20 @@ espconn_on_recv(void *arg, char *pusrdata, unsigned short len)
 {
     // at_fake_uart_rx(pusrdata,len);
     // TODO: 这里会接收到网络数据
-    INFO("on recv %d: [%s]\r\n", len, pusrdata);
+    ec_log("on recv %d: [%s]\r\n", len, pusrdata);
+    os_memset(soc_recv_buffer, 0x0, 512);
+    os_memcpy(soc_recv_buffer, pusrdata, len);
     if (soc_recv_handler) 
     {
-        soc_recv_handler(pusrdata, len);
+        ec_log("-- -- cb recv ---- \r\n");
+        soc_recv_handler(soc_recv_buffer, len);
     }
 }
 
 static void ICACHE_FLASH_ATTR
 espconn_on_send_cb(void *arg)
 {
-    INFO("espconn_on_send_cb\r\n");
+    ec_log("espconn_on_send_cb\r\n");
     espconn_flag = TRUE;
     if (espconn_data_len)
     {
@@ -70,7 +73,7 @@ espconn_on_discon_cb(void *arg)
 {
     struct espconn *espconn_ptr = (struct espconn *)arg;
 
-    INFO("espconn disconnected\r\n");
+    ec_log("espconn disconnected\r\n");
     espconn_flag = FALSE;
     soc_connect_status_handler(-3);
     // TODO: 这里进行重连 这里是否需要进行重连 有待考察
@@ -82,8 +85,8 @@ static void ICACHE_FLASH_ATTR
 espconn_on_connect_cb(void *arg)
 {
     int ret;
-    INFO("espconn connected\r\n");
-    espconn_set_opt((struct espconn*)arg,ESPCONN_COPY);
+    ec_log("espconn connected\r\n");
+    // espconn_set_opt((struct espconn*)arg,ESPCONN_COPY);
     espconn_flag = TRUE;
     espconn_data_len = 0;
     // MARK: 进行后续的注册回调
@@ -109,13 +112,13 @@ espconn_on_dns_cb(const char *name, ip_addr_t *ipaddr, void *arg)
 {
     if (ipaddr == NULL)
     {
-        INFO("DNS: Found , but got no ip, try to reconnect\r\n");
+        ec_log("DNS: Found , but got no ip, try to reconnect\r\n");
         // FIXME: DNS: Found , but got no ip, try to reconnect
         soc_connect_status_handler(-5);
         return;
     }
 
-    INFO("DNS: found ip %d.%d.%d.%d\r\n",
+    ec_log("DNS: found ip %d.%d.%d.%d\r\n",
          *((uint8 *)&ipaddr->addr),
          *((uint8 *)&ipaddr->addr + 1),
          *((uint8 *)&ipaddr->addr + 2),
@@ -138,7 +141,7 @@ e_soc_close()
     espconn_flag = FALSE;
     soc_connect_status_handler = NULL;
     soc_recv_handler = NULL;
-    INFO("e_soc_close\r\n");
+    ec_log("e_soc_close\r\n");
     os_memset(espconn_buffer, 0x0, ESPCONN_BUFFER_SIZE);
     if (espconn_ptr != NULL)
     {
@@ -159,13 +162,13 @@ e_soc_send(const char *data, int len)
     {
         return;
     }
-    INFO("e_sco_send %d: [%s]\r\n", len, data);
+    ec_log("e_sco_send %d: [%s]\r\n", len, data);
     if (espconn_flag)
     {
         int ret;
         // TODO: 对返回值进行判断
         ret = espconn_send(espconn_ptr, (uint8 *)data, len);
-        INFO("send %d \r\n",ret);
+        ec_log("send  %d \r\n",ret);
         espconn_flag = FALSE;
     }
     else
@@ -177,7 +180,7 @@ e_soc_send(const char *data, int len)
         }
         else
         {
-            INFO("espconn buffer full\r\n");
+            ec_log("espconn buffer full\r\n");
             soc_connect_status_handler(-4);
         }
     }
@@ -195,7 +198,7 @@ e_soc_creat(char *host,
     {
         return ;
     }
-
+    ec_log("e_soc_creat\r\n");
     espconn_ptr = (struct espconn *)os_zalloc(sizeof(struct espconn));
     espconn_ptr->type = ESPCONN_TCP;
     espconn_ptr->state = ESPCONN_NONE;
@@ -207,6 +210,7 @@ e_soc_creat(char *host,
     soc_recv_handler = recv_handler;
     espconn_flag = FALSE;
     espconn_data_len = 0;
+    os_memset(soc_recv_buffer,0x0, 512);
     os_memset(espconn_buffer, 0x0, ESPCONN_BUFFER_SIZE);
 
     soc_connect_status_handler(0);
@@ -217,13 +221,13 @@ e_soc_creat(char *host,
     // 注册 TCP 连接发生异常断开时的回调函数，可以在回调函数中进行重连。
     espconn_regist_reconcb(espconn_ptr, espconn_on_recon_cb);
 
-    espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
+    // espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
     
-    //    ipi = ipaddr_addr("192.168.11.223");  /// 测试代码
-    //     os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
-    //     // MARK: 进行连接
-    //     // TODO: 对返回值进行判断
-    //     espconn_connect(espconn_ptr);
+      ipi = ipaddr_addr("192.168.11.236");  /// 测试代码
+      os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
+        // MARK: 进行连接
+        // TODO: 对返回值进行判断
+      espconn_connect(espconn_ptr);
     
     
 

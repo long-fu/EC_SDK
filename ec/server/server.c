@@ -34,12 +34,12 @@ on_headers_complete(http_parser *_)
 }
 
 #include "json/jsonparse.h"
-static jsonparse_state json_state = { 0 };
+// static jsonparse_state json_state = { 0 };
 static void ICACHE_FLASH_ATTR
 on_json_data(char *data) 
 {
-    memset(&json_state,0x0,sizeof(json_state));
-    jsonparse_setup(&json_state, data, os_strlen(data));
+    // memset(&json_state,0x0,sizeof(json_state));
+    // jsonparse_setup(&json_state, data, os_strlen(data));
 }
 
 

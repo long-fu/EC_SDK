@@ -105,7 +105,8 @@ wifiConnectCb(uint8_t status)
         // TODO: 发起网络连接
         // 1. HTTP
         // 2. XMPP
-        xmpp_init();
+        // xmpp_init();
+        http_request("http://192.168.11.236:80/hello.html",0,"",http_success,http_failure);
     }
     else
     {
@@ -117,12 +118,12 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
-    if (user_get_is_regisrer() > 0)
+    if (user_get_is_regisrer() == 0)
     {
         // TODO: 进入XMPP
         // MARK: station model 连接wifi
         ec_log("===== start login ==== \r\n");
-        wifi_connect(NULL, NULL, wifiConnectCb);
+        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
     }
     else
     {

@@ -6,11 +6,11 @@
 #include "mem.h"
 #include "http_io.h"
 
-static char recv_buf[1024] = {0};
+static char recv_buf[512] = {0};
 static char http_body[128] = {0};
 static char soc_send_buf[512] = {0};
 static char http_respons_buf[256] = {0};
-
+// static char soc_recv_buf[512] = {0};
 static void dump_url(const char *url, const struct http_parser_url *u, int type);
 
 static http_failure_callback http_failure_handler;
@@ -41,12 +41,12 @@ on_message_complete(http_parser *_)
     (void)_;
 
     // TODO: 关闭连接
-    e_soc_close();
+    // e_soc_close();
     // soc_close(socket_id);
     // GBC_sys_stop_timer(gbc_dm_timer);
 
-    //   kal_prompt_trace(MOD_MMI, "\n***MESSAGE COMPLETE***\n\n");
-    //   kal_prompt_trace(MOD_MMI, "\n>>>%s<<<\n\n", http_respons_buf);
+    ec_log("\r\n***MESSAGE COMPLETE***\r\n\r\n");
+    ec_log("\r\n>>>%s<<<\n\n", http_respons_buf);
 
     // MARK: 数据接收完成
     if (http_success_handler)
@@ -132,8 +132,12 @@ e_http_init()
 static void ICACHE_FLASH_ATTR
 e_http_recv(char *data, unsigned short len)
 {
+
     size_t parsed;
-    parsed = http_parser_execute(&parser, &settings, data, len);
+    ec_log("jie shou dao de shu ju [%s]\r\n", data);
+    // os_memset(recv_buf, 0x0, 512);
+    os_memcpy(recv_buf, data, len);
+    parsed = http_parser_execute(&parser, &settings, recv_buf, len);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -183,7 +187,7 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
     {
         if ((u->field_set & (1 << i)) == 0)
         {
-            INFO(" == field_data[%u]: unset\r\n", i);
+            ec_log(" == field_data[%u]: unset\r\n", i);
             continue;
         }
 
@@ -229,7 +233,7 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
     {
         os_strcat(soc_send_buf, http_body);
     }
-    INFO("http [%s]\r\n", soc_send_buf);
+    // ec_log("http [%s]\r\n", soc_send_buf);
 
     // kal_prompt_trace(MOD_MMI,"dump_url %s", soc_send_buf);
     // soc_http_connet(host_url);
@@ -239,10 +243,10 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
 // 创建连接部分 初始化部分 请求解析部分
 int ICACHE_FLASH_ATTR
 http_request(const char *url,
-               int type, // type 表示请求类型
-               const char *body,
-               http_success_callback success_handl,
-               http_failure_callback failure_handl)
+             int type, // type 表示请求类型
+             const char *body,
+             http_success_callback success_handl,
+             http_failure_callback failure_handl)
 {
     int len, result;
     struct http_parser_url u;
