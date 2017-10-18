@@ -34,7 +34,7 @@
 // #include <stdlib.h>
 // #include <string.h>
 // #include <limits.h>
-#define assert(X) ec_log("%d assert == %d\r\n", __LINE__, X)
+#define assert(X) // ec_log("%d assert == %d\r\n", __LINE__, X)
 
 #ifndef ULLONG_MAX
 # define ULLONG_MAX ((uint64_t) -1) /* 2^64-1 */

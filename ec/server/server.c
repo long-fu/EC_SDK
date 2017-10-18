@@ -5,8 +5,8 @@
 #include "http_parser.h"
 #include "mem.h"
 
-static http_parser parser = { 0 };
-static http_parser_settings settings = { 0 };
+static http_parser parser = {0};
+static http_parser_settings settings = {0};
 static char http_respons_buf[256] = {0};
 
 #define TASK_QUEUE_LEN = 4;
@@ -42,10 +42,10 @@ on_message_complete(http_parser *_)
     // GBC_sys_stop_timer(gbc_dm_timer);
 
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
-    ec_log("\r\n>>>%s<<<\r\n", http_respons_buf);
-
-    // MARK: 数据接收完成
+    ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
     
+    // MARK: 数据接收完成
+    // TODO: 这里进行数据的回复
     return 0;
 }
 
@@ -53,7 +53,7 @@ static int ICACHE_FLASH_ATTR
 on_url(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    ec_log("on_url  %s \r\n",at);
+    // ec_log("on_url  %s \r\n",at);
     return 0;
 }
 
@@ -61,7 +61,7 @@ static int ICACHE_FLASH_ATTR
 on_header_field(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    ec_log("on_header_field  %s \r\n",at);
+    // ec_log("on_header_field  %s \r\n",at);
     return 0;
 }
 
@@ -69,7 +69,7 @@ static int ICACHE_FLASH_ATTR
 on_header_value(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    ec_log("on_header_value  %s \r\n",at);
+    // ec_log("on_header_value  %s \r\n",at);
     return 0;
 }
 
@@ -77,7 +77,7 @@ static int ICACHE_FLASH_ATTR
 on_body(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    ec_log("on_body  %s \r\n",at);
+    // ec_log("on_body  %s \r\n",at);
     strncat(http_respons_buf, at, length);
     return 0;
 }
@@ -90,6 +90,7 @@ server_parser_init()
     // memset(soc_send_buf, 0x0, sizeof(soc_send_buf));
     os_memset(http_respons_buf, 0x0, sizeof(http_respons_buf));
 
+    os_memset(&parser, 0, sizeof(parser));
     http_parser_init(&parser, HTTP_REQUEST);
 
     os_memset(&settings, 0, sizeof(settings));
@@ -106,9 +107,15 @@ static void ICACHE_FLASH_ATTR
 server_recv(void *arg, char *pusrdata, unsigned short length)
 {
     size_t parsed;
+    struct espconn *pesp_conn = arg;
     ec_log("server_recv %d [%s]\r\n", length, pusrdata);
-    // 解析数据
+    ec_log("server_recv server's %d.%d.%d.%d:%d \r\n", pesp_conn->proto.tcp->remote_ip[0],
+           pesp_conn->proto.tcp->remote_ip[1], pesp_conn->proto.tcp->remote_ip[2],
+           pesp_conn->proto.tcp->remote_ip[3], pesp_conn->proto.tcp->remote_port);
+    // 解析数据 
+    // TODO: 这部分需要进行对数据进行判断 
     server_parser_init();
+    // TODO: 这里是否需要进连接关闭
     parsed = http_parser_execute(&parser, &settings, pusrdata, length);
 }
 
@@ -143,6 +150,9 @@ static void ICACHE_FLASH_ATTR
 server_listen(void *arg)
 {
     struct espconn *pesp_conn = arg;
+    ec_log("server_listen server's %d.%d.%d.%d:%d disconnect\r\n", pesp_conn->proto.tcp->remote_ip[0],
+           pesp_conn->proto.tcp->remote_ip[1], pesp_conn->proto.tcp->remote_ip[2],
+           pesp_conn->proto.tcp->remote_ip[3], pesp_conn->proto.tcp->remote_port);
 
     espconn_regist_reconcb(pesp_conn, server_recon);
     espconn_regist_recvcb(pesp_conn, server_recv);
@@ -151,11 +161,11 @@ server_listen(void *arg)
 }
 
 static void ICACHE_FLASH_ATTR
-on_task(os_event_t * e) 
+on_task(os_event_t *e)
 {
     // TODO: 断开连接
-    espconn_disconnect(&esp_conn);
-    espconn_delete(&esp_conn);
+    // espconn_disconnect(&esp_conn);
+    // espconn_delete(&esp_conn);
 }
 
 void ICACHE_FLASH_ATTR
@@ -166,15 +176,15 @@ server_init(uint32 port)
     esp_conn.state = ESPCONN_NONE;
     esp_conn.proto.tcp = &esptcp;
     esp_conn.proto.tcp->local_port = port;
-    ec_log("server _ init \r\n");
-    
+    ec_log("server init \r\n");
+
     espconn_regist_connectcb(&esp_conn, server_listen);
-    
+
     espconn_accept(&esp_conn);
 
     // TODO: 创建任务
     // task_queue = (os_event_t *) os_malloc( sizeof(os_event_t) * TASK_QUEUE_LEN );
-    // MARK: 
+    // MARK:
     // 注册任务
     // system_os_task(on_task, USER_TASK_PRIO_0, task_queue, TASK_QUEUE_LEN);
 }
