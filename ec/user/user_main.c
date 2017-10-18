@@ -117,10 +117,11 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
-    if (user_get_is_regisrer())
+    if (user_get_is_regisrer() > 0)
     {
         // TODO: 进入XMPP
         // MARK: station model 连接wifi
+        ec_log("===== start login ==== \r\n");
         wifi_connect(NULL, NULL, wifiConnectCb);
     }
     else

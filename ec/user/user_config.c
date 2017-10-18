@@ -5,6 +5,8 @@
 #include "jabber_config.h"
 #include "spi_flash.h"
 #include "osapi.h"
+#include "user_debug.h"
+
 // #ifdef HTTP_DEBUG_ON
 char log_buffer[512];
 // #endif
@@ -22,7 +24,6 @@ CFG_Save(void)
 
 	// MARK: 保存注册信息
 	// MARK: 保存XMPP配置信息
-
 	if (user_isRegisrer == 1)
 	{
 		spi_flash_write((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
@@ -41,7 +42,7 @@ CFG_Load(void)
 	user_isRegisrer = 0;
 	spi_flash_read((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
 				   (uint32 *)&user_isRegisrer, sizeof(user_isRegisrer));
-   
+    ec_log("load -- re   %d ---  \r\n", user_isRegisrer);
 	os_memset(&j_config, 0x0, sizeof(j_config));
 	spi_flash_read((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
 				   (uint32 *)&j_config, sizeof(j_config));
@@ -51,6 +52,6 @@ CFG_Load(void)
 int ICACHE_FLASH_ATTR
 user_get_is_regisrer(void)
 {
-
-	return user_isRegisrer;
+	ec_log("user get register %d\r\n", user_isRegisrer);
+	return user_isRegisrer = 0;
 }
