@@ -5,15 +5,15 @@
 #include "http_parser.h"
 #include "mem.h"
 
-static http_parser parser;
-static http_parser_settings settings;
+static http_parser parser = { 0 };
+static http_parser_settings settings = { 0 };
 static char http_respons_buf[256] = {0};
 
-const static TASK_QUEUE_LEN = 4;
+#define TASK_QUEUE_LEN = 4;
 static os_event_t *task_queue;
 
-LOCAL struct espconn esp_conn;
-LOCAL esp_tcp esptcp;
+static struct espconn esp_conn;
+static esp_tcp esptcp;
 
 static int ICACHE_FLASH_ATTR
 on_message_begin(http_parser *_)
@@ -142,12 +142,13 @@ server_listen(void *arg)
 {
     struct espconn *pesp_conn = arg;
 
+    espconn_regist_reconcb(pesp_conn, server_recon);
     espconn_regist_recvcb(pesp_conn, server_recv);
     espconn_regist_disconcb(pesp_conn, server_discon);
     espconn_regist_sentcb(pesp_conn, server_send_cb);
 }
 
-void ICACHE_FLASH_ATTR
+static void ICACHE_FLASH_ATTR
 on_task(os_event_t * e) 
 {
     // TODO: 断开连接
@@ -163,14 +164,15 @@ server_init(uint32 port)
     esp_conn.state = ESPCONN_NONE;
     esp_conn.proto.tcp = &esptcp;
     esp_conn.proto.tcp->local_port = port;
+    ec_log("server _ init \r\n");
     server_parser_init();
     espconn_regist_connectcb(&esp_conn, server_listen);
-    espconn_regist_reconcb(&esp_conn, server_recon);
+    
     espconn_accept(&esp_conn);
 
     // TODO: 创建任务
-    task_queue = (os_event_t *) os_malloc(sizeof(os_event_t) * TASK_QUEUE_LEN);
+    // task_queue = (os_event_t *) os_malloc( sizeof(os_event_t) * TASK_QUEUE_LEN );
     // MARK: 
     // 注册任务
-    system_os_task(on_task, USER_TASK_PRIO_0, task_queue, TASK_QUEUE_LEN);
+    // system_os_task(on_task, USER_TASK_PRIO_0, task_queue, TASK_QUEUE_LEN);
 }

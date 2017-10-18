@@ -129,7 +129,7 @@ system_on_done_cb(void)
         // TODO: 完整的流程
         // 1. 获取到配置信息 http xmpp wifi
         wifi_ap_set(NULL, NULL);
-        // server_init(80);
+        server_init(80);
         ec_log("===== start ec sdk  ==== \r\n");
         // 2. 连接wifi
         // wifi_connect(NULL, NULL, wifiConnectCb);
