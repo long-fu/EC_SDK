@@ -126,18 +126,15 @@ wifi_ap_set(uint8_t *ssid, uint8_t *pass)
 	get_random_string(AP_DEFINE_NAME_RAND_LEN, tmp_name);
 	os_sprintf(wifi_name, "%s%s", AP_DEFINE_NAME, tmp_name);
 
-	wifi_set_opmode(SOFTAP_MODE);
 	wifi_softap_get_config(&config);
-
 	os_memset(config.ssid, 0, 32);
 	os_memset(config.password, 0, 64);
-
 	os_memcpy(config.ssid, wifi_name, os_strlen(wifi_name));
 	os_memcpy(config.password, AP_DEFINE_PASSWORD, os_strlen(AP_DEFINE_PASSWORD));
 	config.authmode = AUTH_WPA_WPA2_PSK;
 	config.ssid_len = 0;
 	config.beacon_interval = 100;
 	config.max_connection = 4;
-
 	wifi_softap_set_config(&config);
+	wifi_set_opmode(SOFTAP_MODE);
 }

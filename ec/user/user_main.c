@@ -128,8 +128,9 @@ system_on_done_cb(void)
     {
         // TODO: 完整的流程
         // 1. 获取到配置信息 http xmpp wifi
-        wifi_ap_set();
-        server_init(80);
+        wifi_ap_set(NULL, NULL);
+        // server_init(80);
+        ec_log("===== start ec sdk  ==== \r\n");
         // 2. 连接wifi
         // wifi_connect(NULL, NULL, wifiConnectCb);
 
@@ -200,6 +201,7 @@ user_rf_pre_init(void)
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
+    ec_log("user init ok main ----\r\n");
 #if AT_CUSTOM
     // MARK: 注册系统AT指令
     at_init();
@@ -208,6 +210,5 @@ user_init(void)
 #endif
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
-    ec_log("user init ok main ----\r\n");
     system_init_done_cb(system_on_done_cb);
 }

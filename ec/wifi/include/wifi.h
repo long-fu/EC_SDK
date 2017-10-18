@@ -4,6 +4,6 @@
 #include "c_types.h"
 
 typedef void (*WifiCallback)(uint8_t);
-void ICACHE_FLASH_ATTR WIFI_Connect(uint8_t* ssid, uint8_t* pass, WifiCallback cb);
-
+void WIFI_Connect(uint8_t* ssid, uint8_t* pass, WifiCallback cb);
+void wifi_ap_set(uint8_t *ssid, uint8_t *pass);
 #endif
