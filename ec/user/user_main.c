@@ -106,7 +106,7 @@ wifiConnectCb(uint8_t status)
         // 1. HTTP
         // 2. XMPP
         // xmpp_init();
-        http_request("http://192.168.11.236:80/hello.html",0,"",http_success,http_failure);
+        http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
     }
     else
     {

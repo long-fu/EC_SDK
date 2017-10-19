@@ -5,7 +5,11 @@
 #include "http_parser.h"
 #include "mem.h"
 
-char http_respoons_buff[512] = "";
+#define REQUEST_HEAD "HTTP/1.1 200 OK\r\n\
+Server: Apache/2.4.27 (Unix) PHP/7.1.7\r\n\
+Accept-Ranges: bytes\r\n\
+Content-Length: %d\r\n\
+Content-Type: text/html\r\n\r\n%s"
 
 static http_parser parser = {0};
 static http_parser_settings settings = {0};
@@ -47,7 +51,8 @@ static int ICACHE_FLASH_ATTR
 on_message_complete(http_parser *_)
 {
     (void)_;
-
+    char body[64] = "hello the world";
+    char soc_send_buffer[512] = { 0 };
     // TODO: 关闭连接
 
     // soc_close(socket_id);
@@ -56,9 +61,14 @@ on_message_complete(http_parser *_)
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
     ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
     
-        
+            
     // MARK: 数据接收完成
     // TODO: 这里进行数据的回复
+ 
+
+    os_sprintf(soc_send_buffer,REQUEST_HEAD,os_strlen(body),body);
+
+    espconn_send(&esp_conn, soc_send_buffer, os_strlen(soc_send_buffer));
     return 0;
 }
 
