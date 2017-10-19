@@ -106,7 +106,20 @@ wifiConnectCb(uint8_t status)
         // 1. HTTP
         // 2. XMPP
         // xmpp_init();
-        http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
+        
+        // 这部分测试通过
+        // http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
+        struct jabber_config config = {
+            .port = 5222,
+            .ip.addr = 0,
+            .resources = "ec_0.0.1",
+            .username = "18682435851",
+            .password = "18682435851",
+            .domain = "xsxwrd.com",
+            .host_name = "gm.xsxwrd.com"
+        };
+
+        xmpp_init(&config);
     }
     else
     {
@@ -118,7 +131,7 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
-    if (user_get_is_regisrer() == 0)
+    if (user_get_is_regisrer() == 1)
     {
         // TODO: 进入XMPP
         // MARK: station model 连接wifi

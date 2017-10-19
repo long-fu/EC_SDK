@@ -18,7 +18,7 @@
 
 static soc_connect_status_callback soc_connect_status_handler = NULL;
 static soc_recv_callback soc_recv_handler = NULL;
-static char soc_recv_buffer[512];
+// static char soc_recv_buffer[512];
 #define  ESPCONN_BUFFER_SIZE (2920)
 static uint8 espconn_buffer[ESPCONN_BUFFER_SIZE];
 static uint32 espconn_data_len = 0;
@@ -47,12 +47,12 @@ espconn_on_recv(void *arg, char *pusrdata, unsigned short len)
     // at_fake_uart_rx(pusrdata,len);
     // TODO: 这里会接收到网络数据
     ec_log("on recv %d: [%s]\r\n", len, pusrdata);
-    os_memset(soc_recv_buffer, 0x0, 512);
-    os_memcpy(soc_recv_buffer, pusrdata, len);
+    // os_memset(pusrdata, 0x0, 512);
+    // os_memcpy(pusrdata, pusrdata, len);
     if (soc_recv_handler) 
     {
         ec_log("-- -- cb recv ---- \r\n");
-        soc_recv_handler(soc_recv_buffer, len);
+        soc_recv_handler(pusrdata, len);
     }
 }
 
@@ -210,7 +210,7 @@ e_soc_creat(char *host,
     soc_recv_handler = recv_handler;
     espconn_flag = FALSE;
     espconn_data_len = 0;
-    os_memset(soc_recv_buffer,0x0, 512);
+    // os_memset(soc_recv_buffer,0x0, 512);
     os_memset(espconn_buffer, 0x0, ESPCONN_BUFFER_SIZE);
 
     soc_connect_status_handler(0);

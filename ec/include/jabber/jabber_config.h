@@ -15,7 +15,7 @@ struct jabber_config
 	char host_name[32];
 };
 extern struct jabber_config j_config;
-bool jabber_get_config(struct jabber_config * config);
-bool jabber_set_config(struct jabber_config * config);
+bool ICACHE_FLASH_ATTR jabber_get_config(struct jabber_config * config);
+bool ICACHE_FLASH_ATTR jabber_set_config(struct jabber_config * config);
 
 #endif

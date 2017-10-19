@@ -4,7 +4,7 @@
 typedef void (* http_failure_callback)(int error);
 typedef void (* http_success_callback)(char *data, int len);
 
-int
+int ICACHE_FLASH_ATTR
 http_request(const char *url, 
     int type, // type 表示请求类型
     const char *body, 

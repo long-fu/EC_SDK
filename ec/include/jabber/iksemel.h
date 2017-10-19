@@ -19,28 +19,28 @@ extern "C" {
 struct ikstack_struct;
 typedef struct ikstack_struct ikstack;
 
-ikstack *iks_stack_new (size_t meta_chunk, size_t data_chunk);
-void *iks_stack_alloc (ikstack *s, size_t size);
-char *iks_stack_strdup (ikstack *s, const char *src, size_t len);
-char *iks_stack_strcat (ikstack *s, char *old, size_t old_len, const char *src, size_t src_len);
-void iks_stack_stat (ikstack *s, size_t *allocated, size_t *used);
-void iks_stack_delete (ikstack *s);
+ikstack *ICACHE_FLASH_ATTR iks_stack_new (size_t meta_chunk, size_t data_chunk);
+void *ICACHE_FLASH_ATTR iks_stack_alloc (ikstack *s, size_t size);
+char *ICACHE_FLASH_ATTR iks_stack_strdup (ikstack *s, const char *src, size_t len);
+char *ICACHE_FLASH_ATTR iks_stack_strcat (ikstack *s, char *old, size_t old_len, const char *src, size_t src_len);
+void ICACHE_FLASH_ATTR iks_stack_stat (ikstack *s, size_t *allocated, size_t *used);
+void ICACHE_FLASH_ATTR iks_stack_delete (ikstack *s);
 
 /*****  utilities  *****/
 
-void *iks_malloc (size_t size);
-void iks_free (void *ptr);
-void iks_set_mem_funcs (void *(*malloc_func)(size_t size), void (*free_func)(void *ptr));
+void *ICACHE_FLASH_ATTR iks_malloc (size_t size);
+void ICACHE_FLASH_ATTR iks_free (void *ptr);
+void ICACHE_FLASH_ATTR iks_set_mem_funcs (void *(*malloc_func)(size_t size), void (*free_func)(void *ptr));
 
 // char *iks_strdup (const char *src);
-char *iks_strcat (char *dest, const char *src);
-int iks_strcmp (const char *a, const char *b);
-int iks_strcasecmp (const char *a, const char *b);
-int iks_strncmp (const char *a, const char *b, size_t n);
+char *ICACHE_FLASH_ATTR iks_strcat (char *dest, const char *src);
+int ICACHE_FLASH_ATTR iks_strcmp (const char *a, const char *b);
+int ICACHE_FLASH_ATTR iks_strcasecmp (const char *a, const char *b);
+int ICACHE_FLASH_ATTR iks_strncmp (const char *a, const char *b, size_t n);
 // int iks_strncasecmp (const char *a, const char *b, size_t n);
-size_t iks_strlen (const char *src);
-char *iks_escape (ikstack *s, char *src, size_t len);
-char *iks_unescape (ikstack *s, char *src, size_t len);
+size_t ICACHE_FLASH_ATTR iks_strlen (const char *src);
+char *ICACHE_FLASH_ATTR iks_escape (ikstack *s, char *src, size_t len);
+char *ICACHE_FLASH_ATTR iks_unescape (ikstack *s, char *src, size_t len);
 
 /*****  dom tree  *****/
 
@@ -54,41 +54,41 @@ enum ikstype {
 struct iks_struct;
 typedef struct iks_struct iks;
 
-iks *iks_new (const char *name);
-iks *iks_new_within (const char *name, ikstack *s);
-iks *iks_insert (iks *x, const char *name);
-iks *iks_insert_cdata (iks *x, const char *data, size_t len);
-iks *iks_insert_attrib (iks *x, const char *name, const char *value);
-iks *iks_insert_node (iks *x, iks *y);
-iks *iks_append (iks *x, const char *name);
-iks *iks_prepend (iks *x, const char *name);
-iks *iks_append_cdata (iks *x, const char *data, size_t len);
-iks *iks_prepend_cdata (iks *x, const char *data, size_t len);
-void iks_hide (iks *x);
-void iks_delete (iks *x);
-iks *iks_next (iks *x);
-iks *iks_next_tag (iks *x);
-iks *iks_prev (iks *x);
-iks *iks_prev_tag (iks *x);
-iks *iks_parent (iks *x);
-iks *iks_root (iks *x);
-iks *iks_child (iks *x);
-iks *iks_first_tag (iks *x);
-iks *iks_attrib (iks *x);
-iks *iks_find (iks *x, const char *name);
-char *iks_find_cdata (iks *x, const char *name);
-char *iks_find_attrib (iks *x, const char *name);
-iks *iks_find_with_attrib (iks *x, const char *tagname, const char *attrname, const char *value);
-ikstack *iks_stack (iks *x);
-enum ikstype iks_type (iks *x);
-char *iks_name (iks *x);
-char *iks_cdata (iks *x);
-size_t iks_cdata_size (iks *x);
-int iks_has_children (iks *x);
-int iks_has_attribs (iks *x);
-char *iks_string (ikstack *s, iks *x);
-iks *iks_copy (iks *x);
-iks *iks_copy_within (iks *x, ikstack *s);
+iks *ICACHE_FLASH_ATTR iks_new (const char *name);
+iks *ICACHE_FLASH_ATTR iks_new_within (const char *name, ikstack *s);
+iks *ICACHE_FLASH_ATTR iks_insert (iks *x, const char *name);
+iks *ICACHE_FLASH_ATTR iks_insert_cdata (iks *x, const char *data, size_t len);
+iks *ICACHE_FLASH_ATTR iks_insert_attrib (iks *x, const char *name, const char *value);
+iks *ICACHE_FLASH_ATTR iks_insert_node (iks *x, iks *y);
+iks *ICACHE_FLASH_ATTR iks_append (iks *x, const char *name);
+iks *ICACHE_FLASH_ATTR iks_prepend (iks *x, const char *name);
+iks *ICACHE_FLASH_ATTR iks_append_cdata (iks *x, const char *data, size_t len);
+iks *ICACHE_FLASH_ATTR iks_prepend_cdata (iks *x, const char *data, size_t len);
+void ICACHE_FLASH_ATTR iks_hide (iks *x);
+void ICACHE_FLASH_ATTR iks_delete (iks *x);
+iks *ICACHE_FLASH_ATTR iks_next (iks *x);
+iks *ICACHE_FLASH_ATTR iks_next_tag (iks *x);
+iks *ICACHE_FLASH_ATTR iks_prev (iks *x);
+iks *ICACHE_FLASH_ATTR iks_prev_tag (iks *x);
+iks *ICACHE_FLASH_ATTR iks_parent (iks *x);
+iks *ICACHE_FLASH_ATTR iks_root (iks *x);
+iks *ICACHE_FLASH_ATTR iks_child (iks *x);
+iks *ICACHE_FLASH_ATTR iks_first_tag (iks *x);
+iks *ICACHE_FLASH_ATTR iks_attrib (iks *x);
+iks *ICACHE_FLASH_ATTR iks_find (iks *x, const char *name);
+char *ICACHE_FLASH_ATTR iks_find_cdata (iks *x, const char *name);
+char *ICACHE_FLASH_ATTR iks_find_attrib (iks *x, const char *name);
+iks *ICACHE_FLASH_ATTR iks_find_with_attrib (iks *x, const char *tagname, const char *attrname, const char *value);
+ikstack *ICACHE_FLASH_ATTR iks_stack (iks *x);
+enum ikstype ICACHE_FLASH_ATTR iks_type (iks *x);
+char *ICACHE_FLASH_ATTR iks_name (iks *x);
+char *ICACHE_FLASH_ATTR iks_cdata (iks *x);
+size_t ICACHE_FLASH_ATTR iks_cdata_size (iks *x);
+int ICACHE_FLASH_ATTR iks_has_children (iks *x);
+int ICACHE_FLASH_ATTR iks_has_attribs (iks *x);
+char *ICACHE_FLASH_ATTR iks_string (ikstack *s, iks *x);
+iks *ICACHE_FLASH_ATTR iks_copy (iks *x);
+iks *ICACHE_FLASH_ATTR iks_copy_within (iks *x, ikstack *s);
 
 /*****  sax parser  *****/
 
@@ -112,15 +112,15 @@ typedef void (iksDeleteHook)(void *user_data);
 struct iksparser_struct;
 typedef struct iksparser_struct  iksparser;
 
-iksparser *iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook);
-iksparser *iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook, iksDeleteHook *deleteHook);
-ikstack *iks_parser_stack (iksparser *prs);
-void *iks_user_data (iksparser *prs);
-unsigned long iks_nr_bytes (iksparser *prs);
-unsigned long iks_nr_lines (iksparser *prs);
-int iks_parse (iksparser *prs, const char *data, size_t len, int finish);
-void iks_parser_reset (iksparser *prs);
-void iks_parser_delete (iksparser *prs);
+iksparser *ICACHE_FLASH_ATTR iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook);
+iksparser *ICACHE_FLASH_ATTR iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook, iksDeleteHook *deleteHook);
+ikstack *ICACHE_FLASH_ATTR iks_parser_stack (iksparser *prs);
+void *ICACHE_FLASH_ATTR iks_user_data (iksparser *prs);
+unsigned long ICACHE_FLASH_ATTR iks_nr_bytes (iksparser *prs);
+unsigned long ICACHE_FLASH_ATTR iks_nr_lines (iksparser *prs);
+int ICACHE_FLASH_ATTR iks_parse (iksparser *prs, const char *data, size_t len, int finish);
+void ICACHE_FLASH_ATTR iks_parser_reset (iksparser *prs);
+void ICACHE_FLASH_ATTR iks_parser_delete (iksparser *prs);
 
 /*****  dom parser  *****/
 
@@ -130,9 +130,9 @@ enum iksfileerror {
 	IKS_FILE_RWERR
 };
 
-iksparser *iks_dom_new (iks **iksptr);
-void iks_set_size_hint (iksparser *prs, size_t approx_size);
-iks *iks_tree (const char *xml_str, size_t len, int *err);
+iksparser *ICACHE_FLASH_ATTR iks_dom_new (iks **iksptr);
+void ICACHE_FLASH_ATTR iks_set_size_hint (iksparser *prs, size_t approx_size);
+iks *ICACHE_FLASH_ATTR iks_tree (const char *xml_str, size_t len, int *err);
 // int iks_load (const char *fname, iks **xptr);
 // int iks_save (const char *fname, iks *x);
 
@@ -224,25 +224,25 @@ enum ikssasltype {
 typedef int (iksStreamHook)(void *user_data, int type, iks *node);
 typedef void (iksLogHook)(void *user_data, const char *data, size_t size, int is_incoming);
 
-iksparser *iks_stream_new (char *name_space, void *user_data, iksStreamHook *streamHook);
-void *iks_stream_user_data (iksparser *prs);
-void iks_set_log_hook (iksparser *prs, iksLogHook *logHook);
-int iks_connect_tcp (iksparser *prs, const char *server, int port);
-int iks_connect_fd (iksparser *prs, int fd);
-int iks_connect_via (iksparser *prs, const char *server, int port, const char *server_name);
-int iks_connect_with (iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans);
-int iks_connect_async (iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func);
-int iks_connect_async_with (iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans, void *notify_data, iksAsyncNotify *notify_func);
-int iks_fd (iksparser *prs);
-int iks_recv (iksparser *prs, int timeout);
-int iks_send_header (iksparser *prs, const char *to);
-int iks_send (iksparser *prs, iks *x);
-int iks_send_raw (iksparser *prs, const char *xmlstr);
-void iks_disconnect (iksparser *prs);
-int iks_has_tls (void);
-int iks_is_secure (iksparser *prs);
-int iks_start_tls (iksparser *prs);
-int iks_start_sasl (iksparser *prs, enum ikssasltype type, char *username, char *pass);
+iksparser *ICACHE_FLASH_ATTR iks_stream_new (char *name_space, void *user_data, iksStreamHook *streamHook);
+void *ICACHE_FLASH_ATTR iks_stream_user_data (iksparser *prs);
+void ICACHE_FLASH_ATTR iks_set_log_hook (iksparser *prs, iksLogHook *logHook);
+int ICACHE_FLASH_ATTR iks_connect_tcp (iksparser *prs, const char *server, int port);
+// int iks_connect_fd (iksparser *prs, int fd);
+// int iks_connect_via (iksparser *prs, const char *server, int port, const char *server_name);
+int ICACHE_FLASH_ATTR iks_connect_with (iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans);
+// int iks_connect_async (iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func);
+// int iks_connect_async_with (iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans, void *notify_data, iksAsyncNotify *notify_func);
+// int iks_fd (iksparser *prs);
+// int iks_recv (iksparser *prs, int timeout);
+int ICACHE_FLASH_ATTR iks_send_header (iksparser *prs, const char *to);
+int ICACHE_FLASH_ATTR iks_send (iksparser *prs, iks *x);
+int ICACHE_FLASH_ATTR iks_send_raw (iksparser *prs, const char *xmlstr);
+void ICACHE_FLASH_ATTR iks_disconnect (iksparser *prs);
+// int iks_has_tls (void);
+int ICACHE_FLASH_ATTR iks_is_secure (iksparser *prs);
+int ICACHE_FLASH_ATTR iks_start_tls (iksparser *prs);
+int ICACHE_FLASH_ATTR iks_start_sasl (iksparser *prs, enum ikssasltype type, char *username, char *pass);
 
 /*****  jabber  *****/
 
@@ -356,14 +356,14 @@ typedef struct ikspak_struct {
 
 ikspak *iks_packet (iks *x);
 
-iks *iks_make_auth (iksid *id, const char *pass, const char *sid);
-iks *iks_make_msg (enum iksubtype type, const char *to, const char *body);
-iks *iks_make_s10n (enum iksubtype type, const char *to, const char *msg);
-iks *iks_make_pres (enum ikshowtype show, const char *status);
-iks *iks_make_iq (enum iksubtype type, const char *xmlns);
-iks *iks_make_resource_bind(iksid *id);
-iks *iks_make_session(void);
-int iks_stream_features(iks *x);
+iks *ICACHE_FLASH_ATTR iks_make_auth (iksid *id, const char *pass, const char *sid);
+iks *ICACHE_FLASH_ATTR iks_make_msg (enum iksubtype type, const char *to, const char *body);
+iks *ICACHE_FLASH_ATTR iks_make_s10n (enum iksubtype type, const char *to, const char *msg);
+iks *ICACHE_FLASH_ATTR iks_make_pres (enum ikshowtype show, const char *status);
+iks *ICACHE_FLASH_ATTR iks_make_iq (enum iksubtype type, const char *xmlns);
+iks *ICACHE_FLASH_ATTR iks_make_resource_bind(iksid *id);
+iks *ICACHE_FLASH_ATTR iks_make_session(void);
+int ICACHE_FLASH_ATTR iks_stream_features(iks *x);
 
 /*****  jabber packet filter  *****/
 
@@ -387,42 +387,42 @@ typedef struct iksfilter_struct iksfilter;
 struct iksrule_struct;
 typedef struct iksrule_struct iksrule;
 
-iksfilter *iks_filter_new (void);
-iksrule *iks_filter_add_rule (iksfilter *f, iksFilterHook *filterHook, void *user_data, ...);
-void iks_filter_remove_rule (iksfilter *f, iksrule *rule);
-void iks_filter_remove_hook (iksfilter *f, iksFilterHook *filterHook);
-void iks_filter_packet (iksfilter *f, ikspak *pak);
-void iks_filter_delete (iksfilter *f);
+iksfilter *ICACHE_FLASH_ATTR iks_filter_new (void);
+iksrule *ICACHE_FLASH_ATTR iks_filter_add_rule (iksfilter *f, iksFilterHook *filterHook, void *user_data, ...);
+void ICACHE_FLASH_ATTR iks_filter_remove_rule (iksfilter *f, iksrule *rule);
+void ICACHE_FLASH_ATTR iks_filter_remove_hook (iksfilter *f, iksFilterHook *filterHook);
+void ICACHE_FLASH_ATTR iks_filter_packet (iksfilter *f, ikspak *pak);
+void ICACHE_FLASH_ATTR iks_filter_delete (iksfilter *f);
 
 /*****  sha1  *****/
 
 struct iksha_struct;
 typedef struct iksha_struct iksha;
 
-iksha *iks_sha_new (void);
-void iks_sha_reset (iksha *sha);
-void iks_sha_hash (iksha *sha, const unsigned char *data, size_t len, int finish);
-void iks_sha_print (iksha *sha, char *hash);
-void iks_sha_delete (iksha *sha);
-void iks_sha (const char *data, char *hash);
+iksha *ICACHE_FLASH_ATTR iks_sha_new (void);
+void ICACHE_FLASH_ATTR iks_sha_reset (iksha *sha);
+void ICACHE_FLASH_ATTR iks_sha_hash (iksha *sha, const unsigned char *data, size_t len, int finish);
+void ICACHE_FLASH_ATTR iks_sha_print (iksha *sha, char *hash);
+void ICACHE_FLASH_ATTR iks_sha_delete (iksha *sha);
+void ICACHE_FLASH_ATTR iks_sha (const char *data, char *hash);
 
 /*****  md5  *****/
 
 struct ikmd5_struct;
 typedef struct iksmd5_struct iksmd5;
 
-iksmd5 *iks_md5_new(void);
-void iks_md5_reset(iksmd5 *md5);
-void iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finish);
-void iks_md5_delete(iksmd5 *md5);
-void iks_md5_print(iksmd5 *md5, char *buf);
-void iks_md5_digest(iksmd5 *md5, unsigned char *digest);
-void iks_md5(const char *data, char *buf);
+iksmd5 *ICACHE_FLASH_ATTR iks_md5_new(void);
+void ICACHE_FLASH_ATTR iks_md5_reset(iksmd5 *md5);
+void ICACHE_FLASH_ATTR iks_md5_hash(iksmd5 *md5, const unsigned char *data, size_t slen, int finish);
+void ICACHE_FLASH_ATTR iks_md5_delete(iksmd5 *md5);
+void ICACHE_FLASH_ATTR iks_md5_print(iksmd5 *md5, char *buf);
+void ICACHE_FLASH_ATTR iks_md5_digest(iksmd5 *md5, unsigned char *digest);
+void ICACHE_FLASH_ATTR iks_md5(const char *data, char *buf);
 
 /*****  base64  *****/
 
-char *iks_base64_decode(const char *buf);
-char *iks_base64_encode(const char *buf, int len);
+char *ICACHE_FLASH_ATTR iks_base64_decode(const char *buf);
+char *ICACHE_FLASH_ATTR iks_base64_encode(const char *buf, int len);
 
 #ifdef __cplusplus
 }

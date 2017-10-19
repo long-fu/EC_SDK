@@ -1,6 +1,8 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
+#include "user_interface.h"
+
 #define AP_DEFINE_NAME_RAND_LEN 5
 #define AP_DEFINE_NAME "WSLP_"
 #define AP_DEFINE_PASSWORD "12345678"
@@ -24,6 +26,7 @@
 
 void CFG_Save(void);
 void CFG_Load(void);
-int user_get_is_regisrer(void);
-
+int ICACHE_FLASH_ATTR user_get_is_regisrer(void);
+#include "jabber_config.h"
+void ICACHE_FLASH_ATTR xmpp_init(struct jabber_config *config);
 #endif

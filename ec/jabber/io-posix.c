@@ -9,8 +9,9 @@
 #include "espconn.h"
 #include "ip_addr.h"
 #include "jabber_config.h"
+#include "user_debug.h"
 
-static struct espconn *espconn_ptr = NULL;
+static struct espconn espconn_ptr;
 static ip_addr_t espconn_ip;
 
 #define ESPCONN_BUFFER_SIZE (2920)
@@ -26,7 +27,7 @@ on_recon_cb(void *arg, sint8 errType)
 	struct espconn *esp = (struct espconn *)arg;
 	ec_log("espconn reconnect\r\n");
 	espconn_flag = FALSE;
-	espconn_connect(esp);
+	espconn_connect(&espconn_ptr);
 
 	// TODO: 标识连接错误 - 可以进行重连
 }
@@ -56,8 +57,8 @@ espconn_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 		   *((uint8 *)&ipaddr->addr + 2),
 		   *((uint8 *)&ipaddr->addr + 3));
 
-	os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipaddr->addr, 4);
-	espconn_connect(espconn_ptr);
+	os_memcpy(espconn_ptr.proto.tcp->remote_ip, &ipaddr->addr, 4);
+	espconn_connect(&espconn_ptr);
 	// TODO: 标识进行连接中
 }
 
@@ -69,7 +70,7 @@ on_send_cb(void *arg)
 	if (espconn_data_len)
 	{
 		int ret;
-		ret = espconn_send(esp, espconn_buffer, espconn_data_len);
+		ret = espconn_send(&espconn_ptr, espconn_buffer, espconn_data_len);
 		if (ret == 0)
 		{
 			espconn_data_len = 0;
@@ -89,6 +90,7 @@ on_send_cb(void *arg)
 	}
 }
 
+// MARK: 数据解析入口
 static void ICACHE_FLASH_ATTR
 on_recv(void *arg, char *pusrdata, unsigned short len)
 {
@@ -127,16 +129,16 @@ static void ICACHE_FLASH_ATTR
 on_connect_cb(void *arg)
 {
 	struct espconn *esp = (struct espconn *)arg;
-	iksparser *prs = (iksparser *)esp->reverse;
-	os_printf("espconn connected\r\n");
+	iksparser *prs = (iksparser *)espconn_ptr.reverse;
+	ec_log("espconn connected\r\n");
 	espconn_set_opt(esp,ESPCONN_COPY);
 	espconn_flag = TRUE;
 	espconn_data_len = 0;
+
 	// TODO: 标识TCP 连接成功
-	espconn_regist_disconcb(esp, on_discon_cb);
-	espconn_regist_recvcb(esp, on_recv);
-	espconn_regist_sentcb(esp, on_send_cb);
-	
+	espconn_regist_disconcb(&espconn_ptr, on_discon_cb);
+	espconn_regist_recvcb(&espconn_ptr, on_recv);
+	espconn_regist_sentcb(&espconn_ptr, on_send_cb);
 	// TODO: 可以发送消息
 	iks_send_header(prs, j_config.domain);
 	
@@ -155,31 +157,31 @@ io_connect(iksparser *prs,
 		   int port)
 {
 	int ret;
-	espconn_ptr = (struct espconn *)os_zalloc(sizeof(struct espconn));
-	espconn_ptr->type = ESPCONN_TCP;
-	espconn_ptr->state = ESPCONN_NONE;
-	espconn_ptr->proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
-	espconn_ptr->proto.tcp->local_port = espconn_port();
-	espconn_ptr->proto.tcp->remote_port = port;
-	espconn_ptr->reverse = prs;
-
-	espconn_regist_connectcb(espconn_ptr, on_connect_cb);
-	espconn_regist_reconcb(espconn_ptr, on_recon_cb);
+	// espconn_ptr = (struct espconn *)os_zalloc(sizeof(struct espconn));
+	espconn_ptr.type = ESPCONN_TCP;
+	espconn_ptr.state = ESPCONN_NONE;
+	espconn_ptr.proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
+	espconn_ptr.proto.tcp->local_port = espconn_port();
+	espconn_ptr.proto.tcp->remote_port = port;
+	espconn_ptr.reverse = prs;
+    ec_log("start io connent\r\n");
+	espconn_regist_connectcb(&espconn_ptr, on_connect_cb);
+	espconn_regist_reconcb(&espconn_ptr, on_recon_cb);
 	if (server != NULL)
 	{
-		espconn_gethostbyname(espconn_ptr, server, &espconn_ip, espconn_dns_found);
+		espconn_gethostbyname(&espconn_ptr, server, &espconn_ip, espconn_dns_found);
 	}
 	else
 	{
-		os_memcpy(espconn_ptr->proto.tcp->remote_ip, &j_config.ip.addr, 4);
-		espconn_connect(espconn_ptr);
+		os_memcpy(espconn_ptr.proto.tcp->remote_ip, &j_config.ip.addr, 4);
+		espconn_connect(&espconn_ptr);
 	}
 
-	ret = espconn_connect(espconn_ptr);
+	ret = espconn_connect(&espconn_ptr);
 	if (ret)
 	{
 		// TODO: 连接成功
-		*socketptr = (void*)espconn_ptr;
+		*socketptr = (void*)&espconn_ptr;
 		return IKS_OK;
 	}
 	else
@@ -196,13 +198,14 @@ io_send(void *socket, const char *data, size_t len)
 
 	if ((data == NULL) || (len == 0))
 	{
-		return;
+		return -1;
 	}
-
+    ec_log("io send [ %s ] \r\n");
 	if (espconn_flag)
 	{
 		int ret;
-		ret = espconn_send(esp, (uint8 *)data, len);
+		ret = espconn_send(&espconn_ptr, (uint8 *)data, len);
+		ec_log("espconn_send re %d\r\n", ret);
 		if (ret == 0)
 		{
 			espconn_flag = FALSE;
@@ -240,7 +243,7 @@ io_send(void *socket, const char *data, size_t len)
 static int
 io_recv(void *socket, char *buffer, size_t buf_len, int timeout)
 {
-
+    
 	return 0;
 }
 

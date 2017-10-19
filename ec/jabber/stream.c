@@ -11,6 +11,8 @@
 #define SF_TRY_SECURE 2
 #define SF_SECURE 4
 
+#define USE_DEFAULT_IO
+
 struct stream_data
 {
 	iksparser *prs;
@@ -348,6 +350,7 @@ iks_set_log_hook(iksparser *prs, iksLogHook *logHook)
 	data->logHook = logHook;
 }
 
+#include "user_debug.h"
 int ICACHE_FLASH_ATTR
 iks_connect_tcp(iksparser *prs, const char *server, int port)
 {
@@ -358,32 +361,32 @@ iks_connect_tcp(iksparser *prs, const char *server, int port)
 #endif
 }
 
-int ICACHE_FLASH_ATTR
-iks_connect_via(iksparser *prs, const char *server, int port, const char *server_name)
-{
-#ifdef USE_DEFAULT_IO
-	return iks_connect_with(prs, server, port, server_name, &iks_default_transport);
-#else
-	return IKS_NET_NOTSUPP;
-#endif
-}
+// int ICACHE_FLASH_ATTR
+// iks_connect_via(iksparser *prs, const char *server, int port, const char *server_name)
+// {
+// #ifdef USE_DEFAULT_IO
+// 	return iks_connect_with(prs, server, port, server_name, &iks_default_transport);
+// #else
+// 	return IKS_NET_NOTSUPP;
+// #endif
+// }
 
 int ICACHE_FLASH_ATTR
 iks_connect_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans)
 {
 	struct stream_data *data = iks_user_data(prs);
 	int ret;
-
+    ec_log("iks connect with\r\n");
 	if (!trans->connect)
 		return IKS_NET_NOTSUPP;
 
-	// if (!data->buf)
-	// {
-	// 	data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
-	// 	if (NULL == data->buf)
-	// 		return IKS_NOMEM;
-	// }
-
+	if (!data->buf)
+	{
+		data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
+		if (NULL == data->buf)
+			return IKS_NOMEM;
+	}
+    ec_log("in io connect \r\n");
 	ret = trans->connect(prs, &data->sock, server, port);
 	if (ret)
 		return ret;
@@ -394,109 +397,109 @@ iks_connect_with(iksparser *prs, const char *server, int port, const char *serve
 	return IKS_OK;
 }
 
-int ICACHE_FLASH_ATTR
-iks_connect_async(iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func)
-{
-#ifdef USE_DEFAULT_IO
-	return iks_connect_async_with(prs, server, port, server, &iks_default_transport, notify_data, notify_func);
-#else
-	return IKS_NET_NOTSUPP;
-#endif
-}
+// int ICACHE_FLASH_ATTR
+// iks_connect_async(iksparser *prs, const char *server, int port, void *notify_data, iksAsyncNotify *notify_func)
+// {
+// #ifdef USE_DEFAULT_IO
+// 	return iks_connect_async_with(prs, server, port, server, &iks_default_transport, notify_data, notify_func);
+// #else
+// 	return IKS_NET_NOTSUPP;
+// #endif
+// }
 
-int ICACHE_FLASH_ATTR
-iks_connect_async_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans, void *notify_data, iksAsyncNotify *notify_func)
-{
-	struct stream_data *data = iks_user_data(prs);
-	int ret;
+// int ICACHE_FLASH_ATTR
+// iks_connect_async_with(iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans, void *notify_data, iksAsyncNotify *notify_func)
+// {
+// 	struct stream_data *data = iks_user_data(prs);
+// 	int ret;
 
-	if (NULL == trans->connect_async)
-		return IKS_NET_NOTSUPP;
+// 	if (NULL == trans->connect_async)
+// 		return IKS_NET_NOTSUPP;
 
-	if (!data->buf)
-	{
-		data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
-		if (NULL == data->buf)
-			return IKS_NOMEM;
-	}
+// 	if (!data->buf)
+// 	{
+// 		data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
+// 		if (NULL == data->buf)
+// 			return IKS_NOMEM;
+// 	}
 
-	ret = trans->connect_async(prs, &data->sock, server, server_name, port, notify_data, notify_func);
-	if (ret)
-		return ret;
+// 	ret = trans->connect_async(prs, &data->sock, server, server_name, port, notify_data, notify_func);
+// 	if (ret)
+// 		return ret;
 
-	data->trans = trans;
-	data->server = server_name;
+// 	data->trans = trans;
+// 	data->server = server_name;
 
-	return IKS_OK;
-}
+// 	return IKS_OK;
+// }
 
-int ICACHE_FLASH_ATTR
-iks_connect_fd(iksparser *prs, int fd)
-{
-#ifdef USE_DEFAULT_IO
-	struct stream_data *data = iks_user_data(prs);
+// int ICACHE_FLASH_ATTR
+// iks_connect_fd(iksparser *prs, int fd)
+// {
+// #ifdef USE_DEFAULT_IO
+// 	struct stream_data *data = iks_user_data(prs);
 
-	if (!data->buf)
-	{
-		data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
-		if (NULL == data->buf)
-			return IKS_NOMEM;
-	}
+// 	if (!data->buf)
+// 	{
+// 		data->buf = iks_stack_alloc(data->s, NET_IO_BUF_SIZE);
+// 		if (NULL == data->buf)
+// 			return IKS_NOMEM;
+// 	}
 
-	data->sock = (void *)fd;
-	data->flags |= SF_FOREIGN;
-	data->trans = &iks_default_transport;
+// 	data->sock = (void *)fd;
+// 	data->flags |= SF_FOREIGN;
+// 	data->trans = &iks_default_transport;
 
-	return IKS_OK;
-#else
-	return IKS_NET_NOTSUPP;
-#endif
-}
+// 	return IKS_OK;
+// #else
+// 	return IKS_NET_NOTSUPP;
+// #endif
+// }
 
-int ICACHE_FLASH_ATTR
-iks_fd(iksparser *prs)
-{
-	struct stream_data *data = iks_user_data(prs);
+// int ICACHE_FLASH_ATTR
+// iks_fd(iksparser *prs)
+// {
+// 	struct stream_data *data = iks_user_data(prs);
 
-	return (int)data->sock;
-}
+// 	return (int)data->sock;
+// }
 
-int ICACHE_FLASH_ATTR
-iks_recv(iksparser *prs, int timeout)
-{
-	struct stream_data *data = iks_user_data(prs);
-	int len, ret;
+// int ICACHE_FLASH_ATTR
+// iks_recv(iksparser *prs, int timeout)
+// {
+// 	struct stream_data *data = iks_user_data(prs);
+// 	int len, ret;
 
-	while (1)
-	{
-		if (data->flags & SF_SECURE)
-		{
-			len = iks_default_tls.recv(data->tlsdata, data->buf,
-									   NET_IO_BUF_SIZE - 1, timeout);
-		}
-		else
-		{
-			len = data->trans->recv(data->sock, data->buf, NET_IO_BUF_SIZE - 1, timeout);
-		}
-		if (len < 0)
-			return IKS_NET_RWERR;
-		if (len == 0)
-			break;
-		data->buf[len] = '\0';
-		if (data->logHook)
-			data->logHook(data->user_data, data->buf, len, 1);
-		ret = iks_parse(prs, data->buf, len, 0);
-		if (ret != IKS_OK)
-			return ret;
-		if (!data->trans)
-		{
-			/* stream hook called iks_disconnect */
-			return IKS_NET_NOCONN;
-		}
-		timeout = 0;
-	}
-	return IKS_OK;
-}
+// 	while (1)
+// 	{
+// 		if (data->flags & SF_SECURE)
+// 		{
+// 			len = iks_default_tls.recv(data->tlsdata, data->buf,
+// 									   NET_IO_BUF_SIZE - 1, timeout);
+// 		}
+// 		else
+// 		{
+// 			len = data->trans->recv(data->sock, data->buf, NET_IO_BUF_SIZE - 1, timeout);
+// 		}
+// 		if (len < 0)
+// 			return IKS_NET_RWERR;
+// 		if (len == 0)
+// 			break;
+// 		data->buf[len] = '\0';
+// 		if (data->logHook)
+// 			data->logHook(data->user_data, data->buf, len, 1);
+// 		ret = iks_parse(prs, data->buf, len, 0);
+// 		if (ret != IKS_OK)
+// 			return ret;
+// 		if (!data->trans)
+// 		{
+// 			/* stream hook called iks_disconnect */
+// 			return IKS_NET_NOCONN;
+// 		}
+// 		timeout = 0;
+// 	}
+// 	return IKS_OK;
+// }
 
 int ICACHE_FLASH_ATTR
 iks_send_header(iksparser *prs, const char *to)
@@ -540,6 +543,7 @@ iks_send_raw(iksparser *prs, const char *xmlstr)
 	}
 	else
 	{
+		ec_log("iks_send_raw soc\r\n");
 		ret = data->trans->send(data->sock, xmlstr, os_strlen(xmlstr));
 		if (ret)
 			return ret;
@@ -557,11 +561,11 @@ iks_disconnect(iksparser *prs)
 
 /*****  tls api  *****/
 
-int ICACHE_FLASH_ATTR
-iks_has_tls(void)
-{
-	return iks_default_tls.handshake != NULL;
-}
+// int ICACHE_FLASH_ATTR
+// iks_has_tls(void)
+// {
+// 	return iks_default_tls.handshake != NULL;
+// }
 
 int ICACHE_FLASH_ATTR
 iks_is_secure(iksparser *prs)

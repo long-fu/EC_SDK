@@ -19,7 +19,7 @@ iks_malloc(size_t size)
 	// 	return my_malloc_func(size);
 	// else
 	// 	return malloc(size);
-	os_malloc(size);
+	return os_malloc(size);
 }
 
 void ICACHE_FLASH_ATTR

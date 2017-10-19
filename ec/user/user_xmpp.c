@@ -276,8 +276,11 @@ void ICACHE_FLASH_ATTR
 j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *host_name)
 {
 
+	ec_log("jabber connect \r\n");
 	os_memset(&j_sess, 0, sizeof(j_sess));
+	
 	j_sess.prs = iks_stream_new(IKS_NS_CLIENT, &j_sess, (iksStreamHook *)on_stream);
+	
 	// if (opt_log) iks_set_log_hook (sess.prs, (iksLogHook *) on_log);
 	j_sess.acc = iks_id_new(iks_parser_stack(j_sess.prs), jabber_id);
 	if (NULL == j_sess.acc->resource)
@@ -294,9 +297,7 @@ j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *hos
 	}
 	j_sess.pass = pass;
 	j_sess.set_roster = set_roster;
-
 	j_setup_filter(&j_sess);
-
 	iks_connect_tcp(j_sess.prs, host_name, j_config.port);
 	// switch (e) {
 	// 	case IKS_OK:
@@ -324,24 +325,28 @@ j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *hos
 void ICACHE_FLASH_ATTR
 xmpp_init(struct jabber_config *config)
 {
+	ec_log("xmpp_init ");
 	if (config != NULL)
 	{
 		char full_jid[32] = {0};
 
 		os_memset(&j_config, 0x0, sizeof(&j_config));
 		os_memcpy(&j_config, config, sizeof(&j_config));
-
+        ec_log(" config is \r\n");
 		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, config->resources);
 		j_connect(full_jid, config->password, 0, config->username, config->host_name);
+		return;
 	}
 	else if (jabber_get_config(&j_config))
 	{
 		char full_jid[32] = {0};
+		ec_log("read config\r\n");
 		os_sprintf(full_jid, "%s@%s/%s", j_config.username, j_config.domain, j_config.resources);
 		j_connect(full_jid, j_config.password, 0, j_config.username, j_config.host_name);
 	}
 	else
 	{
 		// FIXME: 系统致命错误
+		ec_log("sys error \r\n");
 	}
 }
