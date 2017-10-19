@@ -139,18 +139,19 @@ on_connect_cb(void *arg)
 	espconn_regist_disconcb(&espconn_ptr, on_discon_cb);
 	espconn_regist_recvcb(&espconn_ptr, on_recv);
 	espconn_regist_sentcb(&espconn_ptr, on_send_cb);
-	// TODO: 可以发送消息
+
+	// TODO: 可以发送消息 这部分如果是没有断开一次连接可以不进行连接
 	iks_send_header(prs, j_config.domain);
 	
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 io_close(void *socket)
 {
 	struct espconn *esp = (struct espconn *)socket;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 io_connect(iksparser *prs,
 		   void **socketptr,
 		   const char *server,
@@ -191,16 +192,16 @@ io_connect(iksparser *prs,
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 io_send(void *socket, const char *data, size_t len)
 {
 	struct espconn *esp = (struct espconn *)socket;
-
+    ec_log("io send [ %s ] \r\n", data);
 	if ((data == NULL) || (len == 0))
 	{
 		return -1;
 	}
-    ec_log("io send [ %s ] \r\n");
+    ec_log("io send\r\n");
 	if (espconn_flag)
 	{
 		int ret;
@@ -240,7 +241,7 @@ io_send(void *socket, const char *data, size_t len)
 	return IKS_OK;
 }
 
-static int
+static int ICACHE_FLASH_ATTR
 io_recv(void *socket, char *buffer, size_t buf_len, int timeout)
 {
     

@@ -97,6 +97,16 @@ http_failure(int error)
     ec_log("HTTP ERROR %d \r\n", error);
 }
 
+struct jabber_config config = {
+    .port = 5222,
+    .ip.addr = 0,
+    .resources = "ec_0.0.1",
+    .username = "18682435851",
+    .password = "18682435851",
+    .domain = "xsxwrd.com",
+    .host_name = "gm.xsxwrd.com"
+};
+
 void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
@@ -109,15 +119,7 @@ wifiConnectCb(uint8_t status)
         
         // 这部分测试通过
         // http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
-        struct jabber_config config = {
-            .port = 5222,
-            .ip.addr = 0,
-            .resources = "ec_0.0.1",
-            .username = "18682435851",
-            .password = "18682435851",
-            .domain = "xsxwrd.com",
-            .host_name = "gm.xsxwrd.com"
-        };
+
 
         xmpp_init(&config);
     }

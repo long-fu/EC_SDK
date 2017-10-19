@@ -226,7 +226,7 @@ typedef void (iksLogHook)(void *user_data, const char *data, size_t size, int is
 
 iksparser *ICACHE_FLASH_ATTR iks_stream_new (char *name_space, void *user_data, iksStreamHook *streamHook);
 void *ICACHE_FLASH_ATTR iks_stream_user_data (iksparser *prs);
-void ICACHE_FLASH_ATTR iks_set_log_hook (iksparser *prs, iksLogHook *logHook);
+// void ICACHE_FLASH_ATTR iks_set_log_hook (iksparser *prs, iksLogHook *logHook);
 int ICACHE_FLASH_ATTR iks_connect_tcp (iksparser *prs, const char *server, int port);
 // int iks_connect_fd (iksparser *prs, int fd);
 // int iks_connect_via (iksparser *prs, const char *server, int port, const char *server_name);

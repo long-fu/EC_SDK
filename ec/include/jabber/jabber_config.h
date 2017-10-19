@@ -7,7 +7,7 @@ struct jabber_config
 {
 	int port;
 	struct ip_addr ip;
-	char resources[8];
+	char resources[16];
 	char username[16];
 	char password[16];
 	char app_username[16];

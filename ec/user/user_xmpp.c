@@ -278,9 +278,9 @@ j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *hos
 
 	ec_log("jabber connect \r\n");
 	os_memset(&j_sess, 0, sizeof(j_sess));
-	
+
 	j_sess.prs = iks_stream_new(IKS_NS_CLIENT, &j_sess, (iksStreamHook *)on_stream);
-	
+
 	// if (opt_log) iks_set_log_hook (sess.prs, (iksLogHook *) on_log);
 	j_sess.acc = iks_id_new(iks_parser_stack(j_sess.prs), jabber_id);
 	if (NULL == j_sess.acc->resource)
@@ -331,9 +331,31 @@ xmpp_init(struct jabber_config *config)
 		char full_jid[32] = {0};
 
 		os_memset(&j_config, 0x0, sizeof(&j_config));
-		os_memcpy(&j_config, config, sizeof(&j_config));
-        ec_log(" config is \r\n");
+		// MARK: 不能直接拷贝
+		// os_memcpy(&j_config, config, sizeof(&j_config));
+		{
+			j_config.ip.addr = config->ip.addr;
+			j_config.port = config->port;
+
+			os_memcpy(j_config.resources, config->resources, sizeof(config->resources));
+			os_memcpy(j_config.username, config->username, sizeof(config->username));
+			os_memcpy(j_config.password, config->password, sizeof(config->password));
+			os_memcpy(j_config.app_username, config->app_username, sizeof(config->app_username));
+			os_memcpy(j_config.domain, config->domain, sizeof(config->domain));
+			os_memcpy(j_config.host_name, config->host_name, sizeof(config->host_name));
+
+			ec_log("j_config ip %d \r\n", j_config.ip.addr);
+			ec_log("j_config port %d \r\n", j_config.port);
+			ec_log("j_config resources %s \r\n", j_config.resources);
+			ec_log("j_config username %s \r\n", j_config.username);
+			ec_log("j_config password %s \r\n", j_config.password);
+			ec_log("j_config app_username %s \r\n", j_config.app_username);
+			ec_log("j_config domain %s \r\n", j_config.domain);
+			ec_log("j_config host_name %s\r\n", j_config.host_name);
+		}
+		ec_log(" config is \r\n");
 		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, config->resources);
+
 		j_connect(full_jid, config->password, 0, config->username, config->host_name);
 		return;
 	}

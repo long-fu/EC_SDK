@@ -342,13 +342,13 @@ iks_stream_user_data(iksparser *prs)
 	return data->user_data;
 }
 
-void ICACHE_FLASH_ATTR
-iks_set_log_hook(iksparser *prs, iksLogHook *logHook)
-{
-	struct stream_data *data = iks_user_data(prs);
+// void ICACHE_FLASH_ATTR
+// iks_set_log_hook(iksparser *prs, iksLogHook *logHook)
+// {
+// 	struct stream_data *data = iks_user_data(prs);
 
-	data->logHook = logHook;
-}
+// 	data->logHook = logHook;
+// }
 
 #include "user_debug.h"
 int ICACHE_FLASH_ATTR
@@ -386,7 +386,7 @@ iks_connect_with(iksparser *prs, const char *server, int port, const char *serve
 		if (NULL == data->buf)
 			return IKS_NOMEM;
 	}
-    ec_log("in io connect \r\n");
+    // ec_log("in io connect \r\n");
 	ret = trans->connect(prs, &data->sock, server, port);
 	if (ret)
 		return ret;
@@ -516,6 +516,7 @@ iks_send_header(iksparser *prs, const char *to)
 				 "<stream:stream xmlns:stream='http://etherx.jabber.org/streams' xmlns='"
 				 "%s' to='%s' version='1.0'>",
 			data->name_space, to);
+	ec_log("header [ %s ]\r\n",msg);
 	err = iks_send_raw(prs, msg);
 	iks_free(msg);
 	if (err)
@@ -548,8 +549,8 @@ iks_send_raw(iksparser *prs, const char *xmlstr)
 		if (ret)
 			return ret;
 	}
-	if (data->logHook)
-		data->logHook(data->user_data, xmlstr, os_strlen(xmlstr), 0);
+	// if (data->logHook)
+	// 	data->logHook(data->user_data, xmlstr, os_strlen(xmlstr), 0);
 	return IKS_OK;
 }
 
