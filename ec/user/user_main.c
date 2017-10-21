@@ -133,6 +133,7 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
+    return ;
     if (user_get_is_regisrer() == 1)
     {
         // TODO: 进入XMPP
@@ -227,5 +228,6 @@ user_init(void)
 #endif
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
+    timer_init();
     system_init_done_cb(system_on_done_cb);
 }

@@ -29,4 +29,5 @@ void CFG_Load(void);
 int ICACHE_FLASH_ATTR user_get_is_regisrer(void);
 #include "jabber_config.h"
 void ICACHE_FLASH_ATTR xmpp_init(struct jabber_config *config);
+void ICACHE_FLASH_ATTR timer_init(void);
 #endif
