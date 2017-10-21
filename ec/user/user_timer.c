@@ -215,16 +215,21 @@ timer_check_func(void *arg)
   // ec_log("system_get_time %d\r\n", system_get_time()); // 这里是开机时间 us
   os_memset(&res_buf, 0x0, sizeof(res_buf));
   my_sntp_mktm_r(&system_timestam ,&res_buf ,8);
+  system_os_post(USER_TASK_PRIO_0, 0,'a');
 }
 
 // system_get_rtc_time
 // system_get_time
 
-void al() 
+os_event_t time_task_queue;
+
+
+void al(os_event_t * e) 
 {
    // 到现在是多久
    // 加上定时器
    //  
+   ec_log("tash sldkjaskldsa\r\n");
 }
 
 
@@ -236,4 +241,5 @@ timer_init(void)
   os_timer_disarm(&alarm_timer);
   os_timer_setfn(&alarm_timer, (os_timer_func_t *)timer_check_func, NULL);
   os_timer_arm(&alarm_timer, 60000, 1); // ms 单位
+  system_os_task(al, USER_TASK_PRIO_0, &time_task_queue, 3);
 }
