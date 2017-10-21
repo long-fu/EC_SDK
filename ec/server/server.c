@@ -51,7 +51,7 @@ static int ICACHE_FLASH_ATTR
 on_message_complete(http_parser *_)
 {
     (void)_;
-    char body[64] = "hello the world";
+    char body[64] = "{\"errcode\":0, \"errmsg\":\"ok\" }";
     char soc_send_buffer[512] = { 0 };
     // TODO: 关闭连接
 

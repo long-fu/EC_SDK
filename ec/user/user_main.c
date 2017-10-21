@@ -118,10 +118,10 @@ wifiConnectCb(uint8_t status)
         // xmpp_init();
         
         // 这部分测试通过
-        // http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
+        http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
 
 
-        xmpp_init(&config);
+        // xmpp_init(&config);
     }
     else
     {
