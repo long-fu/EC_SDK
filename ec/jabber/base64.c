@@ -118,9 +118,9 @@ send_codec_encode(char *buff, int len, char *buff_out) {
 
     buff_out = iks_base64_encode(buff, len);
 
-    out_len = strlen(buff_out);
+    out_len = os_strlen(buff_out);
     for (i = 0; i < out_len; i++) {
-        for (j = 0; j < strlen(tab_dec); j++) {
+        for (j = 0; j < os_strlen(tab_dec); j++) {
             if (buff_out[i] == tab_dec[j]) {
                 buff_out[i] = tab_enc[j];
                 break;
@@ -133,9 +133,9 @@ void ICACHE_FLASH_ATTR
 send_codec_decode(char *buf, char *decode_out) {
     int i, j, buff_len;
 
-    buff_len = strlen(buf);
+    buff_len = os_strlen(buf);
     for (i = 0; i < buff_len; i++) {
-        for (j = 0; j < strlen(tab_enc); j++) {
+        for (j = 0; j < os_strlen(tab_enc); j++) {
             if (buf[i] == tab_enc[j]) {
                 buf[i] = tab_dec[j];
                 break;
