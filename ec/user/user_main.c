@@ -57,7 +57,7 @@ server_recv_data(char *data, int len)
 {
     char json[128] = { 0 };
     ec_log("server_recv_data [%s] \r\n",data);
-    send_codec_decode(data, json);
+    // send_codec_decode(data, json);
     // MARK: 这里解析配置数据
     json_parse_config(json, &j_config, &w_config);
 }
@@ -175,9 +175,9 @@ user_init(void)
 
 #if AT_CUSTOM
     // MARK: 注册系统AT指令
-    at_init();
-    // MARK: 注册自定义AT指令
-    at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
+    // at_init();
+    // // MARK: 注册自定义AT指令
+    // at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
 #endif
 
     // MARK: 读取用户配置数据 必须在此处进行读取

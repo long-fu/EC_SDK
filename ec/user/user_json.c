@@ -17,13 +17,12 @@ atoi (char s[])
 int ICACHE_FLASH_ATTR
 sscanf(const char *ibuf, const char *fmt, ...)
 {
-        va_list ap;
-        int ret;
-
-        va_start(ap, fmt);
-        ret = vsscanf(ibuf, fmt, ap);
-        va_end(ap);
-        return(ret);
+        // va_list ap;
+        // int ret;
+        // va_start(ap, fmt);
+        // ret = vsscanf(ibuf, fmt, ap);
+        // va_end(ap);
+        return(0);
 }
 
 static int ICACHE_FLASH_ATTR
