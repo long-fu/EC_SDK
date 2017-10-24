@@ -2,22 +2,7 @@
 #include "user_interface.h"
 #include "user_debug.h"
 #include "osapi.h"
-
-
-typedef uint32 time_t;
-
-struct tm
-{
-    int tm_sec;  /*秒，正常范围0-59， 但允许至61*/
-    int tm_min;  /*分钟，0-59*/
-    int tm_hour; /*小时， 0-23*/
-    int tm_mday; /*日，即一个月中的第几天，1-31*/
-    int tm_mon;  /*月， 从一月算起，0-11*/  // 1+p->tm_mon;
-    int tm_year;  /*年， 从1900至今已经多少年*/   // 1900＋ p->tm_year;
-    int tm_wday; /*星期，一周中的第几天， 从星期日算起，0-6*/
-    int tm_yday; /*从今年1月1日到目前的天数，范围0-365*/
-    int tm_isdst; /*日光节约时间的旗标*/
-};
+#include "user_timer.h"
 
 #define SECSPERMIN 60L
 #define MINSPERHOUR 60L
@@ -34,24 +19,29 @@ struct tm
 #define EPOCH_YEARS_SINCE_CENTURY 70
 #define EPOCH_YEARS_SINCE_LEAP_CENTURY 370
 
+#define SECSPEGMT8 (8 * SECSPERHOUR)
+
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
 
-// int __tznorth;
-// int __tzyear;
-char reult[100];
 static const int mon_lengths[2][12] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
+
+static time_t mon_yday[2][12] =
+    {
+        {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
+        {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335},
+};
 
 static const int year_lengths[2] = {
     365,
     366};
 
-static struct tm res_buf;
-static time_t system_timestam = 0;
+static os_timer_t system_time_timer;
+static uint32 system_timestamp;
 
-struct tm *ICACHE_FLASH_ATTR
-my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offfset)
+struct tm *
+ec_gmtime(const time_t *tim_p, struct tm *res)
 {
   long days, rem;
   time_t lcltime;
@@ -116,13 +106,11 @@ my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offfset)
     days -= ip[res->tm_mon];
   res->tm_mday = days + 1;
 
-
   {
 
-    int hours, mins, secs;
-    res->tm_isdst = 0;
-
-    offset = offfset * SECSPERHOUR;
+    int hours, mins, secs,offset;
+    // res->tm_isdst = 0;
+    offset = -SECSPEGMT8;
     hours = offset / SECSPERHOUR;
     offset = offset % SECSPERHOUR;
 
@@ -194,49 +182,82 @@ my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offfset)
       }
     }
   }
-  ec_log("res %d-%d-%d %d:%d:%d\r\n",1900 + res->tm_year, 
-  1 + res->tm_mon,res->tm_mday, 
-  res->tm_hour, res->tm_min,res->tm_sec);
+  ec_log("res %d-%d-%d %d:%d:%d\r\n", 1900 + res->tm_year,
+         1 + res->tm_mon, res->tm_mday,
+         res->tm_hour, res->tm_min, res->tm_sec);
   return (res);
 }
 
-
-static os_timer_t system_time_timer;
-
-void ICACHE_FLASH_ATTR
-timer_check_func(void *arg)
+static long long 
+get_day(int year)
 {
-  system_timestam = system_timestam + 60;
-  // ec_log("systime: %s %s\r\n", __DATE__, __TIME__);
-  ec_log("time min %d\r\n", system_timestam);
-  // ec_log("system_get_time %d\r\n", system_get_time()); // 这里是开机时间 us
-  os_memset(&res_buf, 0x0, sizeof(res_buf));
-  my_sntp_mktm_r(&system_timestam ,&res_buf , -8);
-  system_os_post(USER_TASK_PRIO_0, 0,'a');
+  year = year - 1;
+  int leap_year_num = year / 4 - year / 100 + year / 400;
+  long long tol_day = year * 365 + leap_year_num;
+  return tol_day;
 }
 
-// system_get_rtc_time
-// system_get_time
+time_t 
+ec_mktime(int year, int mon, int day, int hour, int min, int sec)
+{
+  long long tol_day = 0;
+  tol_day = get_day(year) - get_day(1970);
+  tol_day += mon_yday[isleap(year)][mon - 1];
+  tol_day += day - 1;
+
+  long long ret = 0;
+  ret += tol_day * SECSPERDAY;
+  ret += hour * SECSPERHOUR;
+  ret += min * SECSPERMIN;
+  ret += sec;
+  // 这部分是时区的 差值
+  return ret - SECSPEGMT8;
+}
+
+void ec_set_timestamp(uint32 t)
+{
+
+}
+
+uint32 ec_get_timestamp()
+{
+  // TODO: 返回时间戳
+  return 0;
+}
+
+
+
+void ICACHE_FLASH_ATTR
+check_time_func(void *arg)
+{
+
+  system_timestamp = system_timestamp + 60;
+  ec_log("system_timestamp %d\r\n", system_timestamp);
+  // ec_log("system_get_time %d\r\n", system_get_time()); // 这里是开机时间 us
+  os_memset(&res_buf, 0x0, sizeof(res_buf));
+  // my_sntp_mktm_r(&system_timestamp, &res_buf, -8);
+
+  // 发送任务进行对 定时 和 延时 进行判断
+  system_os_post(USER_TASK_PRIO_0, 0, 'a');
+}
 
 os_event_t time_task_queue;
 
-
-void al(os_event_t * e) 
+void al(os_event_t *e)
 {
-   // 到现在是多久
-   // 加上定时器
-   //  
-   ec_log("tash sldkjaskldsa\r\n");
+  // 到现在是多久
+  // 加上定时器
+  //
+  ec_log("tash sldkjaskldsa\r\n");
 }
-
 
 void ICACHE_FLASH_ATTR
 timer_init(void)
 {
   ec_log("systime: %s %s\r\n", __DATE__, __TIME__); // 代码编译时间
-  system_timestam = 1508578384;// s 为单位
+  system_timestam = 1508578384;                     // s 为单位
   os_timer_disarm(&system_time_timer);
-  os_timer_setfn(&system_time_timer, (os_timer_func_t *)timer_check_func, NULL);
+  os_timer_setfn(&system_time_timer, (os_timer_func_t *)check_time_func, NULL);
   os_timer_arm(&system_time_timer, 60000, 1); // ms 单位
   system_os_task(al, USER_TASK_PRIO_0, &time_task_queue, 3);
 }

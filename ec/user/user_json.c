@@ -1,9 +1,126 @@
 
 #include "cJSON.h"
 
-char http_register_url[64];
 
-int json_parse_config(char *json, struct jabber_config *jconfig, struct wifi_config *wconfig)
+static int 
+add_switch(char *times,char *ttime, char* enable)
+{
+    if (times != NULL && ttime != NULL && enable != NULL)
+    {
+        // TODO: 进行解析
+        int i = 0, b = 0, offset = 0, y, mm, d, h, m, s, on;
+        char c;
+        if (os_strlen(enable) == 1) // "1"
+        {
+            on = atoi(enable);
+        }
+        else
+        {
+            // FIXME: 数据错误 需要作出调整
+        }
+        if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
+        {
+            sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
+        }
+        else
+        {
+            // FIXME: 数据错误 需要作出调整
+        }
+        if (os_strlen(times) > 1)
+        {
+            for (i = 0; i < os_strlen(times); i = i + 2)
+            {
+                c = times[i];
+                offset = atoi(&c);
+                offset = offset - 1;
+                b = b | 1 << offset;
+            }
+            // 加入时间
+            add_user_alarm(b, on, h, m);
+        }
+        else if (os_strlen(times) == 1)
+        {
+            c = times[i];
+            offset = atoi(&c);
+            if (offset == 8)
+            {
+                b = 0x7F;
+                add_user_alarm(b, on, h, m);
+            }
+            else if (offset == 0)
+            {
+                int ds, ls;
+                // 加入到延时队列
+                ls = ec_get_timestamp();
+                ds = mktime(y,mm,d,h,m,s) - ls;
+
+                if ( ds> 0)
+                {
+                    add_user_delay(on,ds);
+                }
+                else
+                {
+                    // FIXME: 数据错误
+                }
+            }
+            else
+            {
+                // FIXME: 数据错误
+            }
+        }
+        else
+        {
+            // FIXME: 数据错误
+        }
+    }
+    return 0;
+}
+
+static 
+int add_scene(char *ttime, char *enable)
+{
+
+    if (ttime != NULL && enable != NULL)
+    {
+        // TODO: 进行解析
+        int on = 0 ,ds, ls;;
+        if (os_strlen(enable) == 1) // "1"
+        {
+            on = atoi(enable);
+        }
+        else
+        {
+            // FIXME: 数据错误 需要作出调整
+        }
+        if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
+        {
+            sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
+        }
+        else
+        {
+            // FIXME: 数据错误 需要作出调整
+        }
+        ls = ec_get_timestamp();
+        ds = mktime(y,mm,d,h,m,s) - ls;
+        if ( ds> 0)
+        {
+            // 加入到延时队列
+            add_user_delay(on, ds);
+        }
+        else
+        {
+            // FIXME: 数据错误
+        }
+        return 0;
+    }
+    return -1;
+}
+
+
+int 
+json_parse_config(char *json, 
+    struct jabber_config *jconfig, 
+    struct wifi_config *wconfig)
 {
 
     if (jconfig != NULL && wconfig != NULL)
@@ -91,7 +208,8 @@ int json_parse_config(char *json, struct jabber_config *jconfig, struct wifi_con
 }
 
 //
-int json_parse_switch(char *json)
+int 
+json_parse_switch(char *json)
 {
     int i = 0;
     cJSON *root = NULL, *t = NULL, *list = NULL, *tp = NULL;
@@ -124,11 +242,12 @@ int json_parse_switch(char *json)
         {
             enable = tp->valuestring;
         }
+        add_switchList(times, ttime, enable);
     }
 
     i = 0;
 
-    list = cJSON_GetObjectItem(root, "switchList");
+    list = cJSON_GetObjectItem(root, "sceneList");
     for (i; i < cJSON_GetArraySize(list); i++)
     {
         t = cJSON_GetArrayItem(list, i);
@@ -142,69 +261,7 @@ int json_parse_switch(char *json)
         {
             enable = tp->valuestring;
         }
-        if (ttime != NULL && enable != NULL)
-        {
-            // TODO: 进行解析
-        }
+        add_scene(ttime, enable);
     }
-}
-
-static int add_switchList(char *times,char *ttime, char* enable)
-{
-    if (times != NULL && ttime != NULL && enable != NULL)
-    {
-        // TODO: 进行解析
-        int i = 0, b = 0, offset = 0, y, mm, d, h, m, s, on;
-        char c;
-        if (os_strlen(enable) == 1) // "1"
-        {
-            on = atoi(enable);
-        }
-        else
-        {
-            // FIXME: 数据错误 需要作出调整
-        }
-        if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
-        {
-            sscanf(time, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
-        }
-        else
-        {
-            // FIXME: 数据错误 需要作出调整
-        }
-        if (os_strlen(times) > 1)
-        {
-            for (i = 0; i < os_strlen(times); i = i + 2)
-            {
-                c = times[i];
-                offset = atoi(&c);
-                offset = offset - 1;
-                b = b | 1 << offset;
-            }
-            // 加入时间
-            add_user_alarm(b, on, h, m);
-        }
-        else if (os_strlen(times) == 1)
-        {
-            c = times[i];
-            offset = atoi(&c);
-            if (offset == 8)
-            {
-                b = 0x7F;
-                add_user_alarm(b, on, h, m);
-            }
-            else if (offset == 0)
-            {
-                // 加入到延时队列
-            }
-            else
-            {
-                // FIXME: 数据错误
-            }
-        }
-        else
-        {
-            // FIXME: 数据错误
-        }
-    }
+    return 0;
 }

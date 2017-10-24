@@ -1,7 +1,9 @@
 
+#include "user_switch.h"
+
 #define EC_ALARM_MAX 10
 
-// 表示开启一次的定时开关 我会放到延时任务队列中
+// 开启一次的定时开关 我会放到延时任务队列中
 
 // 定时任务 会多次开启
 typedef struct ec_alarm_t
@@ -56,7 +58,7 @@ add_user_alarm(int ing, int on, int hour, int min)
 	user_alarm_cout ++ ;
 }
 
-void 
+static void 
 check_user_alarm(int wday, int hour, int min)
 {
     int i = 0;
