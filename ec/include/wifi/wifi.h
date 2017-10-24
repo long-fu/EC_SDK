@@ -3,7 +3,12 @@
 
 #include "c_types.h"
 
+struct wifi_config {
+    char ssid[32];;
+    char password[32];
+}
+
 typedef void (*WifiCallback)(uint8_t);
-void wifi_connect(uint8_t* ssid, uint8_t* pass, WifiCallback cb);
-void wifi_ap_set(uint8_t *ssid, uint8_t *pass);
+void ICACHE_FLASH_ATTR WIFI_Connect(uint8_t* ssid, uint8_t* pass, WifiCallback cb);
+void ICACHE_FLASH_ATTR wifi_ap_set(uint8_t *ssid, uint8_t *pass);
 #endif
