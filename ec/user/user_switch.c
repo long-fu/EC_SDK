@@ -29,25 +29,25 @@ typedef struct ec_delay_t
 };
 
 
-void 
+void ICACHE_FLASH_ATTR
 switch_on(void *arg)
 {
 
 }
 
-void 
+void ICACHE_FLASH_ATTR
 switch_off(void *arg)
 {
 
 }
 
-void 
+void ICACHE_FLASH_ATTR
 stop_all_user_alarm()
 {
 	user_alarm_cout = 0;
 }
 
-void 
+void ICACHE_FLASH_ATTR
 add_user_alarm(int ing, int on, int hour, int min)
 {
 	// 每次的增加都会重置所有的数据
@@ -58,7 +58,7 @@ add_user_alarm(int ing, int on, int hour, int min)
 	user_alarm_cout ++ ;
 }
 
-static void 
+static void ICACHE_FLASH_ATTR
 check_user_alarm(int wday, int hour, int min)
 {
     int i = 0;
@@ -85,7 +85,7 @@ check_user_alarm(int wday, int hour, int min)
 
 static ec_delay_t user_delay;
 
-void 
+void ICACHE_FLASH_ATTR
 add_user_delay(int on, int delay)
 {
 
@@ -109,7 +109,7 @@ add_user_delay(int on, int delay)
     user_delay.next = tmp;
 }
 
-void 
+void ICACHE_FLASH_ATTR
 stop_all_user_delay(void)
 {
 	ec_delay_t *tmp = user_delay.next;

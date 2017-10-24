@@ -2,7 +2,7 @@
 #include "cJSON.h"
 
 
-static int 
+static int ICACHE_FLASH_ATTR
 add_switch(char *times,char *ttime, char* enable)
 {
     if (times != NULL && ttime != NULL && enable != NULL)
@@ -76,7 +76,7 @@ add_switch(char *times,char *ttime, char* enable)
     return 0;
 }
 
-static 
+static ICACHE_FLASH_ATTR
 int add_scene(char *ttime, char *enable)
 {
 
@@ -117,7 +117,7 @@ int add_scene(char *ttime, char *enable)
 }
 
 
-int 
+int ICACHE_FLASH_ATTR
 json_parse_config(char *json, 
     struct jabber_config *jconfig, 
     struct wifi_config *wconfig)
@@ -208,7 +208,7 @@ json_parse_config(char *json,
 }
 
 //
-int 
+int ICACHE_FLASH_ATTR
 json_parse_switch(char *json)
 {
     int i = 0;
@@ -263,5 +263,6 @@ json_parse_switch(char *json)
         }
         add_scene(ttime, enable);
     }
+    cJSON_Delete(root);
     return 0;
 }

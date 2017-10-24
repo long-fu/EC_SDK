@@ -40,7 +40,7 @@ static const int year_lengths[2] = {
 static os_timer_t system_time_timer;
 static uint32 system_timestamp;
 
-struct tm *
+struct tm *ICACHE_FLASH_ATTR
 ec_gmtime(const time_t *tim_p, struct tm *res)
 {
   long days, rem;
@@ -188,7 +188,7 @@ ec_gmtime(const time_t *tim_p, struct tm *res)
   return (res);
 }
 
-static long long 
+static long long ICACHE_FLASH_ATTR
 get_day(int year)
 {
   year = year - 1;
@@ -197,7 +197,7 @@ get_day(int year)
   return tol_day;
 }
 
-time_t 
+time_t ICACHE_FLASH_ATTR
 ec_mktime(int year, int mon, int day, int hour, int min, int sec)
 {
   long long tol_day = 0;
@@ -219,7 +219,8 @@ void ec_set_timestamp(uint32 t)
 
 }
 
-uint32 ec_get_timestamp()
+uint32 ICACHE_FLASH_ATTR
+ec_get_timestamp()
 {
   // TODO: 返回时间戳
   return 0;

@@ -62,6 +62,7 @@ on_message_complete(http_parser *_)
 
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
     ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
+    
     if (server_recv_handler)
     {
         server_recv_handler(http_respons_buf, os_strlen(http_respons_buf));
@@ -69,11 +70,9 @@ on_message_complete(http_parser *_)
             
     // MARK: 数据接收完成
     // TODO: 这里进行数据的回复
- 
-
     os_sprintf(soc_send_buffer,REQUEST_HEAD,os_strlen(body),body);
-
     espconn_send(&esp_conn, soc_send_buffer, os_strlen(soc_send_buffer));
+
     return 0;
 }
 
@@ -202,6 +201,7 @@ server_init(uint32 port, server_recv_callback handler)
     esp_conn.state = ESPCONN_NONE;
     esp_conn.proto.tcp = &esptcp;
     esp_conn.proto.tcp->local_port = port;
+    server_recv_handler = handler；
     ec_log("server init \r\n");
 
     espconn_regist_connectcb(&esp_conn, server_listen);

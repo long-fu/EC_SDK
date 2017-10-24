@@ -13,84 +13,6 @@
 
 os_event_t ec_task_queue[4];
 
-#if AT_CUSTOM
-/// MAKR: AT测试代码
-// test :AT+TEST=1,"abc"<,3>
-void ICACHE_FLASH_ATTR
-at_setupCmdTest(uint8_t id, char *pPara)
-{
-    int result = 0, err = 0, flag = 0;
-    char buffer[32] = {0};
-    pPara++; // skip '='
-
-    //get the first parameter
-    // digit
-    flag = at_get_next_int_dec(&pPara, &result, &err);
-
-    // flag must be ture because there are more parameter
-    if (flag == FALSE)
-    {
-        at_response_error();
-        return;
-    }
-
-    if (*pPara++ != ',')
-    { // skip ','
-        at_response_error();
-        return;
-    }
-
-    ec_log("the first parameter:%d\r\n", result);
-    //get the second parameter
-    // string
-    at_data_str_copy(buffer, &pPara, 10);
-    ec_log("the second parameter:%s\r\n", buffer);
-
-    if (*pPara == ',')
-    {
-        pPara++; // skip ','
-        result = 0;
-        //there is the third parameter
-        // digit
-        flag = at_get_next_int_dec(&pPara, &result, &err);
-        // we donot care of flag
-        ec_log("the third parameter:%d\r\n", result);
-    }
-
-    if (*pPara != '\r')
-    {
-        at_response_error();
-        return;
-    }
-    at_response_ok();
-}
-
-void ICACHE_FLASH_ATTR
-at_testCmdTest(uint8_t id)
-{
-    ec_log("at_testCmdTest\r\n");
-    at_response_ok();
-}
-
-void ICACHE_FLASH_ATTR
-at_queryCmdTest(uint8_t id)
-{
-    ec_log("at_queryCmdTest\r\n");
-    at_response_ok();
-}
-
-void ICACHE_FLASH_ATTR
-at_exeCmdTest(uint8_t id)
-{
-    ec_log("at_exeCmdTest\r\n");
-    at_response_ok();
-}
-
-extern void at_exeCmdCiupdate(uint8_t id);
-at_funcationType at_custom_cmd[] = {
-    {"+TEST", 5, at_testCmdTest, at_queryCmdTest, at_setupCmdTest, at_exeCmdTest},
-};
-#endif
 
 static void ICACHE_FLASH_ATTR
 http_success(char *data, int len)
@@ -104,26 +26,16 @@ http_failure(int error)
     ec_log("HTTP ERROR %d \r\n", error);
 }
 
-struct jabber_config config = {
-    .port = 5222,
-    .ip.addr = 0,
-    .resources = "ec_0.0.1",
-    .username = "18682435851",
-    .password = "18682435851",
-    .domain = "xsxwrd.com",
-    .host_name = "gm.xsxwrd.com"};
-
 void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
         if (user_get_is_regisrer() == 1)
-        {
-    
+        {    
             ec_log("===== login ==== \r\n");
             system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
-    
+
         }
         else
         {
@@ -156,10 +68,12 @@ system_on_done_cb(void)
     }
 }
 
+// 接收任务配置
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
-   
+    ec_log("server_recv_data [%s] \r\n",data);
+
 }
 
 void ICACHE_FLASH_ATTR
