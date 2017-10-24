@@ -186,7 +186,7 @@ iks_unescape(ikstack *s, char *src, size_t len)
 
 	if (!s || !src)
 		return NULL;
-	if (!strchr(src, '&'))
+	if (!os_strchr(src, '&'))
 		return src;
 	if (len == -1)
 		len = os_strlen(src);

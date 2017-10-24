@@ -31,7 +31,7 @@ iks_id_new(ikstack *s, const char *jid)
 	src = id->full;
 
 	/* split resource */
-	tmp = strchr(src, '/');
+	tmp = os_strchr(src, '/');
 	if (tmp)
 	{
 		id->partial = iks_stack_strdup(s, src, tmp - src);
@@ -44,7 +44,7 @@ iks_id_new(ikstack *s, const char *jid)
 	}
 
 	/* split user */
-	tmp = strchr(src, '@');
+	tmp = os_strchr(src, '@');
 	if (tmp)
 	{
 		id->user = iks_stack_strdup(s, src, tmp - src);

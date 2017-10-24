@@ -35,7 +35,7 @@ iks_base64_decode(const char *buf)
 
 	while (*buf && buf < end)
 	{
-		if (!(foo = strchr(base64_charset, *buf)))
+		if (!(foo = os_strchr(base64_charset, *buf)))
 			foo = base64_charset;
 		val = (int)(foo - base64_charset);
 		buf++;

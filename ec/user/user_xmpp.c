@@ -109,7 +109,7 @@ on_stream(struct session *sess, int type, iks *node)
 		break;
 
 	case IKS_NODE_NORMAL:
-		if (strcmp("stream:features", iks_name(node)) == 0)
+		if (os_strcmp("stream:features", iks_name(node)) == 0)
 		{
 			sess->features = iks_stream_features(node);
 			if (opt_use_sasl)
@@ -142,11 +142,11 @@ on_stream(struct session *sess, int type, iks *node)
 				}
 			}
 		}
-		else if (strcmp("failure", iks_name(node)) == 0)
+		else if (os_strcmp("failure", iks_name(node)) == 0)
 		{
 			j_error("sasl authentication failed");
 		}
-		else if (strcmp("success", iks_name(node)) == 0)
+		else if (os_strcmp("success", iks_name(node)) == 0)
 		{
 			sess->authorized = 1;
 			iks_send_header(sess->prs, sess->acc->server);

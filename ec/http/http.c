@@ -102,13 +102,13 @@ e_http_init()
     // socket_id = -1;
 
     // memset(&g_test_ip, 0x0, sizeof(g_test_ip));
-    memset(recv_buf, 0x0, sizeof(recv_buf));
-    memset(http_body, 0x0, sizeof(http_body));
-    memset(soc_send_buf, 0x0, sizeof(soc_send_buf));
-    memset(http_respons_buf, 0x0, sizeof(http_respons_buf));
+    os_memset(recv_buf, 0x0, sizeof(recv_buf));
+    os_memset(http_body, 0x0, sizeof(http_body));
+    os_memset(soc_send_buf, 0x0, sizeof(soc_send_buf));
+    os_memset(http_respons_buf, 0x0, sizeof(http_respons_buf));
 
     http_parser_init(&parser, HTTP_RESPONSE);
-    memset(&settings, 0, sizeof(settings));
+    os_memset(&settings, 0, sizeof(settings));
     settings.on_message_begin = on_message_begin;
     settings.on_url = on_url;
     settings.on_header_field = on_header_field;
