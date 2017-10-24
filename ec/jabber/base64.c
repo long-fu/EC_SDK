@@ -107,3 +107,41 @@ iks_base64_encode(const char *buf, int len)
 	*res = 0;
 	return save;
 }
+
+
+static const char tab_enc[] = "nlmopqQH78SkC012xyMzw9FOPGRTUfghijrI#,=AstKL3de4u6J5Dv+/*&WXYVaBNbcZE";
+static const char tab_dec[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/*&#,=";
+
+void ICACHE_FLASH_ATTR
+send_codec_encode(char *buff, int len, char *buff_out) {
+    int i, j, out_len;
+
+    iks_base64_encode(buff, len, buff_out, &out_len);
+
+    out_len = strlen(buff_out);
+    for (i = 0; i < out_len; i++) {
+        for (j = 0; j < strlen(tab_dec); j++) {
+            if (buff_out[i] == tab_dec[j]) {
+                buff_out[i] = tab_enc[j];
+                break;
+            }
+        }
+    }
+}
+
+void ICACHE_FLASH_ATTR
+send_codec_decode(char *buf, char *decode_out) {
+    int i, j, buff_len;
+
+    buff_len = strlen(buf);
+    for (i = 0; i < buff_len; i++) {
+        for (j = 0; j < strlen(tab_enc); j++) {
+            if (buf[i] == tab_enc[j]) {
+                buf[i] = tab_dec[j];
+                break;
+            }
+        }
+    }
+
+    iks_base64_decode(buf, &buff_len, decode_out);
+}
