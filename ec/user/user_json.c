@@ -124,7 +124,6 @@ int json_parse_switch(char *json)
         {
             enable = tp->valuestring;
         }
-        
     }
 
     i = 0;
