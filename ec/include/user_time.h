@@ -1,6 +1,7 @@
 #ifndef __USER_TIME_H__
 #define __USER_TIME_H__
 
+#include "user_interface.h"
 #include "c_types.h"
 
 typedef uint32 time_t;
