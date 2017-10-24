@@ -1,6 +1,8 @@
 
-#include "user_switch.h"
+#include "osapi.h"
 #include "os_type.h"
+#include "user_switch.h"
+#include "mem.h"
 
 #define EC_ALARM_MAX 10
 
@@ -95,16 +97,16 @@ add_user_delay(int on, int delay)
 	tmp->on = on;
 	tmp->delay = delay;
 
-	os_timer_disarm(tmp->timer);
+	os_timer_disarm(&tmp->timer);
 	if(on)
 	{
-		os_timer_setfn(tmp->timer, (os_timer_func_t *)switch_on, NULL);
+		os_timer_setfn(&tmp->timer, (os_timer_func_t *)switch_on, NULL);
 	}
 	else
 	{
-        os_timer_setfn(tmp->timer, (os_timer_func_t *)switch_off, NULL);
+        os_timer_setfn(&tmp->timer, (os_timer_func_t *)switch_off, NULL);
 	}
-    os_timer_arm(tmp->timer, delay, 0); // ms 单位
+    os_timer_arm(&tmp->timer, delay, 0); // ms 单位
 
     tmp->next = user_delay.next;
     user_delay.next = tmp;
@@ -117,7 +119,7 @@ stop_all_user_delay(void)
 	while(tmp)
 	{
 		ec_delay_t *tt;
-		os_timer_disarm(tmp->timer);
+		os_timer_disarm(&tmp->timer);
 		tt = tmp;
 		tmp = tmp->next;
 	    os_free(tt);

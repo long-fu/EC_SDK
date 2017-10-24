@@ -14,6 +14,8 @@
         "jsonparse.h": "c",
         "cjson.h": "c",
         "mem.h": "c",
-        "server.h": "c"
+        "server.h": "c",
+        "user_switch.h": "c",
+        "os_type.h": "c"
     }
 }

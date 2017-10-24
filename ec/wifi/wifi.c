@@ -8,8 +8,10 @@
 #include "user_debug.h"
 #include "user_config.h"
 
-// TODO: 命名需要调整
 
+struct wifi_config w_config;
+
+// TODO: 命名需要调整
 static ETSTimer WiFiLinker;
 WifiCallback wifiCb = NULL;
 static uint8_t wifiStatus = STATION_IDLE, lastWifiStatus = STATION_IDLE;

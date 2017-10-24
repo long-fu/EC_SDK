@@ -40,20 +40,16 @@ on_headers_complete(http_parser *_)
     return 0;
 }
 
-#include "json/jsonparse.h"
-// static jsonparse_state json_state = { 0 };
-static void ICACHE_FLASH_ATTR
-on_json_data(char *data)
-{
-    // memset(&json_state,0x0,sizeof(json_state));
-    // jsonparse_setup(&json_state, data, os_strlen(data));
-}
+void ICACHE_FLASH_ATTR send_codec_encode(char *buff, int len, char *buff_out);
+
+
 
 static int ICACHE_FLASH_ATTR
 on_message_complete(http_parser *_)
 {
     (void)_;
     char body[64] = "{\"errcode\":0, \"errmsg\":\"ok\" }";
+    char base64_body[128] = { 0 };
     char soc_send_buffer[512] = {0};
     // TODO: 关闭连接
 
@@ -68,9 +64,12 @@ on_message_complete(http_parser *_)
         server_recv_handler(http_respons_buf, os_strlen(http_respons_buf));
     }
 
-    // MARK: 数据接收完成
-    // TODO: 这里进行数据的回复
-    os_sprintf(soc_send_buffer, REQUEST_HEAD, os_strlen(body), body);
+    send_codec_encode(body, os_strlen(body), base64_body);
+
+    // MARK: 这里进行数据的回复
+    os_sprintf(soc_send_buffer, REQUEST_HEAD, os_strlen(base64_body), base64_body);
+    // MARK: 进行简单的加密发送
+    
     espconn_send(&esp_conn, soc_send_buffer, os_strlen(soc_send_buffer));
 
     return 0;
@@ -202,7 +201,7 @@ server_init(uint32 port, server_recv_callback handler)
     esp_conn.proto.tcp = &esptcp;
     esp_conn.proto.tcp->local_port = port;
     server_recv_handler = handler;
-        ec_log("server init \r\n");
+    ec_log("server init \r\n");
 
     espconn_regist_connectcb(&esp_conn, server_listen);
 

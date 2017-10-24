@@ -48,13 +48,17 @@ wifiConnectCb(uint8_t status)
         // TODO: 断开网络连接
     }
 }
-
-// 接收任务配置
+extern void  send_codec_decode(char *buf, char *decode_out);
+#include "user_json.h"
+ 
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
+    char json[128] = { 0 };
     ec_log("server_recv_data [%s] \r\n",data);
-    //TODO: 这里解析配置数据
+    send_codec_decode(data, json);
+    // MARK: 这里解析配置数据
+    json_parse_config(json, &j_config, &w_config);
 }
 
 void ICACHE_FLASH_ATTR

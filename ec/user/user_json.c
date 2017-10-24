@@ -1,13 +1,33 @@
 
+#include "osapi.h"
 #include "cJSON.h"
 #include "c_types.h"
 #include "user_json.h"
-#include <stdio.h>
 
-char http_register_url[64] = { 0 };
+
+char http_register_url[64] = {0};
+
+int ICACHE_FLASH_ATTR
+atoi (char s[])
+{
+    return s[0] - '0';
+}
+
+#include <stdarg.h>
+int ICACHE_FLASH_ATTR
+sscanf(const char *ibuf, const char *fmt, ...)
+{
+        va_list ap;
+        int ret;
+
+        va_start(ap, fmt);
+        ret = vsscanf(ibuf, fmt, ap);
+        va_end(ap);
+        return(ret);
+}
 
 static int ICACHE_FLASH_ATTR
-add_switch(char *times,char *ttime, char* enable)
+add_switch(char *times, char *ttime, char *enable)
 {
     if (times != NULL && ttime != NULL && enable != NULL)
     {
@@ -24,7 +44,7 @@ add_switch(char *times,char *ttime, char* enable)
         }
         if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
         {
-            os_sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
+            sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
         }
         else
         {
@@ -56,11 +76,11 @@ add_switch(char *times,char *ttime, char* enable)
                 int ds, ls;
                 // 加入到延时队列
                 ls = ec_get_timestamp();
-                ds = mktime(y,mm,d,h,m,s) - ls;
+                ds = ec_mktime(y, mm, d, h, m, s) - ls;
 
-                if ( ds> 0)
+                if (ds > 0)
                 {
-                    add_user_delay(on,ds);
+                    add_user_delay(on, ds);
                 }
                 else
                 {
@@ -80,14 +100,13 @@ add_switch(char *times,char *ttime, char* enable)
     return 0;
 }
 
-static ICACHE_FLASH_ATTR
-int add_scene(char *ttime, char *enable)
+static ICACHE_FLASH_ATTR int add_scene(char *ttime, char *enable)
 {
 
     if (ttime != NULL && enable != NULL)
     {
         // TODO: 进行解析
-        int on = 0 ,ds, ls,y, mm, d, h, m, s;
+        int on = 0, ds, ls, y, mm, d, h, m, s;
         if (os_strlen(enable) == 1) // "1"
         {
             on = atoi(enable);
@@ -105,8 +124,8 @@ int add_scene(char *ttime, char *enable)
             // FIXME: 数据错误 需要作出调整
         }
         ls = ec_get_timestamp();
-        ds = mktime(y,mm,d,h,m,s) - ls;
-        if ( ds> 0)
+        ds = ec_mktime(y, mm, d, h, m, s) - ls;
+        if (ds > 0)
         {
             // 加入到延时队列
             add_user_delay(on, ds);
@@ -120,11 +139,10 @@ int add_scene(char *ttime, char *enable)
     return -1;
 }
 
-
 int ICACHE_FLASH_ATTR
-json_parse_config(char *json, 
-    struct jabber_config *jconfig, 
-    struct wifi_config *wconfig)
+json_parse_config(char *json,
+                  struct jabber_config *jconfig,
+                  struct wifi_config *wconfig)
 {
 
     if (jconfig != NULL && wconfig != NULL)
@@ -164,7 +182,7 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
-            jconfig->port = itoa(tmp);
+            jconfig->port = atoi(tmp);
         }
 
         t = cJSON_GetObjectItem(root, "jip");
@@ -172,7 +190,7 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
-            jconfig->ip.addr = itoa(tmp);
+            jconfig->ip.addr = atoi(tmp);
         }
 
         t = cJSON_GetObjectItem(root, "appid");
@@ -246,7 +264,7 @@ json_parse_switch(char *json)
         {
             enable = tp->valuestring;
         }
-        add_switchList(times, ttime, enable);
+        add_switch(times, ttime, enable);
     }
 
     i = 0;

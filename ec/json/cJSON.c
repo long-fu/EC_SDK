@@ -24,10 +24,10 @@
 /* cJSON parser in C. */
 // #include <string.h>
 // #include <stdio.h>
-#include <math.h>
+// #include <math.h>
 // #include <stdlib.h>
-#include <float.h>
-#include <limits.h>
+// #include <float.h>
+// #include <limits.h>
 // #include <ctype.h>
 
 #include "c_types.h"
@@ -37,6 +37,55 @@
 #include "mem.h"
 
 #include "cJSON.h"
+
+// #define DBL_MANT_DIG                         53
+// #define DBL_DIG                              15
+// #define DBL_MIN_EXP                       -1021
+// #define DBL_MIN_10_EXP                     -307
+// #define DBL_MAX_EXP                        1024
+// #define DBL_MAX_10_EXP                      308
+// #define DBL_MAX         1.7976931348623157E+308
+// #define DBL_MIN         2.2250738585072014E-308
+// #define DBL_EPSILON     2.2204460492503131E-016
+
+// #define INT_MAX 0
+// #define INT_MIN 0
+
+// double ICACHE_FLASH_ATTR 
+// fabs(double dnumber)
+// {
+//   *( ( (int *) & dnumber) + 1) &=0x7FFFFFFF;
+//   return dnumber;
+// }
+
+// double ICACHE_FLASH_ATTR floor(double x)
+// {
+//    double y = x;
+//     if( (*( ( (int *) &y)+1) & 0x80000000)  != 0) //或者if(x<0)
+//         return (double)((int)x)-1;
+//     else
+//         return (double)((int)x);
+// }
+
+
+
+double ICACHE_FLASH_ATTR pow(double a,double b)
+{
+    double r=a;
+    if(b>0)
+    {
+      while(--b)
+         r*=a;
+
+    }
+    else if(b<0)
+    {
+        while(++b)     r*=a;
+         r=1.0/r;
+    }
+    else r=0;
+    return r;
+}
 
 static const char *ep;
 const char *ICACHE_FLASH_ATTR cJSON_GetErrorPtr(void) { return ep; }
@@ -208,46 +257,46 @@ static int ICACHE_FLASH_ATTR update(printbuffer *p)
 }
 
 /* Render the number nicely from the given item into a string. */
-static char *ICACHE_FLASH_ATTR print_number(cJSON *item, printbuffer *p)
-{
-	char *str = 0;
-	double d = item->valuedouble;
-	if (d == 0)
-	{
-		if (p)
-			str = ensure(p, 2);
-		else
-			str = (char *)os_malloc(2); /* special case for 0. */
-		if (str)
-			os_strcpy(str, "0");
-	}
-	else if (fabs(((double)item->valueint) - d) <= DBL_EPSILON && d <= INT_MAX && d >= INT_MIN)
-	{
-		if (p)
-			str = ensure(p, 21);
-		else
-			str = (char *)os_malloc(21); /* 2^64+1 can be represented in 21 chars. */
-		if (str)
-			os_sprintf(str, "%d", item->valueint);
-	}
-	else
-	{
-		if (p)
-			str = ensure(p, 64);
-		else
-			str = (char *)os_malloc(64); /* This is a nice tradeoff. */
-		if (str)
-		{
-			if (fabs(floor(d) - d) <= DBL_EPSILON && fabs(d) < 1.0e60)
-				os_sprintf(str, "%.0f", d);
-			else if (fabs(d) < 1.0e-6 || fabs(d) > 1.0e9)
-				os_sprintf(str, "%e", d);
-			else
-				os_sprintf(str, "%f", d);
-		}
-	}
-	return str;
-}
+// static char *ICACHE_FLASH_ATTR print_number(cJSON *item, printbuffer *p)
+// {
+// 	char *str = 0;
+// 	double d = item->valuedouble;
+// 	if (d == 0)
+// 	{
+// 		if (p)
+// 			str = ensure(p, 2);
+// 		else
+// 			str = (char *)os_malloc(2); /* special case for 0. */
+// 		if (str)
+// 			os_strcpy(str, "0");
+// 	}
+// 	else if (fabs(((double)item->valueint) - d) <= DBL_EPSILON && d <= INT_MAX && d >= INT_MIN)
+// 	{
+// 		if (p)
+// 			str = ensure(p, 21);
+// 		else
+// 			str = (char *)os_malloc(21); /* 2^64+1 can be represented in 21 chars. */
+// 		if (str)
+// 			os_sprintf(str, "%d", item->valueint);
+// 	}
+// 	else
+// 	{
+// 		if (p)
+// 			str = ensure(p, 64);
+// 		else
+// 			str = (char *)os_malloc(64); /* This is a nice tradeoff. */
+// 		if (str)
+// 		{
+// 			if (fabs(floor(d) - d) <= DBL_EPSILON && fabs(d) < 1.0e60)
+// 				os_sprintf(str, "%.0f", d);
+// 			else if (fabs(d) < 1.0e-6 || fabs(d) > 1.0e9)
+// 				os_sprintf(str, "%e", d);
+// 			else
+// 				os_sprintf(str, "%f", d);
+// 		}
+// 	}
+// 	return str;
+// }
 
 static unsigned ICACHE_FLASH_ATTR parse_hex4(const char *str)
 {
@@ -401,114 +450,114 @@ static const char *ICACHE_FLASH_ATTR parse_string(cJSON *item, const char *str)
 }
 
 /* Render the cstring provided to an escaped version that can be printed. */
-static char *ICACHE_FLASH_ATTR print_string_ptr(const char *str, printbuffer *p)
-{
-	const char *ptr;
-	char *ptr2, *out;
-	int len = 0, flag = 0;
-	unsigned char token;
+// static char *ICACHE_FLASH_ATTR print_string_ptr(const char *str, printbuffer *p)
+// {
+// 	const char *ptr;
+// 	char *ptr2, *out;
+// 	int len = 0, flag = 0;
+// 	unsigned char token;
 
-	for (ptr = str; *ptr; ptr++)
-		flag |= ((*ptr > 0 && *ptr < 32) || (*ptr == '\"') || (*ptr == '\\')) ? 1 : 0;
-	if (!flag)
-	{
-		len = ptr - str;
-		if (p)
-			out = ensure(p, len + 3);
-		else
-			out = (char *)os_malloc(len + 3);
-		if (!out)
-			return 0;
-		ptr2 = out;
-		*ptr2++ = '\"';
-		os_strcpy(ptr2, str);
-		ptr2[len] = '\"';
-		ptr2[len + 1] = 0;
-		return out;
-	}
+// 	for (ptr = str; *ptr; ptr++)
+// 		flag |= ((*ptr > 0 && *ptr < 32) || (*ptr == '\"') || (*ptr == '\\')) ? 1 : 0;
+// 	if (!flag)
+// 	{
+// 		len = ptr - str;
+// 		if (p)
+// 			out = ensure(p, len + 3);
+// 		else
+// 			out = (char *)os_malloc(len + 3);
+// 		if (!out)
+// 			return 0;
+// 		ptr2 = out;
+// 		*ptr2++ = '\"';
+// 		os_strcpy(ptr2, str);
+// 		ptr2[len] = '\"';
+// 		ptr2[len + 1] = 0;
+// 		return out;
+// 	}
 
-	if (!str)
-	{
-		if (p)
-			out = ensure(p, 3);
-		else
-			out = (char *)os_malloc(3);
-		if (!out)
-			return 0;
-		os_strcpy(out, "\"\"");
-		return out;
-	}
-	ptr = str;
-	while ((token = *ptr) && ++len)
-	{
-		if (os_strchr("\"\\\b\f\n\r\t", token))
-			len++;
-		else if (token < 32)
-			len += 5;
-		ptr++;
-	}
+// 	if (!str)
+// 	{
+// 		if (p)
+// 			out = ensure(p, 3);
+// 		else
+// 			out = (char *)os_malloc(3);
+// 		if (!out)
+// 			return 0;
+// 		os_strcpy(out, "\"\"");
+// 		return out;
+// 	}
+// 	ptr = str;
+// 	while ((token = *ptr) && ++len)
+// 	{
+// 		if (os_strchr("\"\\\b\f\n\r\t", token))
+// 			len++;
+// 		else if (token < 32)
+// 			len += 5;
+// 		ptr++;
+// 	}
 
-	if (p)
-		out = ensure(p, len + 3);
-	else
-		out = (char *)os_malloc(len + 3);
-	if (!out)
-		return 0;
+// 	if (p)
+// 		out = ensure(p, len + 3);
+// 	else
+// 		out = (char *)os_malloc(len + 3);
+// 	if (!out)
+// 		return 0;
 
-	ptr2 = out;
-	ptr = str;
-	*ptr2++ = '\"';
-	while (*ptr)
-	{
-		if ((unsigned char)*ptr > 31 && *ptr != '\"' && *ptr != '\\')
-			*ptr2++ = *ptr++;
-		else
-		{
-			*ptr2++ = '\\';
-			switch (token = *ptr++)
-			{
-			case '\\':
-				*ptr2++ = '\\';
-				break;
-			case '\"':
-				*ptr2++ = '\"';
-				break;
-			case '\b':
-				*ptr2++ = 'b';
-				break;
-			case '\f':
-				*ptr2++ = 'f';
-				break;
-			case '\n':
-				*ptr2++ = 'n';
-				break;
-			case '\r':
-				*ptr2++ = 'r';
-				break;
-			case '\t':
-				*ptr2++ = 't';
-				break;
-			default:
-				os_sprintf(ptr2, "u%04x", token);
-				ptr2 += 5;
-				break; /* escape and print */
-			}
-		}
-	}
-	*ptr2++ = '\"';
-	*ptr2++ = 0;
-	return out;
-}
+// 	ptr2 = out;
+// 	ptr = str;
+// 	*ptr2++ = '\"';
+// 	while (*ptr)
+// 	{
+// 		if ((unsigned char)*ptr > 31 && *ptr != '\"' && *ptr != '\\')
+// 			*ptr2++ = *ptr++;
+// 		else
+// 		{
+// 			*ptr2++ = '\\';
+// 			switch (token = *ptr++)
+// 			{
+// 			case '\\':
+// 				*ptr2++ = '\\';
+// 				break;
+// 			case '\"':
+// 				*ptr2++ = '\"';
+// 				break;
+// 			case '\b':
+// 				*ptr2++ = 'b';
+// 				break;
+// 			case '\f':
+// 				*ptr2++ = 'f';
+// 				break;
+// 			case '\n':
+// 				*ptr2++ = 'n';
+// 				break;
+// 			case '\r':
+// 				*ptr2++ = 'r';
+// 				break;
+// 			case '\t':
+// 				*ptr2++ = 't';
+// 				break;
+// 			default:
+// 				os_sprintf(ptr2, "u%04x", token);
+// 				ptr2 += 5;
+// 				break; /* escape and print */
+// 			}
+// 		}
+// 	}
+// 	*ptr2++ = '\"';
+// 	*ptr2++ = 0;
+// 	return out;
+// }
 /* Invote print_string_ptr (which is useful) on an item. */
-static char *ICACHE_FLASH_ATTR print_string(cJSON *item, printbuffer *p) { return print_string_ptr(item->valuestring, p); }
+// static char *ICACHE_FLASH_ATTR print_string(cJSON *item, printbuffer *p) { return print_string_ptr(item->valuestring, p); }
 
 /* Predeclare these prototypes. */
 static const char *ICACHE_FLASH_ATTR parse_value(cJSON *item, const char *value);
-static char *ICACHE_FLASH_ATTR print_value(cJSON *item, int depth, int fmt, printbuffer *p);
+// static char *ICACHE_FLASH_ATTR print_value(cJSON *item, int depth, int fmt, printbuffer *p);
 static const char *ICACHE_FLASH_ATTR parse_array(cJSON *item, const char *value);
-static char *ICACHE_FLASH_ATTR print_array(cJSON *item, int depth, int fmt, printbuffer *p);
+// static char *ICACHE_FLASH_ATTR print_array(cJSON *item, int depth, int fmt, printbuffer *p);
 static const char *ICACHE_FLASH_ATTR parse_object(cJSON *item, const char *value);
-static char *ICACHE_FLASH_ATTR print_object(cJSON *item, int depth, int fmt, printbuffer *p);
+// static char *ICACHE_FLASH_ATTR print_object(cJSON *item, int depth, int fmt, printbuffer *p);
 
 /* Utility to jump whitespace and cr/lf */
 static const char *ICACHE_FLASH_ATTR skip(const char *in)
@@ -553,18 +602,18 @@ cJSON *ICACHE_FLASH_ATTR cJSON_ParseWithOpts(const char *value, const char **ret
 cJSON *ICACHE_FLASH_ATTR cJSON_Parse(const char *value) { return cJSON_ParseWithOpts(value, 0, 0); }
 
 /* Render a cJSON item/entity/structure to text. */
-char *ICACHE_FLASH_ATTR cJSON_Print(cJSON *item) { return print_value(item, 0, 1, 0); }
-char *ICACHE_FLASH_ATTR cJSON_PrintUnformatted(cJSON *item) { return print_value(item, 0, 0, 0); }
+// char *ICACHE_FLASH_ATTR cJSON_Print(cJSON *item) { return print_value(item, 0, 1, 0); }
+// char *ICACHE_FLASH_ATTR cJSON_PrintUnformatted(cJSON *item) { return print_value(item, 0, 0, 0); }
 
-char *ICACHE_FLASH_ATTR cJSON_PrintBuffered(cJSON *item, int prebuffer, int fmt)
-{
-	printbuffer p;
-	p.buffer = (char *)os_malloc(prebuffer);
-	p.length = prebuffer;
-	p.offset = 0;
-	return print_value(item, 0, fmt, &p);
-	return p.buffer;
-}
+// char *ICACHE_FLASH_ATTR cJSON_PrintBuffered(cJSON *item, int prebuffer, int fmt)
+// {
+// 	printbuffer p;
+// 	p.buffer = (char *)os_malloc(prebuffer);
+// 	p.length = prebuffer;
+// 	p.offset = 0;
+// 	return print_value(item, 0, fmt, &p);
+// 	return p.buffer;
+// }
 
 /* Parser core - when encountering text, process appropriately. */
 static const char *ICACHE_FLASH_ATTR parse_value(cJSON *item, const char *value)
@@ -608,80 +657,80 @@ static const char *ICACHE_FLASH_ATTR parse_value(cJSON *item, const char *value)
 	return 0; /* failure. */
 }
 
-/* Render a value to text. */
-static char *ICACHE_FLASH_ATTR print_value(cJSON *item, int depth, int fmt, printbuffer *p)
-{
-	char *out = 0;
-	if (!item)
-		return 0;
-	if (p)
-	{
-		switch ((item->type) & 255)
-		{
-		case cJSON_NULL:
-		{
-			out = ensure(p, 5);
-			if (out)
-				os_strcpy(out, "null");
-			break;
-		}
-		case cJSON_False:
-		{
-			out = ensure(p, 6);
-			if (out)
-				os_strcpy(out, "false");
-			break;
-		}
-		case cJSON_True:
-		{
-			out = ensure(p, 5);
-			if (out)
-				os_strcpy(out, "true");
-			break;
-		}
-		case cJSON_Number:
-			out = print_number(item, p);
-			break;
-		case cJSON_String:
-			out = print_string(item, p);
-			break;
-		case cJSON_Array:
-			out = print_array(item, depth, fmt, p);
-			break;
-		case cJSON_Object:
-			out = print_object(item, depth, fmt, p);
-			break;
-		}
-	}
-	else
-	{
-		switch ((item->type) & 255)
-		{
-		case cJSON_NULL:
-			out = os_strdup("null");
-			break;
-		case cJSON_False:
-			out = os_strdup("false");
-			break;
-		case cJSON_True:
-			out = os_strdup("true");
-			break;
-		case cJSON_Number:
-			out = print_number(item, 0);
-			break;
-		case cJSON_String:
-			out = print_string(item, 0);
-			break;
-		case cJSON_Array:
-			out = print_array(item, depth, fmt, 0);
-			break;
-		case cJSON_Object:
-			out = print_object(item, depth, fmt, 0);
-			break;
-		}
-	}
-	return out;
-}
+// /* Render a value to text. */
+// static char *ICACHE_FLASH_ATTR print_value(cJSON *item, int depth, int fmt, printbuffer *p)
+// {
+// 	char *out = 0;
+// 	if (!item)
+// 		return 0;
+// 	if (p)
+// 	{
+// 		switch ((item->type) & 255)
+// 		{
+// 		case cJSON_NULL:
+// 		{
+// 			out = ensure(p, 5);
+// 			if (out)
+// 				os_strcpy(out, "null");
+// 			break;
+// 		}
+// 		case cJSON_False:
+// 		{
+// 			out = ensure(p, 6);
+// 			if (out)
+// 				os_strcpy(out, "false");
+// 			break;
+// 		}
+// 		case cJSON_True:
+// 		{
+// 			out = ensure(p, 5);
+// 			if (out)
+// 				os_strcpy(out, "true");
+// 			break;
+// 		}
+// 		case cJSON_Number:
+// 			out = print_number(item, p);
+// 			break;
+// 		case cJSON_String:
+// 			out = print_string(item, p);
+// 			break;
+// 		case cJSON_Array:
+// 			out = print_array(item, depth, fmt, p);
+// 			break;
+// 		case cJSON_Object:
+// 			out = print_object(item, depth, fmt, p);
+// 			break;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		switch ((item->type) & 255)
+// 		{
+// 		case cJSON_NULL:
+// 			out = os_strdup("null");
+// 			break;
+// 		case cJSON_False:
+// 			out = os_strdup("false");
+// 			break;
+// 		case cJSON_True:
+// 			out = os_strdup("true");
+// 			break;
+// 		case cJSON_Number:
+// 			out = print_number(item, 0);
+// 			break;
+// 		case cJSON_String:
+// 			out = print_string(item, 0);
+// 			break;
+// 		case cJSON_Array:
+// 			out = print_array(item, depth, fmt, 0);
+// 			break;
+// 		case cJSON_Object:
+// 			out = print_object(item, depth, fmt, 0);
+// 			break;
+// 		}
+// 	}
+// 	return out;
+// }
 
 /* Build an array from input text. */
 static const char *ICACHE_FLASH_ATTR parse_array(cJSON *item, const char *value)
@@ -725,126 +774,126 @@ static const char *ICACHE_FLASH_ATTR parse_array(cJSON *item, const char *value)
 }
 
 /* Render an array to text */
-static char *ICACHE_FLASH_ATTR print_array(cJSON *item, int depth, int fmt, printbuffer *p)
-{
-	char **entries;
-	char *out = 0, *ptr, *ret;
-	int len = 5;
-	cJSON *child = item->child;
-	int numentries = 0, i = 0, fail = 0;
-	size_t tmplen = 0;
+// static char *ICACHE_FLASH_ATTR print_array(cJSON *item, int depth, int fmt, printbuffer *p)
+// {
+// 	char **entries;
+// 	char *out = 0, *ptr, *ret;
+// 	int len = 5;
+// 	cJSON *child = item->child;
+// 	int numentries = 0, i = 0, fail = 0;
+// 	size_t tmplen = 0;
 
-	/* How many entries in the array? */
-	while (child)
-		numentries++, child = child->next;
-	/* Explicitly handle numentries==0 */
-	if (!numentries)
-	{
-		if (p)
-			out = ensure(p, 3);
-		else
-			out = (char *)os_malloc(3);
-		if (out)
-			os_strcpy(out, "[]");
-		return out;
-	}
+// 	/* How many entries in the array? */
+// 	while (child)
+// 		numentries++, child = child->next;
+// 	/* Explicitly handle numentries==0 */
+// 	if (!numentries)
+// 	{
+// 		if (p)
+// 			out = ensure(p, 3);
+// 		else
+// 			out = (char *)os_malloc(3);
+// 		if (out)
+// 			os_strcpy(out, "[]");
+// 		return out;
+// 	}
 
-	if (p)
-	{
-		/* Compose the output array. */
-		i = p->offset;
-		ptr = ensure(p, 1);
-		if (!ptr)
-			return 0;
-		*ptr = '[';
-		p->offset++;
-		child = item->child;
-		while (child && !fail)
-		{
-			print_value(child, depth + 1, fmt, p);
-			p->offset = update(p);
-			if (child->next)
-			{
-				len = fmt ? 2 : 1;
-				ptr = ensure(p, len + 1);
-				if (!ptr)
-					return 0;
-				*ptr++ = ',';
-				if (fmt)
-					*ptr++ = ' ';
-				*ptr = 0;
-				p->offset += len;
-			}
-			child = child->next;
-		}
-		ptr = ensure(p, 2);
-		if (!ptr)
-			return 0;
-		*ptr++ = ']';
-		*ptr = 0;
-		out = (p->buffer) + i;
-	}
-	else
-	{
-		/* Allocate an array to hold the values for each */
-		entries = (char **)os_malloc(numentries * sizeof(char *));
-		if (!entries)
-			return 0;
-		os_memset(entries, 0, numentries * sizeof(char *));
-		/* Retrieve all the results: */
-		child = item->child;
-		while (child && !fail)
-		{
-			ret = print_value(child, depth + 1, fmt, 0);
-			entries[i++] = ret;
-			if (ret)
-				len += os_strlen(ret) + 2 + (fmt ? 1 : 0);
-			else
-				fail = 1;
-			child = child->next;
-		}
+// 	if (p)
+// 	{
+// 		/* Compose the output array. */
+// 		i = p->offset;
+// 		ptr = ensure(p, 1);
+// 		if (!ptr)
+// 			return 0;
+// 		*ptr = '[';
+// 		p->offset++;
+// 		child = item->child;
+// 		while (child && !fail)
+// 		{
+// 			print_value(child, depth + 1, fmt, p);
+// 			p->offset = update(p);
+// 			if (child->next)
+// 			{
+// 				len = fmt ? 2 : 1;
+// 				ptr = ensure(p, len + 1);
+// 				if (!ptr)
+// 					return 0;
+// 				*ptr++ = ',';
+// 				if (fmt)
+// 					*ptr++ = ' ';
+// 				*ptr = 0;
+// 				p->offset += len;
+// 			}
+// 			child = child->next;
+// 		}
+// 		ptr = ensure(p, 2);
+// 		if (!ptr)
+// 			return 0;
+// 		*ptr++ = ']';
+// 		*ptr = 0;
+// 		out = (p->buffer) + i;
+// 	}
+// 	else
+// 	{
+// 		/* Allocate an array to hold the values for each */
+// 		entries = (char **)os_malloc(numentries * sizeof(char *));
+// 		if (!entries)
+// 			return 0;
+// 		os_memset(entries, 0, numentries * sizeof(char *));
+// 		/* Retrieve all the results: */
+// 		child = item->child;
+// 		while (child && !fail)
+// 		{
+// 			ret = print_value(child, depth + 1, fmt, 0);
+// 			entries[i++] = ret;
+// 			if (ret)
+// 				len += os_strlen(ret) + 2 + (fmt ? 1 : 0);
+// 			else
+// 				fail = 1;
+// 			child = child->next;
+// 		}
 
-		/* If we didn't fail, try to malloc the output string */
-		if (!fail)
-			out = (char *)os_malloc(len);
-		/* If that fails, we fail. */
-		if (!out)
-			fail = 1;
+// 		/* If we didn't fail, try to malloc the output string */
+// 		if (!fail)
+// 			out = (char *)os_malloc(len);
+// 		/* If that fails, we fail. */
+// 		if (!out)
+// 			fail = 1;
 
-		/* Handle failure. */
-		if (fail)
-		{
-			for (i = 0; i < numentries; i++)
-				if (entries[i])
-					os_free(entries[i]);
-			os_free(entries);
-			return 0;
-		}
+// 		/* Handle failure. */
+// 		if (fail)
+// 		{
+// 			for (i = 0; i < numentries; i++)
+// 				if (entries[i])
+// 					os_free(entries[i]);
+// 			os_free(entries);
+// 			return 0;
+// 		}
 
-		/* Compose the output array. */
-		*out = '[';
-		ptr = out + 1;
-		*ptr = 0;
-		for (i = 0; i < numentries; i++)
-		{
-			tmplen = os_strlen(entries[i]);
-			os_memcpy(ptr, entries[i], tmplen);
-			ptr += tmplen;
-			if (i != numentries - 1)
-			{
-				*ptr++ = ',';
-				if (fmt)
-					*ptr++ = ' ';
-				*ptr = 0;
-			}
-			os_free(entries[i]);
-		}
-		os_free(entries);
-		*ptr++ = ']';
-		*ptr++ = 0;
-	}
-	return out;
-}
+// 		/* Compose the output array. */
+// 		*out = '[';
+// 		ptr = out + 1;
+// 		*ptr = 0;
+// 		for (i = 0; i < numentries; i++)
+// 		{
+// 			tmplen = os_strlen(entries[i]);
+// 			os_memcpy(ptr, entries[i], tmplen);
+// 			ptr += tmplen;
+// 			if (i != numentries - 1)
+// 			{
+// 				*ptr++ = ',';
+// 				if (fmt)
+// 					*ptr++ = ' ';
+// 				*ptr = 0;
+// 			}
+// 			os_free(entries[i]);
+// 		}
+// 		os_free(entries);
+// 		*ptr++ = ']';
+// 		*ptr++ = 0;
+// 	}
+// 	return out;
+// }
 
 /* Build an object from the text. */
 static const char *ICACHE_FLASH_ATTR parse_object(cJSON *item, const char *value)
@@ -908,191 +957,191 @@ static const char *ICACHE_FLASH_ATTR parse_object(cJSON *item, const char *value
 }
 
 /* Render an object to text. */
-static char *ICACHE_FLASH_ATTR print_object(cJSON *item, int depth, int fmt, printbuffer *p)
-{
-	char **entries = 0, **names = 0;
-	char *out = 0, *ptr, *ret, *str;
-	int len = 7, i = 0, j;
-	cJSON *child = item->child;
-	int numentries = 0, fail = 0;
-	size_t tmplen = 0;
-	/* Count the number of entries. */
-	while (child)
-		numentries++, child = child->next;
-	/* Explicitly handle empty object case */
-	if (!numentries)
-	{
-		if (p)
-			out = ensure(p, fmt ? depth + 4 : 3);
-		else
-			out = (char *)os_malloc(fmt ? depth + 4 : 3);
-		if (!out)
-			return 0;
-		ptr = out;
-		*ptr++ = '{';
-		if (fmt)
-		{
-			*ptr++ = '\n';
-			for (i = 0; i < depth - 1; i++)
-				*ptr++ = '\t';
-		}
-		*ptr++ = '}';
-		*ptr++ = 0;
-		return out;
-	}
-	if (p)
-	{
-		/* Compose the output: */
-		i = p->offset;
-		len = fmt ? 2 : 1;
-		ptr = ensure(p, len + 1);
-		if (!ptr)
-			return 0;
-		*ptr++ = '{';
-		if (fmt)
-			*ptr++ = '\n';
-		*ptr = 0;
-		p->offset += len;
-		child = item->child;
-		depth++;
-		while (child)
-		{
-			if (fmt)
-			{
-				ptr = ensure(p, depth);
-				if (!ptr)
-					return 0;
-				for (j = 0; j < depth; j++)
-					*ptr++ = '\t';
-				p->offset += depth;
-			}
-			print_string_ptr(child->string, p);
-			p->offset = update(p);
+// static char *ICACHE_FLASH_ATTR print_object(cJSON *item, int depth, int fmt, printbuffer *p)
+// {
+// 	char **entries = 0, **names = 0;
+// 	char *out = 0, *ptr, *ret, *str;
+// 	int len = 7, i = 0, j;
+// 	cJSON *child = item->child;
+// 	int numentries = 0, fail = 0;
+// 	size_t tmplen = 0;
+// 	/* Count the number of entries. */
+// 	while (child)
+// 		numentries++, child = child->next;
+// 	/* Explicitly handle empty object case */
+// 	if (!numentries)
+// 	{
+// 		if (p)
+// 			out = ensure(p, fmt ? depth + 4 : 3);
+// 		else
+// 			out = (char *)os_malloc(fmt ? depth + 4 : 3);
+// 		if (!out)
+// 			return 0;
+// 		ptr = out;
+// 		*ptr++ = '{';
+// 		if (fmt)
+// 		{
+// 			*ptr++ = '\n';
+// 			for (i = 0; i < depth - 1; i++)
+// 				*ptr++ = '\t';
+// 		}
+// 		*ptr++ = '}';
+// 		*ptr++ = 0;
+// 		return out;
+// 	}
+// 	if (p)
+// 	{
+// 		/* Compose the output: */
+// 		i = p->offset;
+// 		len = fmt ? 2 : 1;
+// 		ptr = ensure(p, len + 1);
+// 		if (!ptr)
+// 			return 0;
+// 		*ptr++ = '{';
+// 		if (fmt)
+// 			*ptr++ = '\n';
+// 		*ptr = 0;
+// 		p->offset += len;
+// 		child = item->child;
+// 		depth++;
+// 		while (child)
+// 		{
+// 			if (fmt)
+// 			{
+// 				ptr = ensure(p, depth);
+// 				if (!ptr)
+// 					return 0;
+// 				for (j = 0; j < depth; j++)
+// 					*ptr++ = '\t';
+// 				p->offset += depth;
+// 			}
+// 			print_string_ptr(child->string, p);
+// 			p->offset = update(p);
 
-			len = fmt ? 2 : 1;
-			ptr = ensure(p, len);
-			if (!ptr)
-				return 0;
-			*ptr++ = ':';
-			if (fmt)
-				*ptr++ = '\t';
-			p->offset += len;
+// 			len = fmt ? 2 : 1;
+// 			ptr = ensure(p, len);
+// 			if (!ptr)
+// 				return 0;
+// 			*ptr++ = ':';
+// 			if (fmt)
+// 				*ptr++ = '\t';
+// 			p->offset += len;
 
-			print_value(child, depth, fmt, p);
-			p->offset = update(p);
+// 			print_value(child, depth, fmt, p);
+// 			p->offset = update(p);
 
-			len = (fmt ? 1 : 0) + (child->next ? 1 : 0);
-			ptr = ensure(p, len + 1);
-			if (!ptr)
-				return 0;
-			if (child->next)
-				*ptr++ = ',';
-			if (fmt)
-				*ptr++ = '\n';
-			*ptr = 0;
-			p->offset += len;
-			child = child->next;
-		}
-		ptr = ensure(p, fmt ? (depth + 1) : 2);
-		if (!ptr)
-			return 0;
-		if (fmt)
-			for (i = 0; i < depth - 1; i++)
-				*ptr++ = '\t';
-		*ptr++ = '}';
-		*ptr = 0;
-		out = (p->buffer) + i;
-	}
-	else
-	{
-		/* Allocate space for the names and the objects */
-		entries = (char **)os_malloc(numentries * sizeof(char *));
-		if (!entries)
-			return 0;
-		names = (char **)os_malloc(numentries * sizeof(char *));
-		if (!names)
-		{
-			os_free(entries);
-			return 0;
-		}
-		os_memset(entries, 0, sizeof(char *) * numentries);
-		os_memset(names, 0, sizeof(char *) * numentries);
+// 			len = (fmt ? 1 : 0) + (child->next ? 1 : 0);
+// 			ptr = ensure(p, len + 1);
+// 			if (!ptr)
+// 				return 0;
+// 			if (child->next)
+// 				*ptr++ = ',';
+// 			if (fmt)
+// 				*ptr++ = '\n';
+// 			*ptr = 0;
+// 			p->offset += len;
+// 			child = child->next;
+// 		}
+// 		ptr = ensure(p, fmt ? (depth + 1) : 2);
+// 		if (!ptr)
+// 			return 0;
+// 		if (fmt)
+// 			for (i = 0; i < depth - 1; i++)
+// 				*ptr++ = '\t';
+// 		*ptr++ = '}';
+// 		*ptr = 0;
+// 		out = (p->buffer) + i;
+// 	}
+// 	else
+// 	{
+// 		/* Allocate space for the names and the objects */
+// 		entries = (char **)os_malloc(numentries * sizeof(char *));
+// 		if (!entries)
+// 			return 0;
+// 		names = (char **)os_malloc(numentries * sizeof(char *));
+// 		if (!names)
+// 		{
+// 			os_free(entries);
+// 			return 0;
+// 		}
+// 		os_memset(entries, 0, sizeof(char *) * numentries);
+// 		os_memset(names, 0, sizeof(char *) * numentries);
 
-		/* Collect all the results into our arrays: */
-		child = item->child;
-		depth++;
-		if (fmt)
-			len += depth;
-		while (child)
-		{
-			names[i] = str = print_string_ptr(child->string, 0);
-			entries[i++] = ret = print_value(child, depth, fmt, 0);
-			if (str && ret)
-				len += os_strlen(ret) + os_strlen(str) + 2 + (fmt ? 2 + depth : 0);
-			else
-				fail = 1;
-			child = child->next;
-		}
+// 		/* Collect all the results into our arrays: */
+// 		child = item->child;
+// 		depth++;
+// 		if (fmt)
+// 			len += depth;
+// 		while (child)
+// 		{
+// 			names[i] = str = print_string_ptr(child->string, 0);
+// 			entries[i++] = ret = print_value(child, depth, fmt, 0);
+// 			if (str && ret)
+// 				len += os_strlen(ret) + os_strlen(str) + 2 + (fmt ? 2 + depth : 0);
+// 			else
+// 				fail = 1;
+// 			child = child->next;
+// 		}
 
-		/* Try to allocate the output string */
-		if (!fail)
-			out = (char *)os_malloc(len);
-		if (!out)
-			fail = 1;
+// 		/* Try to allocate the output string */
+// 		if (!fail)
+// 			out = (char *)os_malloc(len);
+// 		if (!out)
+// 			fail = 1;
 
-		/* Handle failure */
-		if (fail)
-		{
-			for (i = 0; i < numentries; i++)
-			{
-				if (names[i])
-					os_free(names[i]);
-				if (entries[i])
-					os_free(entries[i]);
-			}
-			os_free(names);
-			os_free(entries);
-			return 0;
-		}
+// 		/* Handle failure */
+// 		if (fail)
+// 		{
+// 			for (i = 0; i < numentries; i++)
+// 			{
+// 				if (names[i])
+// 					os_free(names[i]);
+// 				if (entries[i])
+// 					os_free(entries[i]);
+// 			}
+// 			os_free(names);
+// 			os_free(entries);
+// 			return 0;
+// 		}
 
-		/* Compose the output: */
-		*out = '{';
-		ptr = out + 1;
-		if (fmt)
-			*ptr++ = '\n';
-		*ptr = 0;
-		for (i = 0; i < numentries; i++)
-		{
-			if (fmt)
-				for (j = 0; j < depth; j++)
-					*ptr++ = '\t';
-			tmplen = os_strlen(names[i]);
-			os_memcpy(ptr, names[i], tmplen);
-			ptr += tmplen;
-			*ptr++ = ':';
-			if (fmt)
-				*ptr++ = '\t';
-			os_strcpy(ptr, entries[i]);
-			ptr += os_strlen(entries[i]);
-			if (i != numentries - 1)
-				*ptr++ = ',';
-			if (fmt)
-				*ptr++ = '\n';
-			*ptr = 0;
-			os_free(names[i]);
-			os_free(entries[i]);
-		}
+// 		/* Compose the output: */
+// 		*out = '{';
+// 		ptr = out + 1;
+// 		if (fmt)
+// 			*ptr++ = '\n';
+// 		*ptr = 0;
+// 		for (i = 0; i < numentries; i++)
+// 		{
+// 			if (fmt)
+// 				for (j = 0; j < depth; j++)
+// 					*ptr++ = '\t';
+// 			tmplen = os_strlen(names[i]);
+// 			os_memcpy(ptr, names[i], tmplen);
+// 			ptr += tmplen;
+// 			*ptr++ = ':';
+// 			if (fmt)
+// 				*ptr++ = '\t';
+// 			os_strcpy(ptr, entries[i]);
+// 			ptr += os_strlen(entries[i]);
+// 			if (i != numentries - 1)
+// 				*ptr++ = ',';
+// 			if (fmt)
+// 				*ptr++ = '\n';
+// 			*ptr = 0;
+// 			os_free(names[i]);
+// 			os_free(entries[i]);
+// 		}
 
-		os_free(names);
-		os_free(entries);
-		if (fmt)
-			for (i = 0; i < depth - 1; i++)
-				*ptr++ = '\t';
-		*ptr++ = '}';
-		*ptr++ = 0;
-	}
-	return out;
-}
+// 		os_free(names);
+// 		os_free(entries);
+// 		if (fmt)
+// 			for (i = 0; i < depth - 1; i++)
+// 				*ptr++ = '\t';
+// 		*ptr++ = '}';
+// 		*ptr++ = 0;
+// 	}
+// 	return out;
+// }
 
 /* Get Array size/item / object item. */
 int ICACHE_FLASH_ATTR cJSON_GetArraySize(cJSON *array)
