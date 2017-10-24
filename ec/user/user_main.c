@@ -6,6 +6,13 @@
 #include "user_debug.h"
 #include "wifi.h"
 
+#define SIG_CG 0 // AP模式 作为HTTP服务器 APP配置必须数据
+#define SIG_ST 1 // station模式
+#define SIG_RG 3 // 进行注册
+#define SIG_LG 4 // 进行连接
+
+os_event_t ec_task_queue[4];
+
 #if AT_CUSTOM
 /// MAKR: AT测试代码
 // test :AT+TEST=1,"abc"<,3>
@@ -13,7 +20,7 @@ void ICACHE_FLASH_ATTR
 at_setupCmdTest(uint8_t id, char *pPara)
 {
     int result = 0, err = 0, flag = 0;
-    char buffer[32] = { 0 };
+    char buffer[32] = {0};
     pPara++; // skip '='
 
     //get the first parameter
@@ -104,24 +111,25 @@ struct jabber_config config = {
     .username = "18682435851",
     .password = "18682435851",
     .domain = "xsxwrd.com",
-    .host_name = "gm.xsxwrd.com"
-};
+    .host_name = "gm.xsxwrd.com"};
 
 void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
-        // TODO: 发起网络连接
-        // 1. HTTP
-        // 2. XMPP
-        // xmpp_init();
-        
-        // 这部分测试通过
-        http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
-
-
-        // xmpp_init(&config);
+        if (user_get_is_regisrer() == 1)
+        {
+    
+            ec_log("===== login ==== \r\n");
+            system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+    
+        }
+        else
+        {
+            ec_log("===== register  ==== \r\n");
+            system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
+        }
     }
     else
     {
@@ -133,30 +141,52 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
-    return ;
+   
+    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 4);
+   
     if (user_get_is_regisrer() == 1)
     {
-        // TODO: 进入XMPP
-        // MARK: station model 连接wifi
         ec_log("===== start login ==== \r\n");
-        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
     }
     else
     {
-        // TODO: 完整的流程
         ec_log("===== start ec sdk  ==== \r\n");
-        // 1. 获取到配置信息 http xmpp wifi
-        wifi_ap_set(NULL, NULL);
-        server_init(80);
-        
-        // 2. 连接wifi
-        // wifi_connect(NULL, NULL, wifiConnectCb);
-
-        // 2. 通过http 注册xmpp
-        // http_request("",0,"",http_success,http_failure);
-        // 3. 连接xmpp
+        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
     }
 }
+
+void ICACHE_FLASH_ATTR
+server_recv_data(char *data, int len)
+{
+   
+}
+
+void ICACHE_FLASH_ATTR
+ec_task(os_event_t *e)
+{
+    switch (e->sig)
+    {
+    case SIG_CG:
+        ec_log("config ap model\r\n");
+        wifi_ap_set(NULL, NULL);
+        server_init(80, server_recv_data);
+        break;
+    case SIG_ST:
+        ec_log("config station model\r\n");
+        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+        break;
+    case SIG_RG:
+        ec_log(" register openfari\r\n");
+        http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
+        break;
+    case SIG_LG:
+        ec_log("login openfair\r\n");
+        xmpp_init(&j_config);
+        break;
+    }
+}
+
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -220,12 +250,14 @@ void ICACHE_FLASH_ATTR
 user_init(void)
 {
     ec_log("user init ok main ----\r\n");
+
 #if AT_CUSTOM
     // MARK: 注册系统AT指令
     at_init();
     // MARK: 注册自定义AT指令
     at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
 #endif
+
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
     timer_init();

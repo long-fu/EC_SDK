@@ -14,6 +14,8 @@ Content-Type: text/html\r\n\r\n%s"
 static http_parser parser = {0};
 static http_parser_settings settings = {0};
 static char http_respons_buf[256] = {0};
+static server_recv_callback server_recv_handler = NULL;
+
 
 #define TASK_QUEUE_LEN = 4;
 static os_event_t *task_queue;
@@ -60,7 +62,10 @@ on_message_complete(http_parser *_)
 
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
     ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
-    
+    if (server_recv_handler)
+    {
+        server_recv_handler(http_respons_buf, os_strlen(http_respons_buf));
+    }
             
     // MARK: 数据接收完成
     // TODO: 这里进行数据的回复
@@ -108,9 +113,7 @@ on_body(http_parser *_, const char *at, size_t length)
 static void ICACHE_FLASH_ATTR
 server_parser_init()
 {
-    // memset(recv_buf, 0x0, sizeof(recv_buf));
-    // memset(http_body, 0x0, sizeof(http_body));
-    // memset(soc_send_buf, 0x0, sizeof(soc_send_buf));
+
     os_memset(http_respons_buf, 0x0, sizeof(http_respons_buf));
 
     os_memset(&parser, 0, sizeof(parser));
@@ -192,7 +195,7 @@ on_task(os_event_t *e)
 }
 
 void ICACHE_FLASH_ATTR
-server_init(uint32 port)
+server_init(uint32 port, server_recv_callback handler)
 {
 
     esp_conn.type = ESPCONN_TCP;
@@ -206,8 +209,4 @@ server_init(uint32 port)
     espconn_accept(&esp_conn);
 
     // TODO: 创建任务
-    // task_queue = (os_event_t *) os_malloc( sizeof(os_event_t) * TASK_QUEUE_LEN );
-    // MARK:
-    // 注册任务
-    // system_os_task(on_task, USER_TASK_PRIO_0, task_queue, TASK_QUEUE_LEN);
 }

@@ -51,7 +51,7 @@ static struct tm res_buf;
 static time_t system_timestam = 0;
 
 struct tm *ICACHE_FLASH_ATTR
-my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offset)
+my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offfset)
 {
   long days, rem;
   time_t lcltime;
@@ -122,10 +122,7 @@ my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offset)
     int hours, mins, secs;
     res->tm_isdst = 0;
 
-    // 时间偏移 8 * 60 * 60 东8 --
-    // offset = (res->tm_isdst == 1 ? sntp__tzrule[1].offset : sntp__tzrule[0].offset);
-
-    offset = -offset * SECSPERHOUR;
+    offset = offfset * SECSPERHOUR;
     hours = offset / SECSPERHOUR;
     offset = offset % SECSPERHOUR;
 
@@ -204,7 +201,7 @@ my_sntp_mktm_r(const time_t *tim_p, struct tm *res, int offset)
 }
 
 
-static os_timer_t alarm_timer;
+static os_timer_t system_time_timer;
 
 void ICACHE_FLASH_ATTR
 timer_check_func(void *arg)
@@ -214,7 +211,7 @@ timer_check_func(void *arg)
   ec_log("time min %d\r\n", system_timestam);
   // ec_log("system_get_time %d\r\n", system_get_time()); // 这里是开机时间 us
   os_memset(&res_buf, 0x0, sizeof(res_buf));
-  my_sntp_mktm_r(&system_timestam ,&res_buf ,8);
+  my_sntp_mktm_r(&system_timestam ,&res_buf , -8);
   system_os_post(USER_TASK_PRIO_0, 0,'a');
 }
 
@@ -238,8 +235,8 @@ timer_init(void)
 {
   ec_log("systime: %s %s\r\n", __DATE__, __TIME__); // 代码编译时间
   system_timestam = 1508578384;// s 为单位
-  os_timer_disarm(&alarm_timer);
-  os_timer_setfn(&alarm_timer, (os_timer_func_t *)timer_check_func, NULL);
-  os_timer_arm(&alarm_timer, 60000, 1); // ms 单位
+  os_timer_disarm(&system_time_timer);
+  os_timer_setfn(&system_time_timer, (os_timer_func_t *)timer_check_func, NULL);
+  os_timer_arm(&system_time_timer, 60000, 1); // ms 单位
   system_os_task(al, USER_TASK_PRIO_0, &time_task_queue, 3);
 }
