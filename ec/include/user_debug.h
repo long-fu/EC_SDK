@@ -2,7 +2,7 @@
 #define __USER_DEBUG_H__
 
 #include "user_config.h"
-
+#include "osapi.h"
 #if DEBUG_ON
 extern char log_buffer[512];
 #ifdef HTTP_DEBUG_ON

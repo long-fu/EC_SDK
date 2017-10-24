@@ -11,6 +11,9 @@
         "osapi.h": "c",
         "user_interface.h": "c",
         "queue.h": "c",
-        "jsonparse.h": "c"
+        "jsonparse.h": "c",
+        "cjson.h": "c",
+        "mem.h": "c",
+        "server.h": "c"
     }
 }

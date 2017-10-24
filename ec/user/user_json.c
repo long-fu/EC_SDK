@@ -1,6 +1,10 @@
 
 #include "cJSON.h"
+#include "c_types.h"
+#include "user_json.h"
+#include <stdio.h>
 
+char http_register_url[64] = { 0 };
 
 static int ICACHE_FLASH_ATTR
 add_switch(char *times,char *ttime, char* enable)
@@ -20,7 +24,7 @@ add_switch(char *times,char *ttime, char* enable)
         }
         if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
         {
-            sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
+            os_sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
         }
         else
         {
@@ -83,7 +87,7 @@ int add_scene(char *ttime, char *enable)
     if (ttime != NULL && enable != NULL)
     {
         // TODO: 进行解析
-        int on = 0 ,ds, ls;;
+        int on = 0 ,ds, ls,y, mm, d, h, m, s;
         if (os_strlen(enable) == 1) // "1"
         {
             on = atoi(enable);
@@ -132,7 +136,7 @@ json_parse_config(char *json,
         os_memset(wconfig, 0x0, sizeof(struct wifi_config));
 
         t = cJSON_GetObjectItem(root, "ssid");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -140,15 +144,15 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "pssd");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
-            char *pwd;
-            pwd = t->valuestring;
+            char *tmp;
+            tmp = t->valuestring;
             os_memcpy(wconfig->password, tmp, os_strlen(tmp));
         }
 
         t = cJSON_GetObjectItem(root, "hurl");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -156,7 +160,7 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "jport");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -164,7 +168,7 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "jip");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -172,7 +176,7 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "appid");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -180,7 +184,7 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "jdomain");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -188,7 +192,7 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "jhost");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
@@ -196,11 +200,11 @@ json_parse_config(char *json,
         }
 
         t = cJSON_GetObjectItem(root, "jres");
-        if (t->type == JSON_TYPE_STRING)
+        if (t->type == cJSON_String)
         {
             char *tmp;
             tmp = t->valuestring;
-            os_memcpy(jconfig->resources, tmp, os_strlen(resources));
+            os_memcpy(jconfig->resources, tmp, os_strlen(tmp));
         }
         cJSON_Delete(root);
     }
@@ -226,19 +230,19 @@ json_parse_switch(char *json)
         t = cJSON_GetArrayItem(list, i);
 
         tp = cJSON_GetObjectItem(t, "times");
-        if (tp == JSON_TYPE_STRING)
+        if (tp->type == cJSON_String)
         {
             times = tp->valuestring;
         }
 
         tp = cJSON_GetObjectItem(t, "time");
-        if (tp == JSON_TYPE_STRING)
+        if (tp->type == cJSON_String)
         {
             ttime = tp->valuestring;
         }
 
         tp = cJSON_GetObjectItem(t, "enable");
-        if (tp == JSON_TYPE_STRING)
+        if (tp->type == cJSON_String)
         {
             enable = tp->valuestring;
         }
@@ -252,12 +256,12 @@ json_parse_switch(char *json)
     {
         t = cJSON_GetArrayItem(list, i);
         tp = cJSON_GetObjectItem(t, "time");
-        if (tp == JSON_TYPE_STRING)
+        if (tp->type == cJSON_String)
         {
             ttime = tp->valuestring;
         }
         tp = cJSON_GetObjectItem(t, "enable");
-        if (tp == JSON_TYPE_STRING)
+        if (tp->type == cJSON_String)
         {
             enable = tp->valuestring;
         }

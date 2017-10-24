@@ -1,5 +1,8 @@
 #include "at_custom.h"
 #include "user_config.h"
+#include "user_at.h"
+
+#include "user_debug.h"
 
 #if AT_CUSTOM
 /// MAKR: AT测试代码

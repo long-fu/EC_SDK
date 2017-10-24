@@ -1,4 +1,6 @@
 
+#include "osapi.h"
+#include "server.h"
 #include "user_interface.h"
 #include "user_debug.h"
 #include "espconn.h"
@@ -14,8 +16,7 @@ Content-Type: text/html\r\n\r\n%s"
 static http_parser parser = {0};
 static http_parser_settings settings = {0};
 static char http_respons_buf[256] = {0};
-static server_recv_callback server_recv_handler = NULL;
-
+static server_recv_callback server_recv_handler;
 
 #define TASK_QUEUE_LEN = 4;
 static os_event_t *task_queue;
@@ -42,19 +43,18 @@ on_headers_complete(http_parser *_)
 #include "json/jsonparse.h"
 // static jsonparse_state json_state = { 0 };
 static void ICACHE_FLASH_ATTR
-on_json_data(char *data) 
+on_json_data(char *data)
 {
     // memset(&json_state,0x0,sizeof(json_state));
     // jsonparse_setup(&json_state, data, os_strlen(data));
 }
-
 
 static int ICACHE_FLASH_ATTR
 on_message_complete(http_parser *_)
 {
     (void)_;
     char body[64] = "{\"errcode\":0, \"errmsg\":\"ok\" }";
-    char soc_send_buffer[512] = { 0 };
+    char soc_send_buffer[512] = {0};
     // TODO: 关闭连接
 
     // soc_close(socket_id);
@@ -62,15 +62,15 @@ on_message_complete(http_parser *_)
 
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
     ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
-    
+
     if (server_recv_handler)
     {
         server_recv_handler(http_respons_buf, os_strlen(http_respons_buf));
     }
-            
+
     // MARK: 数据接收完成
     // TODO: 这里进行数据的回复
-    os_sprintf(soc_send_buffer,REQUEST_HEAD,os_strlen(body),body);
+    os_sprintf(soc_send_buffer, REQUEST_HEAD, os_strlen(body), body);
     espconn_send(&esp_conn, soc_send_buffer, os_strlen(soc_send_buffer));
 
     return 0;
@@ -137,8 +137,8 @@ server_recv(void *arg, char *pusrdata, unsigned short length)
     ec_log("server_recv server's %d.%d.%d.%d:%d \r\n", pesp_conn->proto.tcp->remote_ip[0],
            pesp_conn->proto.tcp->remote_ip[1], pesp_conn->proto.tcp->remote_ip[2],
            pesp_conn->proto.tcp->remote_ip[3], pesp_conn->proto.tcp->remote_port);
-    // 解析数据 
-    // TODO: 这部分需要进行对数据进行判断 
+    // 解析数据
+    // TODO: 这部分需要进行对数据进行判断
     server_parser_init();
     // TODO: 这里是否需要进连接关闭
     parsed = http_parser_execute(&parser, &settings, pusrdata, length);
@@ -201,8 +201,8 @@ server_init(uint32 port, server_recv_callback handler)
     esp_conn.state = ESPCONN_NONE;
     esp_conn.proto.tcp = &esptcp;
     esp_conn.proto.tcp->local_port = port;
-    server_recv_handler = handler；
-    ec_log("server init \r\n");
+    server_recv_handler = handler;
+        ec_log("server init \r\n");
 
     espconn_regist_connectcb(&esp_conn, server_listen);
 

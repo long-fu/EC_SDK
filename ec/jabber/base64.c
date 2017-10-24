@@ -116,7 +116,7 @@ void ICACHE_FLASH_ATTR
 send_codec_encode(char *buff, int len, char *buff_out) {
     int i, j, out_len;
 
-    iks_base64_encode(buff, len, buff_out, &out_len);
+    buff_out = iks_base64_encode(buff, len);
 
     out_len = strlen(buff_out);
     for (i = 0; i < out_len; i++) {
@@ -143,5 +143,5 @@ send_codec_decode(char *buf, char *decode_out) {
         }
     }
 
-    iks_base64_decode(buf, &buff_len, decode_out);
+    decode_out = iks_base64_decode(buf);
 }

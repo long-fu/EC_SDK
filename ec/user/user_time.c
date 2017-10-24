@@ -2,7 +2,7 @@
 #include "user_interface.h"
 #include "user_debug.h"
 #include "osapi.h"
-#include "user_timer.h"
+#include "user_time.h"
 
 #define SECSPERMIN 60L
 #define MINSPERHOUR 60L
@@ -39,6 +39,7 @@ static const int year_lengths[2] = {
 
 static os_timer_t system_time_timer;
 static uint32 system_timestamp;
+static struct tm system_datetime;
 
 struct tm *ICACHE_FLASH_ATTR
 ec_gmtime(const time_t *tim_p, struct tm *res)
@@ -235,7 +236,7 @@ check_time_func(void *arg)
   system_timestamp = system_timestamp + 60;
   ec_log("system_timestamp %d\r\n", system_timestamp);
   // ec_log("system_get_time %d\r\n", system_get_time()); // 这里是开机时间 us
-  os_memset(&res_buf, 0x0, sizeof(res_buf));
+  os_memset(&system_datetime, 0x0, sizeof(system_datetime));
   // my_sntp_mktm_r(&system_timestamp, &res_buf, -8);
 
   // 发送任务进行对 定时 和 延时 进行判断
@@ -256,7 +257,7 @@ void ICACHE_FLASH_ATTR
 timer_init(void)
 {
   ec_log("systime: %s %s\r\n", __DATE__, __TIME__); // 代码编译时间
-  system_timestam = 1508578384;                     // s 为单位
+  system_timestamp = 1508578384;                     // s 为单位
   os_timer_disarm(&system_time_timer);
   os_timer_setfn(&system_time_timer, (os_timer_func_t *)check_time_func, NULL);
   os_timer_arm(&system_time_timer, 60000, 1); // ms 单位

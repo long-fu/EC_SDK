@@ -5,7 +5,7 @@
 #include "user_config.h"
 #include "user_debug.h"
 #include "wifi.h"
-
+#include "user_at.h"
 #define SIG_CG 0 // AP模式 作为HTTP服务器 APP配置必须数据
 #define SIG_ST 1 // station模式
 #define SIG_RG 3 // 进行注册
@@ -49,31 +49,12 @@ wifiConnectCb(uint8_t status)
     }
 }
 
-void ICACHE_FLASH_ATTR
-system_on_done_cb(void)
-{
-    ec_log("system_on_init_done \r\n");
-   
-    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 4);
-   
-    if (user_get_is_regisrer() == 1)
-    {
-        ec_log("===== start login ==== \r\n");
-        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
-    }
-    else
-    {
-        ec_log("===== start ec sdk  ==== \r\n");
-        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
-    }
-}
-
 // 接收任务配置
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
     ec_log("server_recv_data [%s] \r\n",data);
-
+    //TODO: 这里解析配置数据
 }
 
 void ICACHE_FLASH_ATTR
@@ -100,6 +81,28 @@ ec_task(os_event_t *e)
         break;
     }
 }
+
+void ICACHE_FLASH_ATTR
+system_on_done_cb(void)
+{
+    ec_log("system_on_init_done \r\n");
+   
+    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 4);
+   
+    if (user_get_is_regisrer() == 1)
+    {
+        ec_log("===== start login ==== \r\n");
+        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    }
+    else
+    {
+        ec_log("===== start ec sdk  ==== \r\n");
+        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
+    }
+}
+
+
+
 
 
 /******************************************************************************

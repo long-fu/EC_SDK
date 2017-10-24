@@ -18,7 +18,7 @@ struct tm
   // int tm_isdst; /*日光节约时间的旗标*/
 };
 void ICACHE_FLASH_ATTR ec_set_timestamp(uint32 t);
-int ICACHE_FLASH_ATTR ec_get_timestamp();
+uint32 ICACHE_FLASH_ATTR ec_get_timestamp();
 struct tm *ICACHE_FLASH_ATTR ec_gmtime(const time_t *tim_p, struct tm *res);
 time_t ICACHE_FLASH_ATTR ec_mktime(int year, int mon, int day, int hour, int min, int sec);
 #endif

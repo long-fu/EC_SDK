@@ -1,5 +1,6 @@
 
 #include "user_switch.h"
+#include "os_type.h"
 
 #define EC_ALARM_MAX 10
 
@@ -13,7 +14,7 @@ typedef struct ec_alarm_t
 	int ing; //标识循环次数
 	int hour;
 	int min;
-};
+}ec_alarm_t;
 
 
 static int user_alarm_cout = 0;
@@ -25,20 +26,20 @@ typedef struct ec_delay_t
 	int on; // 开关
 	int delay;
 	os_timer_t timer;
-	ec_delay_t *next;
-};
+	struct ec_delay_t *next;
+}ec_delay_t;
 
 
 void ICACHE_FLASH_ATTR
 switch_on(void *arg)
 {
-
+	// TODO: 加上 插座开 接口
 }
 
 void ICACHE_FLASH_ATTR
 switch_off(void *arg)
 {
-
+    // TODO: 加上 插座关 接口
 }
 
 void ICACHE_FLASH_ATTR
@@ -70,7 +71,7 @@ check_user_alarm(int wday, int hour, int min)
     		// 判断时间
     		if (hour == user_alarm[i].hour && min == user_alarm[i].min)
     		{
-    			if(on)
+    			if(user_alarm[i].on)
 	            {
 		            switch_on(NULL);
 	            }
@@ -90,7 +91,7 @@ add_user_delay(int on, int delay)
 {
 
 	ec_delay_t *tmp;
-	tmp = os_malloc(sizoef(ec_delay_t));
+	tmp = (ec_delay_t *) os_malloc(sizeof(ec_delay_t));
 	tmp->on = on;
 	tmp->delay = delay;
 
