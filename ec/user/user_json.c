@@ -3,7 +3,7 @@
 #include "cJSON.h"
 #include "c_types.h"
 #include "user_json.h"
-
+#include "user_debug.h"
 static int ICACHE_FLASH_ATTR 
 parse_data_time(const char *ibuf,
                     int *year, int *mon, int *day, int *hour, int *min, int *se)
@@ -297,6 +297,7 @@ json_parse_register(char *json)
 {
     cJSON *root = NULL, *t = NULL;
     char *error_code = NULL;
+    ec_log("json_parse_register %s \r\n",json);
     root = cJSON_Parse(json);
     t = cJSON_GetObjectItem(root, "error_code");
     if (t->type == cJSON_String)
@@ -304,8 +305,12 @@ json_parse_register(char *json)
         error_code = t->valuestring;
         if (os_strcmp(error_code, "0") == 0)
         {
+            ec_log("====json_parse_register==== \r\n");
+            cJSON_Delete(root);
             return 1;
         }
+        ec_log("eroor code %s\r\n", error_code);
+        cJSON_Delete(root);
         return -1;
     }
 

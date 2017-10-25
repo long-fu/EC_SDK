@@ -38,10 +38,10 @@ wifiConnectCb(uint8_t status)
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
-    char json[256] = {0};
+    char json[512] = {0};
     ec_log("server_recv_data [%s] \r\n", data);
     // MARK: 数据解码
-    send_codec_decode(data,json);
+    send_codec_decode(data, json);
     ec_log("json_parse_config [%s] \r\n", json);
     // MARK: 这里解析配置数据
     json_parse_config(json, &j_config, &w_config, http_register_url);

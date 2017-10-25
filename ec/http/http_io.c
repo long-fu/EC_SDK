@@ -44,21 +44,26 @@ espconn_on_recon_cb(void *arg, sint8 errType)
 static void ICACHE_FLASH_ATTR
 espconn_on_recv(void *arg, char *pusrdata, unsigned short len)
 {
+    struct espconn *espconn_ptr = (struct espconn *)arg;
     // at_fake_uart_rx(pusrdata,len);
     // TODO: 这里会接收到网络数据
-    ec_log("on recv %d: [%s]\r\n", len, pusrdata);
+    ec_log("http on recv %d: [%s]\r\n", len, pusrdata);
     // os_memset(pusrdata, 0x0, 512);
     // os_memcpy(pusrdata, pusrdata, len);
     if (soc_recv_handler) 
     {
-        ec_log("-- -- cb recv ---- \r\n");
+        // ec_log("-- -- cb recv ---- \r\n");
         soc_recv_handler(pusrdata, len);
     }
+    // TODO: 
+    // espconn_disconnect(espconn_ptr);
+    // espconn_delete(espconn_ptr);
 }
 
 static void ICACHE_FLASH_ATTR
 espconn_on_send_cb(void *arg)
 {
+    struct espconn *espconn_ptr = (struct espconn *)arg;
     ec_log("espconn_on_send_cb\r\n");
     espconn_flag = TRUE;
     if (espconn_data_len)

@@ -19,8 +19,8 @@
 static void ICACHE_FLASH_ATTR
 http_success(char *data, int len)
 {
-    ec_log("HTTP SUCCESS %d: [%s]\r\n", len, data);
-    if (json_parse_register(data) == 0)
+    ec_log("\r\n HTTP SUCCESS %d: [%s]\r\n", len, data);
+    if (json_parse_register(data) == 1)
     {
         ec_log("json_parse_register SUCCESS \r\n");
         system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
@@ -34,14 +34,14 @@ http_failure(int error)
     // FIXME: 发送请求错误
 }
 
-static char register_body[512] = {0};
-static char body[256] = {0};
+static char register_body[1024] = {0};
+static char body[512] = {0};
 
 void ICACHE_FLASH_ATTR
 http_register_jab(char *url, int re, char *appid)
 {
     uint32 chipid = 0;
-    char acc[16] = {0}, sig[64] = {0}, mdsig[128] = {0};
+    char acc[16] = {0}, sig[128] = {0}, mdsig[256] = {0};
 
     chipid = system_get_chip_id();
     os_sprintf(acc, "%d", chipid);

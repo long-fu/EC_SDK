@@ -9,7 +9,7 @@
 static char recv_buf[512] = {0};
 static char http_body[512] = {0};
 static char soc_send_buf[1024] = {0};
-static char http_respons_buf[256] = {0};
+static char http_respons_buf[512] = {0};
 // static char soc_recv_buf[512] = {0};
 static void dump_url(const char *url, const struct http_parser_url *u, int type);
 
@@ -42,17 +42,18 @@ on_message_complete(http_parser *_)
 
     // TODO: 关闭连接
     // e_soc_close();
-    // soc_close(socket_id);
-    // GBC_sys_stop_timer(gbc_dm_timer);
+
 
     ec_log("\r\n*** http MESSAGE COMPLETE***\r\n\r\n");
-    ec_log("\r\n>>>%s<<<\n\n", http_respons_buf);
+    ec_log("\r\n>>> %s <<< \r\n\r\n", http_respons_buf);
 
     // MARK: 数据接收完成
     if (http_success_handler)
     {
         http_success_handler(http_respons_buf, os_strlen(http_respons_buf));
     }
+    
+    e_soc_close();
     return 0;
 }
 
@@ -69,8 +70,7 @@ static int ICACHE_FLASH_ATTR
 on_header_field(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    //kal_prompt_trace(MOD_MMI,"Header field: %s\n", at);
-    //kal_prompt_trace(MOD_MMI,"Header field: %.*s\n", (int)length, at);
+
     return 0;
 }
 
@@ -78,8 +78,7 @@ static int ICACHE_FLASH_ATTR
 on_header_value(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    //kal_prompt_trace(MOD_MMI,"Header value: %s\n", at);
-    // kal_prompt_trace(MOD_MMI,"Header value: %.*s\n", (int)length, at);
+
     return 0;
 }
 
@@ -87,7 +86,6 @@ static int ICACHE_FLASH_ATTR
 on_body(http_parser *_, const char *at, size_t length)
 {
     (void)_;
-    // kal_prompt_trace(MOD_MMI,"Body: %s\n", at);
 
     strncat(http_respons_buf, at, length);
 
@@ -134,7 +132,7 @@ e_http_recv(char *data, unsigned short len)
 {
 
     size_t parsed;
-    // ec_log("jie shou dao de shu ju [%s]\r\n", data);
+    ec_log("e_http_recv [%s]\r\n", data);
     os_memcpy(recv_buf, data, len);
     parsed = http_parser_execute(&parser, &settings, recv_buf, len);
 }
