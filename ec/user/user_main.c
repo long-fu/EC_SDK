@@ -10,7 +10,6 @@
 char http_register_url[64];
 static os_event_t ec_task_queue[1];
 
-
 static void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
@@ -32,9 +31,8 @@ wifiConnectCb(uint8_t status)
         // TODO: 断开网络连接
     }
 }
+
 //////////////////////////////////////////////////////////
-
-
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
@@ -43,6 +41,8 @@ server_recv_data(char *data, int len)
     // MARK: 数据解码
     send_codec_decode(data, json);
     ec_log("json_parse_config [%s] \r\n", json);
+    os_memset(&j_config, 0x0, sizeof(j_config));
+    os_memset(&w_config, 0x0, sizeof(w_config));
     // MARK: 这里解析配置数据
     json_parse_config(json, &j_config, &w_config, http_register_url);
     ec_log("-----server_recv_data %d \r\n", j_config.port);
@@ -67,22 +67,22 @@ ec_task(os_event_t *e)
         break;
     case SIG_RG:
         ec_log(" register openfari\r\n");
-        http_register_jab( http_register_url , 0, j_config.app_username);
+        http_register_jab(http_register_url, 0, j_config.app_username);
         break;
     case SIG_LG:
-        {
-            uint32 chipid = 0;
-            char sid[16] = { 0 };
-            ec_log("login openfair\r\n");
-            chipid = system_get_chip_id();
-            os_sprintf(sid, "%d", chipid);
-            ec_log("clint id %s\r\n", sid);
-            ec_log("-----jconfig user %d \r\n", j_config.port);
-            os_memcpy(j_config.username, sid, os_strlen(sid));
-            os_memcpy(j_config.password, sid, os_strlen(sid));
-            xmpp_init(&j_config);
-        }
-        break;
+    {
+        uint32 chipid = 0;
+        char sid[16] = {0};
+        ec_log("login openfair\r\n");
+        chipid = system_get_chip_id();
+        os_sprintf(sid, "%d", chipid);
+        ec_log("clint id %s\r\n", sid);
+        ec_log("-----jconfig user %d \r\n", j_config.port);
+        os_memcpy(j_config.username, sid, os_strlen(sid));
+        os_memcpy(j_config.password, sid, os_strlen(sid));
+        xmpp_init(&j_config);
+    }
+    break;
     }
 }
 
