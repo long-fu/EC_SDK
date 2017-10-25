@@ -7,8 +7,8 @@
 #include "http_io.h"
 
 static char recv_buf[512] = {0};
-static char http_body[128] = {0};
-static char soc_send_buf[512] = {0};
+static char http_body[512] = {0};
+static char soc_send_buf[1024] = {0};
 static char http_respons_buf[256] = {0};
 // static char soc_recv_buf[512] = {0};
 static void dump_url(const char *url, const struct http_parser_url *u, int type);
@@ -236,6 +236,7 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
 
     // kal_prompt_trace(MOD_MMI,"dump_url %s", soc_send_buf);
     // soc_http_connet(host_url);
+    
     e_soc_creat(host_url, port, e_http_connet_status, e_http_recv);
 }
 

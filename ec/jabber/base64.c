@@ -108,6 +108,120 @@ iks_base64_encode(const char *buf, int len)
 	return save;
 }
 
+static char * ICACHE_FLASH_ATTR
+send_base64_decode( const char *buf, int *size , char *buf_out )
+{
+	char *res, *save;
+	char val;
+	const char *foo;
+	const char *end;
+	int index;
+	size_t len;
+
+	if ( !buf )
+	{
+		return NULL;
+	}
+
+	len = strlen( buf ) * 6 / 8 + 1;
+
+	if( size )
+	{
+		*size = len;
+	}
+
+	save = res = buf_out;
+
+	index = 0;
+	end = buf + strlen( buf );
+
+	while ( *buf && buf < end )
+	{
+		if ( !( foo = strchr( base64_charset, *buf ) ) )
+		{
+			foo = base64_charset;
+		}
+
+		val = ( int )( foo - base64_charset );
+		buf++;
+
+		switch ( index )
+		{
+		case 0:
+			*res |= val << 2;
+			break;
+
+		case 1:
+			*res++ |= val >> 4;
+			*res |= val << 4;
+			break;
+
+		case 2:
+			*res++ |= val >> 2;
+			*res |= val << 6;
+			break;
+
+		case 3:
+			*res++ |= val;
+			break;
+		}
+
+		index++;
+		index %= 4;
+	}
+
+	*res = 0;
+
+	return save;
+}
+
+static char * ICACHE_FLASH_ATTR
+send_base64_encode( const char *buf , int len , char *buf_out , int *size )
+{
+	char *res, *save;
+	int k, t;
+
+	len = ( len > 0 ) ? ( len ) : ( strlen( buf ) );
+
+	save = res = buf_out;
+
+	*size = ( len*8 ) / 6 + 4;
+
+	for ( k = 0; k < len/3; ++k )
+	{
+		*res++ = base64_charset[*buf >> 2];
+		t = ( ( *buf & 0x03 ) << 4 );
+		buf++;
+		*res++ = base64_charset[t | ( *buf >> 4 )];
+		t = ( ( *buf & 0x0F ) << 2 );
+		buf++;
+		*res++ = base64_charset[t | ( *buf >> 6 )];
+		*res++ = base64_charset[*buf++ & 0x3F];
+	}
+
+	switch ( len % 3 )
+	{
+	case 2:
+		*res++ = base64_charset[*buf >> 2];
+		t =  ( ( *buf & 0x03 ) << 4 );
+		buf++;
+		*res++ = base64_charset[t | ( *buf >> 4 )];
+		*res++ = base64_charset[( ( *buf++ & 0x0F ) << 2 )];
+		*res++ = '=';
+		break;
+
+	case 1:
+		*res++ = base64_charset[*buf >> 2];
+		*res++ = base64_charset[( *buf++ & 0x03 ) << 4];
+		*res++ = '=';
+		*res++ = '=';
+		break;
+	}
+
+	*res = 0;
+
+	return save;
+}
 
 static const char tab_enc[] = "nlmopqQH78SkC012xyMzw9FOPGRTUfghijrI#,=AstKL3de4u6J5Dv+/*&WXYVaBNbcZE";
 static const char tab_dec[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/*&#,=";
@@ -116,11 +230,11 @@ void ICACHE_FLASH_ATTR
 send_codec_encode(char *buff, int len, char *buff_out) {
     int i, j, out_len;
 
-    buff_out = iks_base64_encode(buff, len);
+    send_base64_encode(buff, len, buff_out, &out_len);
 
-    out_len = os_strlen(buff_out);
+    out_len = strlen(buff_out);
     for (i = 0; i < out_len; i++) {
-        for (j = 0; j < os_strlen(tab_dec); j++) {
+        for (j = 0; j < strlen(tab_dec); j++) {
             if (buff_out[i] == tab_dec[j]) {
                 buff_out[i] = tab_enc[j];
                 break;
@@ -133,9 +247,9 @@ void ICACHE_FLASH_ATTR
 send_codec_decode(char *buf, char *decode_out) {
     int i, j, buff_len;
 
-    buff_len = os_strlen(buf);
+    buff_len = strlen(buf);
     for (i = 0; i < buff_len; i++) {
-        for (j = 0; j < os_strlen(tab_enc); j++) {
+        for (j = 0; j < strlen(tab_enc); j++) {
             if (buf[i] == tab_enc[j]) {
                 buf[i] = tab_dec[j];
                 break;
@@ -143,5 +257,5 @@ send_codec_decode(char *buf, char *decode_out) {
         }
     }
 
-    decode_out = iks_base64_decode(buf);
+    send_base64_decode(buf, &buff_len, decode_out);
 }

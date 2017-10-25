@@ -17,6 +17,8 @@
         "server.h": "c",
         "user_switch.h": "c",
         "os_type.h": "c",
-        "c_types.h": "c"
+        "c_types.h": "c",
+        "user_json.h": "c",
+        "wifi.h": "c"
     }
 }

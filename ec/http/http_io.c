@@ -221,13 +221,25 @@ e_soc_creat(char *host,
     // 注册 TCP 连接发生异常断开时的回调函数，可以在回调函数中进行重连。
     espconn_regist_reconcb(espconn_ptr, espconn_on_recon_cb);
 
-    // espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
-    
-      ipi = ipaddr_addr("192.168.11.236");  /// 测试代码
-      os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
+    // 
+    ipi = ipaddr_addr(host);
+    ec_log("ipi hah %d\r\n",ipi);
+    if (ipi > 0)
+    {
+        os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
         // MARK: 进行连接
+        ipi = ipaddr_addr("www.baidu.com");
+        ec_log("test hah %d \r\n",ipi);
         // TODO: 对返回值进行判断
-      espconn_connect(espconn_ptr);
+        espconn_connect(espconn_ptr);
+    }
+    else 
+    {
+        espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
+    }
+    
+    //   ipi = ipaddr_addr("192.168.11.236");  /// 测试代码
+
     
     
 
