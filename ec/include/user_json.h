@@ -7,8 +7,9 @@
 
 int ICACHE_FLASH_ATTR json_parse_config(char *json, 
     struct jabber_config *jconfig, 
-    struct wifi_config *wconfig);
+    struct wifi_config *wconfig, char *re_url);
 
 int ICACHE_FLASH_ATTR json_parse_switch(char *json);
+int ICACHE_FLASH_ATTR json_parse_register(char *json);
 #endif
 

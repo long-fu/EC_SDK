@@ -4,33 +4,19 @@
 #include "c_types.h"
 #include "user_json.h"
 
-char http_register_url[64] = {0};
-
-// #include <stdarg.h>
-int ICACHE_FLASH_ATTR
-sscanf(const char *ibuf, const char *fmt, ...)
-{
-    // va_list ap;
-    // int ret;
-    // va_start(ap, fmt);
-    // ret = vsscanf(ibuf, fmt, ap);
-    // va_end(ap);
-
-    return (0);
-}
-
-int parse_data_time(const char *ibuf,
+static int ICACHE_FLASH_ATTR 
+parse_data_time(const char *ibuf,
                     int *year, int *mon, int *day, int *hour, int *min, int *se)
 {
-    char yyear[8] = { 0 }, mmonth[4] = {0}, dday[4] = { 0 },hhour[4] = { 0 }, mmin[4] = { 0 }, sse[4] = { 0 };
-    
+    char yyear[8] = {0}, mmonth[4] = {0}, dday[4] = {0}, hhour[4] = {0}, mmin[4] = {0}, sse[4] = {0};
+
     os_strncpy(yyear, ibuf, 4);
-    os_strncpy(mmonth, ibuf+5, 2);
-    os_strncpy(dday, ibuf+8, 2);
-    os_strncpy(hhour, ibuf+11, 2);
-    os_strncpy(mmin, ibuf+14, 2);
-    os_strncpy(sse, ibuf+17, 2);
-    
+    os_strncpy(mmonth, ibuf + 5, 2);
+    os_strncpy(dday, ibuf + 8, 2);
+    os_strncpy(hhour, ibuf + 11, 2);
+    os_strncpy(mmin, ibuf + 14, 2);
+    os_strncpy(sse, ibuf + 17, 2);
+
     *year = atoi(yyear);
     *mon = atoi(mmonth);
     *day = atoi(dday);
@@ -38,7 +24,7 @@ int parse_data_time(const char *ibuf,
     *min = atoi(mmin);
     *se = atoi(sse);
 
-    return 0 ;
+    return 0;
 }
 
 static int ICACHE_FLASH_ATTR
@@ -115,7 +101,8 @@ add_switch(char *times, char *ttime, char *enable)
     return 0;
 }
 
-static ICACHE_FLASH_ATTR int add_scene(char *ttime, char *enable)
+static int ICACHE_FLASH_ATTR 
+add_scene(char *ttime, char *enable)
 {
 
     if (ttime != NULL && enable != NULL)
@@ -157,7 +144,7 @@ static ICACHE_FLASH_ATTR int add_scene(char *ttime, char *enable)
 int ICACHE_FLASH_ATTR
 json_parse_config(char *json,
                   struct jabber_config *jconfig,
-                  struct wifi_config *wconfig)
+                  struct wifi_config *wconfig, char *register_url)
 {
 
     if (jconfig != NULL && wconfig != NULL)
@@ -189,7 +176,7 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
-            os_memcpy(http_register_url, tmp, os_strlen(tmp));
+            os_memcpy(register_url, tmp, os_strlen(tmp));
         }
 
         t = cJSON_GetObjectItem(root, "jport");
@@ -302,4 +289,26 @@ json_parse_switch(char *json)
     }
     cJSON_Delete(root);
     return 0;
+}
+
+
+int ICACHE_FLASH_ATTR
+json_parse_register(char *json)
+{
+    cJSON *root = NULL, *t = NULL;
+    char *error_code = NULL;
+    root = cJSON_Parse(json);
+    t = cJSON_GetObjectItem(root, "error_code");
+    if (t->type == cJSON_String)
+    {
+        error_code = t->valuestring;
+        if (os_strcmp(error_code, "1") == 0)
+        {
+            return 1;
+        }
+        return -1;
+    }
+
+    cJSON_Delete(root);
+    return -1;
 }

@@ -7,34 +7,11 @@
 #include "wifi.h"
 #include "user_at.h"
 
-#define SIG_CG 0 // AP模式 作为HTTP服务器 APP配置必须数据
-#define SIG_ST 1 // station模式
-#define SIG_RG 3 // 进行注册
-#define SIG_LG 4 // 进行连接
-
-#define S_CODE "smartswitch"
-
-#define RIGISTER_BODY "{\"acc\":\"%s\",\
-\"act\":\"%s\",\
-\"reset\":\"%s\",\
-\"phone\":\"%s\",\
-\"sign\":\"%s\"}"
-
+char http_register_url[64];
 static os_event_t ec_task_queue[1];
 
-static void ICACHE_FLASH_ATTR
-http_success(char *data, int len)
-{
-    ec_log("HTTP SUCCESS %d: [%s]\r\n", len, data);
-}
 
 static void ICACHE_FLASH_ATTR
-http_failure(int error)
-{
-    ec_log("HTTP ERROR %d \r\n", error);
-}
-
-void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
@@ -55,48 +32,23 @@ wifiConnectCb(uint8_t status)
         // TODO: 断开网络连接
     }
 }
-void ICACHE_FLASH_ATTR send_codec_encode(char *buff, int len, char *buff_out);
-#include "user_json.h"
+//////////////////////////////////////////////////////////
+
 
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
     char json[256] = {0};
     ec_log("server_recv_data [%s] \r\n", data);
-    // send_codec_encode(data, os_strlen(data),json);
+    // MARK: 数据解码
+    send_codec_decode(data,json);
     ec_log("json_parse_config [%s] \r\n", json);
     // MARK: 这里解析配置数据
-    // json_parse_config(json, &j_config, &w_config);
+    json_parse_config(json, &j_config, &w_config, http_register_url);
+    // 配置完成 进行注册
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
 }
-
-void ICACHE_FLASH_ATTR iks_md5(const char *data, char *buf);
-static char register_body[512]  = { 0 };
-static char body[256] = {0};
-void ICACHE_FLASH_ATTR
-http_register_jab(int re, char *appid)
-{
-    uint32 chipid = 0;
-    char reset[4] = {0}, acc[16] = {0}, sig[64] = {0}, mdsig[128] = {0} ;
-    
-    chipid = system_get_chip_id();
-    os_sprintf(acc, "%d", chipid);
-    ec_log("http_register_jab sig acc %s\r\n", acc);
-    os_sprintf(reset, "%d", re);
-    os_sprintf(sig, "%s%s%s%s%s", acc, "regeditForClient", appid, reset, S_CODE);
-    ec_log("http_register_jab sig %s %s\r\n", sig, acc);
-    
-    iks_md5(sig, mdsig);
-
-    ec_log("http_register_jab mdsig %s \r\n", mdsig);
-    
-    os_memset(register_body, 0x0, sizeof(register_body));
-    ec_log("http_register_jab acc acc %s\r\n" , acc);
-    os_sprintf(body, RIGISTER_BODY, acc, "regeditForClient", reset, appid, mdsig);
-    ec_log("http_register_jab body %s %s\r\n", body,acc);
-    send_codec_encode(body, os_strlen(body), register_body);
-    ec_log("http_register_jab register_body %s \r\n", register_body);
-    http_request("http://52.80.97.230:9090/plugins/SmartSwitch/sev", 0, register_body, http_success, http_failure);
-}
+/////////////////////////////////////
 
 void ICACHE_FLASH_ATTR
 ec_task(os_event_t *e)
@@ -115,7 +67,7 @@ ec_task(os_event_t *e)
     case SIG_RG:
 
         ec_log(" register openfari\r\n");
-        http_register_jab(0, "18627312312");
+        http_register_jab( http_register_url , 0, "18627312312");
 
         break;
     case SIG_LG:

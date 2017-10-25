@@ -53,9 +53,6 @@ on_message_complete(http_parser *_)
     char soc_send_buffer[512] = {0};
     // TODO: 关闭连接
 
-    // soc_close(socket_id);
-    // GBC_sys_stop_timer(gbc_dm_timer);
-
     ec_log("\r\n***MESSAGE COMPLETE***\r\n");
     ec_log("\r\n>>> %s <<<\r\n", http_respons_buf);
 
@@ -65,7 +62,7 @@ on_message_complete(http_parser *_)
     }
 
     // MARK: 进行简单的加密发送
-    // send_codec_encode(body, os_strlen(body), base64_body);
+    send_codec_encode(body, os_strlen(body), base64_body);
 
     // MARK: 这里进行数据的回复
     os_sprintf(soc_send_buffer, REQUEST_HEAD, os_strlen(base64_body), base64_body);

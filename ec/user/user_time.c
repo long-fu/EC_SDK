@@ -245,7 +245,8 @@ check_time_func(void *arg)
 
 os_event_t time_task_queue;
 
-void al(os_event_t *e)
+void ICACHE_FLASH_ATTR 
+al(os_event_t *e)
 {
   // 到现在是多久
   // 加上定时器
