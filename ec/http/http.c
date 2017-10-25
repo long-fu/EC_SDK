@@ -6,10 +6,10 @@
 #include "mem.h"
 #include "http_io.h"
 
-static char recv_buf[512] = {0};
-static char http_body[512] = {0};
+static char recv_buf[1024] = {0};
+static char http_body[1024] = {0};
 static char soc_send_buf[1024] = {0};
-static char http_respons_buf[512] = {0};
+static char http_respons_buf[1024] = {0};
 // static char soc_recv_buf[512] = {0};
 static void dump_url(const char *url, const struct http_parser_url *u, int type);
 
@@ -52,8 +52,8 @@ on_message_complete(http_parser *_)
     {
         http_success_handler(http_respons_buf, os_strlen(http_respons_buf));
     }
-    
-    e_soc_close();
+
+    // e_soc_close();
     return 0;
 }
 
@@ -106,7 +106,7 @@ e_http_init()
     os_memset(http_respons_buf, 0x0, sizeof(http_respons_buf));
 
     http_parser_init(&parser, HTTP_RESPONSE);
-    os_memset(&settings, 0, sizeof(settings));
+    os_memset(&settings, 0x0, sizeof(settings));
     settings.on_message_begin = on_message_begin;
     settings.on_url = on_url;
     settings.on_header_field = on_header_field;
@@ -116,23 +116,12 @@ e_http_init()
     settings.on_message_complete = on_message_complete;
 }
 
-// static void ICACHE_FLASH_ATTR
-// gbc_dm_http_time_out()
-// {
-//     if (http_failure_cb)
-//     {
-//         http_success_cb = NULL;
-//         http_failure_cb(500);
-//         soc_close(socket_id);
-//     }
-// }
-
 static void ICACHE_FLASH_ATTR
 e_http_recv(char *data, unsigned short len)
 {
 
     size_t parsed;
-    ec_log("e_http_recv [%s]\r\n", data);
+    ec_log("e_http_recv [ %s ] \r\n", data);
     os_memcpy(recv_buf, data, len);
     parsed = http_parser_execute(&parser, &settings, recv_buf, len);
 }

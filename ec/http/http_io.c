@@ -173,7 +173,7 @@ e_soc_send(const char *data, int len)
         int ret;
         // TODO: 对返回值进行判断
         ret = espconn_send(espconn_ptr, (uint8 *)data, len);
-        ec_log("send  %d \r\n",ret);
+        // ec_log("send  %d \r\n",ret);
         espconn_flag = FALSE;
     }
     else

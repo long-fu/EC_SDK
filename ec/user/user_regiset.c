@@ -44,8 +44,11 @@ http_register_jab(char *url, int re, char *appid)
     char acc[16] = {0}, sig[128] = {0}, mdsig[256] = {0};
 
     chipid = system_get_chip_id();
+    
     os_sprintf(acc, "%d", chipid);
+    
     ec_log("clint id %s\r\n", acc);
+    
     os_sprintf(sig, "%sregeditForClient%s%d%s", acc, appid, re, S_CODE);
     iks_md5(sig, mdsig);
     os_memset(register_body, 0x0, sizeof(register_body));
