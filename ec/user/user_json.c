@@ -4,25 +4,41 @@
 #include "c_types.h"
 #include "user_json.h"
 
-
 char http_register_url[64] = {0};
 
-int ICACHE_FLASH_ATTR
-atoi (char s[])
-{
-    return s[0] - '0';
-}
-
-#include <stdarg.h>
+// #include <stdarg.h>
 int ICACHE_FLASH_ATTR
 sscanf(const char *ibuf, const char *fmt, ...)
 {
-        // va_list ap;
-        // int ret;
-        // va_start(ap, fmt);
-        // ret = vsscanf(ibuf, fmt, ap);
-        // va_end(ap);
-        return(0);
+    // va_list ap;
+    // int ret;
+    // va_start(ap, fmt);
+    // ret = vsscanf(ibuf, fmt, ap);
+    // va_end(ap);
+
+    return (0);
+}
+
+int parse_data_time(const char *ibuf,
+                    int *year, int *mon, int *day, int *hour, int *min, int *se)
+{
+    char yyear[8] = { 0 }, mmonth[4] = {0}, dday[4] = { 0 },hhour[4] = { 0 }, mmin[4] = { 0 }, sse[4] = { 0 };
+    
+    os_strncpy(yyear, ibuf, 4);
+    os_strncpy(mmonth, ibuf+5, 2);
+    os_strncpy(dday, ibuf+8, 2);
+    os_strncpy(hhour, ibuf+11, 2);
+    os_strncpy(mmin, ibuf+14, 2);
+    os_strncpy(sse, ibuf+17, 2);
+    
+    *year = atoi(yyear);
+    *mon = atoi(mmonth);
+    *day = atoi(dday);
+    *hour = atoi(hhour);
+    *min = atoi(mmin);
+    *se = atoi(sse);
+
+    return 0 ;
 }
 
 static int ICACHE_FLASH_ATTR
@@ -43,7 +59,7 @@ add_switch(char *times, char *ttime, char *enable)
         }
         if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
         {
-            sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
+            parse_data_time(ttime, &y, &mm, &d, &h, &m, &s);
         }
         else
         {
@@ -116,7 +132,7 @@ static ICACHE_FLASH_ATTR int add_scene(char *ttime, char *enable)
         }
         if (os_strlen(ttime) == 19) //"2017-10-24 10:24:00"
         {
-            sscanf(ttime, "%4d-%2d-%2d %2d:%2d:%2d", &y, &mm, &d, &h, &m, &s);
+            parse_data_time(ttime, &y, &mm, &d, &h, &m, &s);
         }
         else
         {

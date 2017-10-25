@@ -64,12 +64,11 @@ on_message_complete(http_parser *_)
         server_recv_handler(http_respons_buf, os_strlen(http_respons_buf));
     }
 
-    send_codec_encode(body, os_strlen(body), base64_body);
+    // MARK: 进行简单的加密发送
+    // send_codec_encode(body, os_strlen(body), base64_body);
 
     // MARK: 这里进行数据的回复
     os_sprintf(soc_send_buffer, REQUEST_HEAD, os_strlen(base64_body), base64_body);
-    // MARK: 进行简单的加密发送
-    
     espconn_send(&esp_conn, soc_send_buffer, os_strlen(soc_send_buffer));
 
     return 0;

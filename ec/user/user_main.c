@@ -12,7 +12,7 @@
 #define SIG_RG 3 // 进行注册
 #define SIG_LG 4 // 进行连接
 
-os_event_t ec_task_queue[4];
+static os_event_t ec_task_queue[1];
 
 
 static void ICACHE_FLASH_ATTR
@@ -55,11 +55,27 @@ extern void  send_codec_decode(char *buf, char *decode_out);
 void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
-    char json[128] = { 0 };
+    char json[256] = { 0 };
     ec_log("server_recv_data [%s] \r\n",data);
-    // send_codec_decode(data, json);
+    send_codec_decode(data, json);
+    ec_log("json_parse_config [%s] \r\n", json);
     // MARK: 这里解析配置数据
-    json_parse_config(json, &j_config, &w_config);
+    // json_parse_config(json, &j_config, &w_config);
+}
+void ICACHE_FLASH_ATTR iks_md5(const char *data, char *buf);
+void ICACHE_FLASH_ATTR
+http_register_jab(int re, char * appid) 
+{
+    uint32 chipid = 0; 
+    char reset[4] = {0}, acc[32] = { 0 }, sig[128] = { 0 }, mdsig[216] = { 0 };
+    chipid = system_get_chip_id();
+    os_sprintf(acc, "%d", chipid);
+    
+    os_sprintf(reset,"%d",re);
+    os_sprintf(sig, "%s%s%s%s", acc,"regeditForClient", appid, reset);
+    ec_log("http_register_jab sig %s \r\n", sig);
+    iks_md5(sig, mdsig);
+    http_request("http://192.168.11.236:80/hello.html", 0, mdsig, http_success, http_failure);
 }
 
 void ICACHE_FLASH_ATTR
@@ -77,8 +93,10 @@ ec_task(os_event_t *e)
         wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
         break;
     case SIG_RG:
+        
         ec_log(" register openfari\r\n");
-        http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
+        http_register_jab(0, "18627312312");
+        
         break;
     case SIG_LG:
         ec_log("login openfair\r\n");
@@ -92,7 +110,7 @@ system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
    
-    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 4);
+    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
    
     if (user_get_is_regisrer() == 1)
     {
@@ -172,7 +190,7 @@ void ICACHE_FLASH_ATTR
 user_init(void)
 {
     ec_log("user init ok main ----\r\n");
-
+    at_init();
 #if AT_CUSTOM
     // MARK: 注册系统AT指令
     // at_init();
@@ -182,6 +200,6 @@ user_init(void)
 
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
-    timer_init();
+    // timer_init();
     system_init_done_cb(system_on_done_cb);
 }
