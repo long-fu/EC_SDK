@@ -40,9 +40,9 @@ static char body[512] = {0};
 void ICACHE_FLASH_ATTR
 http_register_jab(char *url, int re, char *appid)
 {
-    uint32 chipid = 0;
+    
     char acc[16] = {0}, sig[128] = {0}, mdsig[256] = {0};
-
+    uint32 chipid = 0;
     chipid = system_get_chip_id();
     
     os_sprintf(acc, "%d", chipid);

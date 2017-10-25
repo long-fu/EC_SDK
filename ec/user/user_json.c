@@ -4,6 +4,8 @@
 #include "c_types.h"
 #include "user_json.h"
 #include "user_debug.h"
+#include "ip_addr.h"
+
 static int ICACHE_FLASH_ATTR 
 parse_data_time(const char *ibuf,
                     int *year, int *mon, int *day, int *hour, int *min, int *se)
@@ -184,7 +186,9 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
+            // ec_log("json port %d \r\n");
             jconfig->port = atoi(tmp);
+            ec_log("json port %d \r\n", jconfig->port);
         }
 
         t = cJSON_GetObjectItem(root, "jip");
@@ -192,7 +196,17 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
-            jconfig->ip.addr = atoi(tmp);
+            if(os_strlen(tmp)>4)
+            {
+                ec_log("xmpp ip %s\r\n",tmp);
+                jconfig->ip.addr = ipaddr_addr(tmp);
+                ec_log("xmpp ip %d\r\n", jconfig->ip.addr);
+            }
+            else
+            {
+                jconfig->ip.addr = 0;
+            }
+            
         }
 
         t = cJSON_GetObjectItem(root, "appid");
@@ -216,7 +230,15 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
-            os_memcpy(jconfig->host_name, tmp, os_strlen(tmp));
+            if(os_strlen(tmp)>1)
+            {
+                os_memcpy(jconfig->host_name, tmp, os_strlen(tmp));
+            }
+            else
+            {
+                // jconfig->host_name = NULL;
+            }
+            
         }
 
         t = cJSON_GetObjectItem(root, "jres");
@@ -226,6 +248,7 @@ json_parse_config(char *json,
             tmp = t->valuestring;
             os_memcpy(jconfig->resources, tmp, os_strlen(tmp));
         }
+        ec_log("-----json_parse_config %d \r\n", j_config.port);
         cJSON_Delete(root);
     }
     return 0;

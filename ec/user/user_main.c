@@ -45,6 +45,7 @@ server_recv_data(char *data, int len)
     ec_log("json_parse_config [%s] \r\n", json);
     // MARK: 这里解析配置数据
     json_parse_config(json, &j_config, &w_config, http_register_url);
+    ec_log("-----server_recv_data %d \r\n", j_config.port);
     // 配置完成 进行注册
     system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
 }
@@ -65,14 +66,22 @@ ec_task(os_event_t *e)
         wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
         break;
     case SIG_RG:
-
         ec_log(" register openfari\r\n");
-        http_register_jab( http_register_url , 0, "18627312312");
-
+        http_register_jab( http_register_url , 0, j_config.app_username);
         break;
     case SIG_LG:
-        ec_log("login openfair\r\n");
-        xmpp_init(&j_config);
+        {
+            uint32 chipid = 0;
+            char sid[16] = { 0 };
+            ec_log("login openfair\r\n");
+            chipid = system_get_chip_id();
+            os_sprintf(sid, "%d", chipid);
+            ec_log("clint id %s\r\n", sid);
+            ec_log("-----jconfig user %d \r\n", j_config.port);
+            os_memcpy(j_config.username, sid, os_strlen(sid));
+            os_memcpy(j_config.password, sid, os_strlen(sid));
+            xmpp_init(&j_config);
+        }
         break;
     }
 }

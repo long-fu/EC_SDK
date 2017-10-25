@@ -7,6 +7,8 @@
 #define AP_DEFINE_NAME "WSLP_"
 #define AP_DEFINE_PASSWORD "12345678"
 
+#define EC_VERSION "ec_v0.0.1"
+
 /// 支持AT指令
 #define AT_CUSTOM 0
 

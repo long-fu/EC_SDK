@@ -174,6 +174,7 @@ io_connect(iksparser *prs,
 	}
 	else
 	{
+		ec_log("xmpp soc ip %d\r\n", j_config.ip.addr);
 		os_memcpy(espconn_ptr.proto.tcp->remote_ip, &j_config.ip.addr, 4);
 		espconn_connect(&espconn_ptr);
 	}

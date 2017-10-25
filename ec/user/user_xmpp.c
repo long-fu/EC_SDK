@@ -209,7 +209,7 @@ on_presence()
 
 // MARK: 发送消息
 static int ICACHE_FLASH_ATTR
-on_message(char *subject, char *body, char *id, char *to) {
+ec_make_message(char *subject, char *body, char *id, char *to) {
 	iks *m;
 	m = iks_new("message");
 	iks_insert_attrib(m, "type", "normal");
@@ -241,7 +241,7 @@ on_receipt(char *to,char *id, char* subject, char *linkid, int result)
     os_sprintf(body,RECEIPT_M, result, cresult, linkid);
     send_codec_encode(body, os_strlen(body), ebody);
 
-    on_message(subject,ebody,id,to);
+    ec_make_message(subject,ebody,id,to);
     return IKS_FILTER_EAT;
 }
 
@@ -264,8 +264,10 @@ on_infomation(int power,int totalPower,int co2,int co,int pm25,int state)
 	send_codec_encode(body, os_strlen(body), ebody);
 	// TODO: 这里直接填入服务器地址
 	get_random_string(12, id);
-	on_message("initinfo", ebody, id,"to");
+	ec_make_message("initinfo", ebody, id,"to");
 }
+
+
 
 // MARK: 服务器发起同步数据
 #define ASYNCINFO_M "{\"act\":\"client\",\
@@ -286,7 +288,7 @@ on_asyncinfomation(int power,int totalPower,int co2,int co,int pm25,int state, c
 	send_codec_encode(body, os_strlen(body), ebody);
 	// TODO: 这里直接填入服务器地址
 	get_random_string(12, id);
-	on_message("async", ebody, id,"to");
+	ec_make_message("async", ebody, id,"to");
 }
 
 int ICACHE_FLASH_ATTR
@@ -303,6 +305,16 @@ on_bing(struct session *sess, ikspak *pak)
 	iks_delete(t);
 	// on_presence();
 	return IKS_FILTER_EAT;
+}
+
+int ICACHE_FLASH_ATTR
+on_message(struct session *sess, ikspak *pak)
+{
+	char *id,*body,*subject;
+	subject = iks_find_cdata(pak->x,"subject");
+	body = iks_find_cdata(pak->x, "body");
+	// TODO: 进行数据解析
+	// TODO: 进行对应操作
 }
 
 int ICACHE_FLASH_ATTR
@@ -354,6 +366,10 @@ j_setup_filter(struct session *sess)
 						IKS_RULE_SUBTYPE, IKS_TYPE_GET,
 						IKS_RULE_NS, IKS_NS_XMPP_PING,
 						IKS_RULE_DONE);
+
+	iks_filter_add_rule(my_filter, (iksFilterHook *)on_message, sess,
+						IKS_RULE_TYPE, IKS_PAK_MESSAGE,
+						IKS_RULE_DONE);
 }
 
 void ICACHE_FLASH_ATTR
@@ -376,12 +392,13 @@ j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *hos
 		// j_sess.acc = iks_id_new (iks_parser_stack (j_sess.prs), tmp);
 		// iks_free (tmp);
 		char tmp[32] = {0};
-		os_sprintf(tmp, "%s@%s/%s", username, j_config.domain, j_config.resources);
+		os_sprintf(tmp, "%s@%s/%s", username, j_config.domain, EC_VERSION);
 		j_sess.acc = iks_id_new(iks_parser_stack(j_sess.prs), tmp);
 	}
 	j_sess.pass = pass;
 	j_sess.set_roster = set_roster;
 	j_setup_filter(&j_sess);
+
 	iks_connect_tcp(j_sess.prs, host_name, j_config.port);
 	// switch (e) {
 	// 	case IKS_OK:
@@ -409,19 +426,30 @@ j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *hos
 void ICACHE_FLASH_ATTR
 xmpp_init(struct jabber_config *config)
 {
-	ec_log("xmpp_init ");
+	ec_log("xmpp_init \r\n");
 	if (config != NULL)
 	{
 		char full_jid[32] = {0};
 
-		os_memset(&j_config, 0x0, sizeof(&j_config));
+		// os_memset(&j_config, 0x0, sizeof(&j_config));
 		// MARK: 不能直接拷贝
 		// os_memcpy(&j_config, config, sizeof(&j_config));
 		{
+
+			// ec_log("j_config ip %d \r\n", j_config.ip.addr);
+			ec_log("j_config port %d \r\n", config->port);
+			// ec_log("j_config resources %s \r\n", j_config.resources);
+			// ec_log("j_config username %s \r\n", j_config.username);
+			// ec_log("j_config password %s \r\n", j_config.password);
+			// ec_log("j_config app_username %s \r\n", j_config.app_username);
+			// ec_log("j_config domain %s \r\n", j_config.domain);
+			// ec_log("j_config host_name %s\r\n", j_config.host_name);
+
+			// 单个初始化
 			j_config.ip.addr = config->ip.addr;
 			j_config.port = config->port;
 
-			os_memcpy(j_config.resources, config->resources, sizeof(config->resources));
+			os_memcpy(j_config.resources, EC_VERSION, os_strlen(EC_VERSION));
 			os_memcpy(j_config.username, config->username, sizeof(config->username));
 			os_memcpy(j_config.password, config->password, sizeof(config->password));
 			os_memcpy(j_config.app_username, config->app_username, sizeof(config->app_username));
@@ -438,9 +466,17 @@ xmpp_init(struct jabber_config *config)
 			ec_log("j_config host_name %s\r\n", j_config.host_name);
 		}
 		ec_log(" config is \r\n");
-		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, config->resources);
+		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, EC_VERSION);
 
-		j_connect(full_jid, config->password, 0, config->username, config->host_name);
+if(os_strlen(config->host_name)>5)
+{
+	j_connect(full_jid, config->password, 0, config->username, config->host_name);
+}
+else 
+{
+	j_connect(full_jid, config->password, 0, config->username, NULL);
+}
+		
 		return;
 	}
 	else if (jabber_get_config(&j_config))
