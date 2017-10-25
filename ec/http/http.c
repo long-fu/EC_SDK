@@ -45,7 +45,7 @@ on_message_complete(http_parser *_)
     // soc_close(socket_id);
     // GBC_sys_stop_timer(gbc_dm_timer);
 
-    ec_log("\r\n***MESSAGE COMPLETE***\r\n\r\n");
+    ec_log("\r\n*** http MESSAGE COMPLETE***\r\n\r\n");
     ec_log("\r\n>>>%s<<<\n\n", http_respons_buf);
 
     // MARK: 数据接收完成
@@ -134,7 +134,7 @@ e_http_recv(char *data, unsigned short len)
 {
 
     size_t parsed;
-    ec_log("jie shou dao de shu ju [%s]\r\n", data);
+    // ec_log("jie shou dao de shu ju [%s]\r\n", data);
     os_memcpy(recv_buf, data, len);
     parsed = http_parser_execute(&parser, &settings, recv_buf, len);
 }

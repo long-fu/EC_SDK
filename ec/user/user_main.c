@@ -84,7 +84,7 @@ system_on_done_cb(void)
 
     system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
 
-    if (user_get_is_regisrer() == 0)
+    if (user_get_is_regisrer() == 1)
     {
         ec_log("===== start login ==== \r\n");
         system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);

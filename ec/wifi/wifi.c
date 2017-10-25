@@ -91,32 +91,7 @@ wifi_connect(uint8_t *ssid, uint8_t *pass, WifiCallback cb)
 	wifi_station_connect();
 }
 
-int ICACHE_FLASH_ATTR
-get_random_string(int length, char *ouput)
-{
-	int flag, i;
-	// srand((unsigned)time(NULL));
-	for (i = 0; i < length - 1; i++)
-	{
-		flag = os_random() % 3;
-		switch (flag)
-		{
-		case 0:
-			ouput[i] = 'A' + os_random() % 26;
-			break;
-		case 1:
-			ouput[i] = 'a' + os_random() % 26;
-			break;
-		case 2:
-			ouput[i] = '0' + os_random() % 10;
-			break;
-		default:
-			ouput[i] = 'x';
-			break;
-		}
-	}
-	return 0;
-}
+
 
 void ICACHE_FLASH_ATTR
 wifi_ap_set(uint8_t *ssid, uint8_t *pass)

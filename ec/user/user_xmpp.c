@@ -207,14 +207,98 @@ on_presence()
 	return IKS_FILTER_EAT;
 }
 
+// MARK: 发送消息
+static int ICACHE_FLASH_ATTR
+on_message(char *subject, char *body, char *id, char *to) {
+	iks *m;
+	m = iks_new("message");
+	iks_insert_attrib(m, "type", "normal");
+	iks_insert_attrib(m, "to", to);
+	iks_insert_attrib(m, "id", id);
+	iks_insert_cdata(iks_insert(m, "subject"), subject, 0);
+	iks_insert_cdata(iks_insert(m, "body"), body, 0);
+	return IKS_FILTER_EAT;
+}
+
+// MARK: 发送回执消息
+#define RECEIPT_M "{\"act\":\"client\",\
+\"result\":\"%d\",\
+\"reason\":\"%s\",\
+\"linkid\":\"%s\"}"
+int ICACHE_FLASH_ATTR
+on_receipt(char *to,char *id, char* subject, char *linkid, int result)
+{
+	char cresult[32] = { 0 },body[64] = { 0 }, ebody[128] = { 0 };
+
+    if(result)
+    {
+        os_sprintf(cresult,"成功");
+    }
+    else
+    {
+        os_sprintf(cresult,"失败");
+    }
+    os_sprintf(body,RECEIPT_M, result, cresult, linkid);
+    send_codec_encode(body, os_strlen(body), ebody);
+
+    on_message(subject,ebody,id,to);
+    return IKS_FILTER_EAT;
+}
+
+// MARK: 主动发起数据同步
+#define INITINFO_M "{\"act\":\"client\",\
+\"power\":\"%d\",\
+\"totalPower\":\"%d\",\
+\"co2\":\"%d\",\
+\"co\":\"%d\",\
+\"pm25\":\"%d\",\
+\"state\":\"%d\"}"
+
+void ICACHE_FLASH_ATTR
+on_infomation(int power,int totalPower,int co2,int co,int pm25,int state)
+{
+
+	char id[16]= { 0 }, body[256] = { 0 }, ebody[512] = { 0 };
+	// TODO: 看是在这里直接调用接口 还是
+	os_sprintf(body, INITINFO_M, power, totalPower, co2, co, pm25, state);
+	send_codec_encode(body, os_strlen(body), ebody);
+	// TODO: 这里直接填入服务器地址
+	get_random_string(12, id);
+	on_message("initinfo", ebody, id,"to");
+}
+
+// MARK: 服务器发起同步数据
+#define ASYNCINFO_M "{\"act\":\"client\",\
+\"power\":\"%d\",\
+\"totalPower\":\"%d\",\
+\"co2\":\"%d\",\
+\"co\":\"%d\",\
+\"pm25\":\"%d\",\
+\"state\":\"%d\",\
+\"linkid\":\"%s\"}"
+
+void ICACHE_FLASH_ATTR
+on_asyncinfomation(int power,int totalPower,int co2,int co,int pm25,int state, char *linkid)
+{
+	char id[16]= { 0 }, body[256] = { 0 }, ebody[512] = { 0 };
+	// TODO: 看是在这里直接调用接口 还是
+	os_sprintf(body, ASYNCINFO_M, power, totalPower, co2, co, pm25, state, linkid);
+	send_codec_encode(body, os_strlen(body), ebody);
+	// TODO: 这里直接填入服务器地址
+	get_random_string(12, id);
+	on_message("async", ebody, id,"to");
+}
+
 int ICACHE_FLASH_ATTR
 on_bing(struct session *sess, ikspak *pak)
 {
 	iks *t;
+	char sid[16] = { 0 };
 	// INFO("---- on_bing --- \r\n");
 	// MARK: 创建一个新的session
+	get_random_string(12, sid);
 	t = iks_make_session();
-	iks_insert_attrib(t, "id", "sess_1");
+	iks_insert_attrib(t, "id", sid);
 	iks_send(sess->prs, t);
 	iks_delete(t);
 	// on_presence();

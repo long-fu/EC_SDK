@@ -45,4 +45,5 @@ void ICACHE_FLASH_ATTR xmpp_init(struct jabber_config *config);
 void ICACHE_FLASH_ATTR timer_init(void);
 
 void ICACHE_FLASH_ATTR http_register_jab(char *url,int re, char *appid);
+int ICACHE_FLASH_ATTR get_random_string(int length, char *ouput);
 #endif

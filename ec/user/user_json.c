@@ -302,7 +302,7 @@ json_parse_register(char *json)
     if (t->type == cJSON_String)
     {
         error_code = t->valuestring;
-        if (os_strcmp(error_code, "1") == 0)
+        if (os_strcmp(error_code, "0") == 0)
         {
             return 1;
         }
