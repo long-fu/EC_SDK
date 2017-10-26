@@ -262,7 +262,7 @@ on_infomation(int power,int totalPower,int co2,int co,int pm25,int state)
 	// TODO: 看是在这里直接调用接口 还是
 	os_sprintf(body, INITINFO_M, power, totalPower, co2, co, pm25, state);
 	send_codec_encode(body, os_strlen(body), ebody);
-	// TODO: 这里直接填入服务器地址
+	// TODO: 这里直接填入fullur;
 	get_random_string(12, id);
 	ec_make_message("initinfo", ebody, id,"to");
 }
