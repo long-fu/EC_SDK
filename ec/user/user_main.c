@@ -163,20 +163,29 @@ user_rf_pre_init(void)
     system_phy_freq_trace_enable(at_get_rf_auto_trace_from_flash());
 }
 
+///// test _At ..
+void ICACHE_FLASH_ATTR
+response_func(const char *str) 
+{
+    ec_log("----===test at===--\r\n%s\r\n", str);
+}
+
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
     ec_log("user init ok main ----\r\n");
-    at_init();
+    // at_init();
 #if AT_CUSTOM
 // MARK: 注册系统AT指令
-// at_init();
-// // MARK: 注册自定义AT指令
-// at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
+at_init();
+// MARK: 注册自定义AT指令
+at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
+// 响应所有的AT
+// at_register_response_func(response_func);
 #endif
 
     // MARK: 读取用户配置数据 必须在此处进行读取
-    CFG_Load();
+    // CFG_Load();
     // timer_init();
-    system_init_done_cb(system_on_done_cb);
+    // system_init_done_cb(system_on_done_cb);
 }

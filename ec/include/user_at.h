@@ -5,7 +5,7 @@
 #ifdef AT_CUSTOM
 #include "at_custom.h"
 
-extern at_funcationType at_custom_cmd[1];
+extern at_funcationType at_custom_cmd[11];
 #endif
 #endif
 

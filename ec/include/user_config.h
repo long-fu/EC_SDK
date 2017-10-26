@@ -10,7 +10,7 @@
 #define EC_VERSION "ec_v0.0.1"
 
 /// 支持AT指令
-#define AT_CUSTOM 0
+#define AT_CUSTOM 1
 
 /// LOG信息输出模式
 #define DEBUG_ON 1
