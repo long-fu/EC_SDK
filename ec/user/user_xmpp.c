@@ -445,15 +445,15 @@ xmpp_init(struct jabber_config *config)
 			// ec_log("j_config host_name %s\r\n", j_config.host_name);
 
 			// 单个初始化
-			// j_config.ip.addr = config->ip.addr;
-			// j_config.port = config->port;
+			j_config.ip.addr = config->ip.addr;
+			j_config.port = config->port;
 
-			// os_memcpy(j_config.resources, EC_VERSION, os_strlen(EC_VERSION));
-			// os_memcpy(j_config.username, config->username, sizeof(config->username));
-			// os_memcpy(j_config.password, config->password, sizeof(config->password));
-			// os_memcpy(j_config.app_username, config->app_username, sizeof(config->app_username));
-			// os_memcpy(j_config.domain, config->domain, sizeof(config->domain));
-			// os_memcpy(j_config.host_name, config->host_name, sizeof(config->host_name));
+			os_memcpy(j_config.resources, EC_VERSION, os_strlen(EC_VERSION));
+			os_memcpy(j_config.username, config->username, sizeof(config->username));
+			os_memcpy(j_config.password, config->password, sizeof(config->password));
+			os_memcpy(j_config.app_username, config->app_username, sizeof(config->app_username));
+			os_memcpy(j_config.domain, config->domain, sizeof(config->domain));
+			os_memcpy(j_config.host_name, config->host_name, sizeof(config->host_name));
 
 			// ec_log("j_config ip %d \r\n", j_config.ip.addr);
 			// ec_log("j_config port %d \r\n", j_config.port);

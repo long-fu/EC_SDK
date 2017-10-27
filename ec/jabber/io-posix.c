@@ -165,7 +165,7 @@ io_connect(iksparser *prs,
 	espconn_ptr.proto.tcp->local_port = espconn_port();
 	espconn_ptr.proto.tcp->remote_port = port;
 	espconn_ptr.reverse = prs;
-    ec_log("start io connent\r\n");
+    ec_log("start io connent port %d\r\n",port);
 	espconn_regist_connectcb(&espconn_ptr, on_connect_cb);
 	espconn_regist_reconcb(&espconn_ptr, on_recon_cb);
 	if (server != NULL)
