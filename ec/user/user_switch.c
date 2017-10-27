@@ -61,7 +61,7 @@ add_user_alarm(int ing, int on, int hour, int min)
 	user_alarm_cout ++ ;
 }
 
-static void ICACHE_FLASH_ATTR
+void ICACHE_FLASH_ATTR
 check_user_alarm(int wday, int hour, int min)
 {
     int i = 0;

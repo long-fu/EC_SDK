@@ -3,9 +3,9 @@
 
 #include "c_types.h"
 
-void  ICACHE_FLASH_ATTR stop_all_user_alarm();
-void  ICACHE_FLASH_ATTR add_user_alarm(int ing, int on, int hour, int min);
-void  ICACHE_FLASH_ATTR add_user_delay(int on, int delay);
-void  ICACHE_FLASH_ATTR  stop_all_user_delay(void);
-
+void ICACHE_FLASH_ATTR stop_all_user_alarm();
+void ICACHE_FLASH_ATTR add_user_alarm(int ing, int on, int hour, int min);
+void ICACHE_FLASH_ATTR add_user_delay(int on, int delay);
+void ICACHE_FLASH_ATTR stop_all_user_delay(void);
+void ICACHE_FLASH_ATTR check_user_alarm(int wday, int hour, int min);
 #endif

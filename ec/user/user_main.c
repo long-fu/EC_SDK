@@ -37,16 +37,16 @@ void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
 {
     char json[512] = {0};
-    ec_log("server_recv_data [%s] \r\n", data);
+    // ec_log("server_recv_data [%s] \r\n", data);
     // MARK: 数据解码
     send_codec_decode(data, json);
-    ec_log("json_parse_config [%s] \r\n", json);
+    // ec_log("json_parse_config [%s] \r\n", json);
     os_memset(&j_config, 0x0, sizeof(j_config));
     os_memset(&w_config, 0x0, sizeof(w_config));
-    // MARK: 这里解析配置数据
+    // MARK: 这里解析配置数据 WIFI(不做保存 系统会自动进行保存) - XMPP 配置消息
     json_parse_config(json, &j_config, &w_config, http_register_url);
     ec_log("-----server_recv_data %d \r\n", j_config.port);
-    // 配置完成 进行注册
+    // MARK: 发送WIFI 状态切换
     system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
 }
 /////////////////////////////////////
@@ -71,15 +71,6 @@ ec_task(os_event_t *e)
         break;
     case SIG_LG:
     {
-        uint32 chipid = 0;
-        char sid[16] = {0};
-        ec_log("login openfair\r\n");
-        chipid = system_get_chip_id();
-        os_sprintf(sid, "%d", chipid);
-        ec_log("clint id %s\r\n", sid);
-        ec_log("-----jconfig user %d \r\n", j_config.port);
-        os_memcpy(j_config.username, sid, os_strlen(sid));
-        os_memcpy(j_config.password, sid, os_strlen(sid));
         xmpp_init(&j_config);
     }
     break;
@@ -165,7 +156,7 @@ user_rf_pre_init(void)
 
 ///// test _At ..
 void ICACHE_FLASH_ATTR
-response_func(const char *str) 
+response_func(const char *str)
 {
     ec_log("----===test at===--\r\n%s\r\n", str);
 }
@@ -174,18 +165,15 @@ void ICACHE_FLASH_ATTR
 user_init(void)
 {
     ec_log("user init ok main ----\r\n");
-    // at_init();
 #if AT_CUSTOM
-// MARK: 注册系统AT指令
-at_init();
-// MARK: 注册自定义AT指令
-at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
-// 响应所有的AT
-// at_register_response_func(response_func);
+    // MARK: 注册系统AT指令
+    at_init();
+    // MARK: 注册自定义AT指令
+    at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
 #endif
 
     // MARK: 读取用户配置数据 必须在此处进行读取
-    // CFG_Load();
+    CFG_Load();
     // timer_init();
-    // system_init_done_cb(system_on_done_cb);
+    system_init_done_cb(system_on_done_cb);
 }

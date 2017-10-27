@@ -11,7 +11,7 @@
 char log_buffer[512];
 // #endif
 
-static int user_isRegisrer;
+static int user_isRegisrer = 0;
 
 /// 保存用户配置信息
 void ICACHE_FLASH_ATTR
@@ -21,7 +21,7 @@ CFG_Save(void)
 
 	spi_flash_erase_sector(CFG_LOCATION + 0);
 	spi_flash_erase_sector(CFG_LOCATION + 1);
-
+    user_isRegisrer = 1;
 	// MARK: 保存注册信息
 	// MARK: 保存XMPP配置信息
 	if (user_isRegisrer == 1)
@@ -53,7 +53,7 @@ int ICACHE_FLASH_ATTR
 user_get_is_regisrer(void)
 {
 	ec_log("user get register %d\r\n", user_isRegisrer);
-	return user_isRegisrer = 0;
+	return user_isRegisrer;
 }
 
 int ICACHE_FLASH_ATTR

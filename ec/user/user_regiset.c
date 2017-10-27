@@ -22,7 +22,14 @@ http_success(char *data, int len)
     ec_log("\r\n HTTP SUCCESS %d: [%s]\r\n", len, data);
     if (json_parse_register(data) == 1)
     {
+        uint32 chipid = 0;
+        char sid[16] = {0};
         ec_log("json_parse_register SUCCESS \r\n");
+        chipid = system_get_chip_id();
+        os_sprintf(sid, "%d", chipid);
+        os_memcpy(j_config.username, sid, os_strlen(sid));
+        os_memcpy(j_config.password, sid, os_strlen(sid));
+        CFG_Save();
         system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
     }
 }

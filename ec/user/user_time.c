@@ -109,7 +109,7 @@ ec_gmtime(const time_t *tim_p, struct tm *res)
 
   {
 
-    int hours, mins, secs,offset;
+    int hours, mins, secs, offset;
     // res->tm_isdst = 0;
     offset = -SECSPEGMT8;
     hours = offset / SECSPERHOUR;
@@ -215,11 +215,6 @@ ec_mktime(int year, int mon, int day, int hour, int min, int sec)
   return ret - SECSPEGMT8;
 }
 
-void ec_set_timestamp(uint32 t)
-{
-
-}
-
 uint32 ICACHE_FLASH_ATTR
 ec_get_timestamp()
 {
@@ -227,12 +222,9 @@ ec_get_timestamp()
   return 0;
 }
 
-
-
 void ICACHE_FLASH_ATTR
 check_time_func(void *arg)
 {
-
   system_timestamp = system_timestamp + 60;
   ec_log("system_timestamp %d\r\n", system_timestamp);
   // ec_log("system_get_time %d\r\n", system_get_time()); // 这里是开机时间 us
@@ -240,27 +232,27 @@ check_time_func(void *arg)
   // my_sntp_mktm_r(&system_timestamp, &res_buf, -8);
 
   // 发送任务进行对 定时 和 延时 进行判断
-  system_os_post(USER_TASK_PRIO_0, 0, 'a');
+  system_os_post(USER_TASK_PRIO_0, 0, NULL);
 }
 
-os_event_t time_task_queue;
+static os_event_t time_task_queue[1];
 
-void ICACHE_FLASH_ATTR 
-al(os_event_t *e)
+static void ICACHE_FLASH_ATTR
+alarm_clock_check(os_event_t *e)
 {
-  // 到现在是多久
-  // 加上定时器
-  //
-  ec_log("tash sldkjaskldsa\r\n");
+  uint32 t;
+  t = ec_get_timestamp();
+  ec_gmtime(t, &system_datetime);
+  check_user_alarm(system_datetime.tm_wday, system_datetime.tm_hour, system_datetime.tm_min);
 }
 
 void ICACHE_FLASH_ATTR
-timer_init(void)
+timer_init(uint32 t)
 {
-  ec_log("systime: %s %s\r\n", __DATE__, __TIME__); // 代码编译时间
-  system_timestamp = 1508578384;                     // s 为单位
+  // ec_log("systime: %s %s\r\n", __DATE__, __TIME__); // 代码编译时间
+  system_timestamp = t; // s 为单位
   os_timer_disarm(&system_time_timer);
   os_timer_setfn(&system_time_timer, (os_timer_func_t *)check_time_func, NULL);
   os_timer_arm(&system_time_timer, 60000, 1); // ms 单位
-  system_os_task(al, USER_TASK_PRIO_0, &time_task_queue, 3);
+  system_os_task(alarm_clock_check, USER_TASK_PRIO_0, time_task_queue, 1);
 }
