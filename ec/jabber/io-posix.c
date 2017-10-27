@@ -28,7 +28,7 @@ on_recon_cb(void *arg, sint8 errType)
 	struct espconn *esp = (struct espconn *)arg;
 	ec_log("espconn reconnect\r\n");
 	espconn_flag = FALSE;
-	espconn_connect(&espconn_ptr);
+	espconn_connect(esp);
 	reconnect_status = 1;
 	// TODO: 标识连接错误 - 可以进行重连
 }
@@ -40,7 +40,7 @@ on_discon_cb(void *arg)
 	ec_log("espconn disconnected\r\n");
 	espconn_flag = FALSE;
 	reconnect_status = 0;
-	espconn_connect(&espconn_ptr);
+	espconn_connect(esp);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -74,7 +74,7 @@ on_send_cb(void *arg)
 	{
 		int ret;
 		ec_log("io send::%s\r\n\r\n", espconn_buffer);
-		ret = espconn_send(&espconn_ptr, espconn_buffer, espconn_data_len);
+		ret = espconn_send(esp, espconn_buffer, espconn_data_len);
 		if (ret == 0)
 		{
 			espconn_data_len = 0;
@@ -118,58 +118,56 @@ static char soc_recv_buffer[2048];
 static void ICACHE_FLASH_ATTR
 on_recv(void *arg, char *pusrdata, unsigned short len)
 {
-	struct stream_data *data;
+
 	int ret;
 	struct espconn *esp = (struct espconn *)arg;
-
 	iksparser *prs = (iksparser *)esp->reverse;
 
-	data = (struct stream_data *)iks_user_data(prs);
-
+	struct stream_data *data = iks_user_data (prs);
+	
 	if(len > NET_IO_BUF_SIZE - 1)
 	{
 		ec_log("io recv::buff full\r\n\r\n");	
 	}
+	
 	os_memcpy(data->buf, pusrdata, len);
-	if (len < 0)
-		return;
-	if (len == 0)
-		return;
+
+	if (len < 0) return ;
+	if (len == 0) return ;
+
 	data->buf[len] = '\0';
-	// if (data->logHook)
-	// {
-	// 	data->logHook(data->user_data, pusrdata, len, 1);
-	// }
+	
+	if (data->logHook) data->logHook (data->user_data, pusrdata, len, 1);
+	
+
 	ec_log("io recv::%s\r\n\r\n", data->buf);
 	
 	ret = iks_parse(prs,(char *) data->buf, len, 0);
-	if (ret != IKS_OK)
-	{
-		return;
-	}
 
-	// if (!data->trans)
-	// {
-	// 	/* stream hook called iks_disconnect */
-	// 	return;
-	// }
-	// ec_log();
+	if (ret != IKS_OK) return ;
+	
+	if (!data->trans) {
+		/* stream hook called iks_disconnect */
+		// MARK: 这里需要重连
+		ec_log("disconnect\r\n");
+
+	}
 }
 
 static void ICACHE_FLASH_ATTR
 on_connect_cb(void *arg)
 {
 	struct espconn *esp = (struct espconn *)arg;
-	iksparser *prs = (iksparser *)espconn_ptr.reverse;
+	iksparser *prs = (iksparser *)esp->reverse;
 	ec_log("espconn connected\r\n");
 	// espconn_set_opt(esp,ESPCONN_COPY);
 	espconn_flag = TRUE;
 	espconn_data_len = 0;
 
 	// TODO: 标识TCP 连接成功
-	espconn_regist_disconcb(&espconn_ptr, on_discon_cb);
-	espconn_regist_recvcb(&espconn_ptr, on_recv);
-	espconn_regist_sentcb(&espconn_ptr, on_send_cb);
+	espconn_regist_disconcb(esp, on_discon_cb);
+	espconn_regist_recvcb(esp, on_recv);
+	espconn_regist_sentcb(esp, on_send_cb);
 
 	// if (reconnect_status == 0)
 	{
@@ -186,6 +184,8 @@ io_close(void *socket)
 	struct espconn *esp = (struct espconn *)socket;
 }
 
+
+static esp_tcp tcp;
 static int ICACHE_FLASH_ATTR
 io_connect(iksparser *prs,
 		   void **socketptr,
@@ -201,7 +201,7 @@ io_connect(iksparser *prs,
 	// espconn_ptr = (struct espconn *)os_zalloc(sizeof(struct espconn));
 	espconn_ptr.type = ESPCONN_TCP;
 	espconn_ptr.state = ESPCONN_NONE;
-	espconn_ptr.proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
+	espconn_ptr.proto.tcp = &tcp;
 	espconn_ptr.proto.tcp->local_port = espconn_port();
 	espconn_ptr.proto.tcp->remote_port = port;
 	espconn_ptr.reverse = prs;

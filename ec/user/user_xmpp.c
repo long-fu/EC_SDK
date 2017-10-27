@@ -378,12 +378,12 @@ j_connect(char *jabber_id, char *pass, int set_roster, char *username, char *hos
 {
 
 	ec_log("jabber connect \r\n");
-	os_memset(&j_sess, 0, sizeof(j_sess));
+	os_memset (&j_sess, 0, sizeof (j_sess));
+	j_sess.authorized = 0;
+	j_sess.prs = iks_stream_new (IKS_NS_CLIENT, &j_sess, (iksStreamHook *) on_stream);
+	if (1) iks_set_log_hook (j_sess.prs, (iksLogHook *) on_log);
+	j_sess.acc = iks_id_new (iks_parser_stack (j_sess.prs), jabber_id);
 
-	j_sess.prs = iks_stream_new(IKS_NS_CLIENT, &j_sess, (iksStreamHook *)on_stream);
-
-	// if (opt_log) iks_set_log_hook (sess.prs, (iksLogHook *) on_log);
-	j_sess.acc = iks_id_new(iks_parser_stack(j_sess.prs), jabber_id);
 	if (NULL == j_sess.acc->resource)
 	{
 		/* user gave no resource name, use the default */
