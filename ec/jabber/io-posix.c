@@ -12,7 +12,7 @@
 #include "os_type.h"
 #include "mem.h"
 
-
+#include "user_debug.h"
 
 // #include <errno.h>
 #ifdef _WIN32
@@ -63,7 +63,7 @@ queue_push(char *data, int len)
 	int font = 0;
 	if (queue_count == QUEUE_MAX - 1) 
 	{
-		INFO("QUEUE MAX");
+		ec_log("QUEUE MAX");
 		return 0;
 	}
 	queue_count ++ ;
@@ -82,7 +82,7 @@ queue_put()
 	struct queue_node *t;
 	if (quque_isEmty()) 
 	{
-		INFO("queue is empty");
+		ec_log("queue is empty");
 		return NULL;
 	}	
 	t = &queue_list[queue_head];
@@ -133,16 +133,16 @@ LOCAL void ICACHE_FLASH_ATTR
 e_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 {
 	struct espconn *pConn = (struct espconn *)arg;
-    INFO("server name %s\r\n", name);
+    ec_log("server name %s\r\n", name);
 	// MQTT_Client* client = (MQTT_Client *)pConn->reverse;
 	if (ipaddr == NULL)
 	{
-		INFO("DNS: Found , but got no ip, try to reconnect\r\n");
+		ec_log("DNS: Found , but got no ip, try to reconnect\r\n");
 		// client->connState = TCP_RECONNECT_REQ;
 		return;
 	}
 
-	INFO("DNS: found ip %d.%d.%d.%d\r\n",
+	ec_log("DNS: found ip %d.%d.%d.%d\r\n",
 	     *((uint8 *) &ipaddr->addr),
 	     *((uint8 *) &ipaddr->addr + 1),
 	     *((uint8 *) &ipaddr->addr + 2),
@@ -152,7 +152,7 @@ e_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 	{
 		os_memcpy(client_connect->proto.tcp->remote_ip, &ipaddr->addr, 4);
 		// MARK: 域名解析成功 进行连接
-		INFO("TCP: connecting...\r\n");
+		ec_log("TCP: connecting...\r\n");
 		espconn_connect(client_connect);
 	}
 
@@ -163,7 +163,7 @@ void ICACHE_FLASH_ATTR
 e_tcpclient_delete(struct espconn * mqttClient)
 {
 	if (client_connect != NULL) {
-		INFO("Free memory\r\n");
+		ec_log("Free memory\r\n");
 		espconn_delete(client_connect);
 		if (client_connect->proto.tcp)
 			os_free(client_connect->proto.tcp);
@@ -195,22 +195,35 @@ e_tcpclient_recv(void *arg, char *pdata, unsigned short len)
 	iksparser* prs = (iksparser *)pCon->reverse;
 	struct stream_data *data = iks_user_data (prs);
 
-	INFO("--------tcp recv start--------\r\n");
-	INFO("%d:[%s] \r\n",len,pdata);
-	INFO("--------tcp recv end----------\r\n");
+	ec_log("--------tcp recv start--------\r\n");
+	ec_log("%d:[%s] \r\n",len,pdata);
+	ec_log("--------tcp recv end----------\r\n");
 
 	if (len < 0) return ;
 	if (len == 0) return ;
 	// data->buf[len] = '\0';
 	if (data->logHook) data->logHook (data->user_data, pdata, len, 1);
+	// 可能需要缓存数据
 	ret = iks_parse (prs, pdata, len, 0);
 	if (ret != IKS_OK) return ;
 	if (!data->trans) {
 		/* stream hook called iks_disconnect */
 		// MARK: 这里需要重连
-		INFO("disconnect\r\n");
+		ec_log("disconnect\r\n");
 		// return IKS_NET_NOCONN;
 	}
+}
+
+static void ICACHE_FLASH_ATTR
+on_recon_cb(void *arg, sint8 errType)
+{
+	struct espconn *esp = (struct espconn *)arg;
+	ec_log("espconn reconnect error=%d\r\n",errType);
+
+	// espconn_flag = FALSE;
+	// espconn_connect(esp);
+	// reconnect_status = 1;
+	// TODO: 标识连接错误 - 可以进行重连
 }
 
 void ICACHE_FLASH_ATTR
@@ -219,15 +232,15 @@ e_tcpclient_connect_cb(void *arg)
 	struct espconn *pCon = (struct espconn *)arg;
 	iksparser* prs = (iksparser *)pCon->reverse;
 
-	INFO("TCP connect success \r\n");
+	ec_log("TCP connect success \r\n");
 	espconn_regist_disconcb(pCon, e_tcpclient_discon_cb);
 	espconn_regist_recvcb(pCon, e_tcpclient_recv);////////
 	espconn_regist_sentcb(pCon, e_tcpclient_sent_cb);///////
-	// INFO("MQTT: Connected to broker %s:%d\r\n", client->host, client->port);
+	// ec_log("MQTT: Connected to broker %s:%d\r\n", client->host, client->port);
 
 
 	// 根据状态进行消息的发送 发送第一条消息头
-	if (connect_status == 10) // 发送第一条消息
+	// if (connect_status == 10) // 发送第一条消息
 	{
 		iks_send_header (prs, IKS_JABBER_DOMAIN);
 	}
@@ -249,7 +262,7 @@ io_close (void *socket)
 static int ICACHE_FLASH_ATTR
 io_connect (iksparser *prs, void **socketptr, const char *server, int port)
 {
-	INFO("TCP init ... %s:%d \r\n",server,port);
+	ec_log("TCP init ... %s:%d \r\n",server,port);
 
 	if (client_connect) {
 		e_tcpclient_delete(client_connect);
@@ -265,7 +278,19 @@ io_connect (iksparser *prs, void **socketptr, const char *server, int port)
 	client_connect->reverse = prs;
 	//MARK: 注册连接成功的回调
 	espconn_regist_connectcb(client_connect, e_tcpclient_connect_cb);
-    espconn_gethostbyname(client_connect, server, &client_ip, e_dns_found);
+	espconn_regist_reconcb(client_connect, on_recon_cb);
+	if(server != NULL)
+	{
+		espconn_gethostbyname(client_connect, server, &client_ip, e_dns_found);
+	}
+	else
+	{
+		os_memcpy(client_connect->proto.tcp->remote_ip, &j_config.ip.addr, 4);
+		// MARK: 域名解析成功 进行连接
+		ec_log("TCP: connecting...\r\n");
+		espconn_connect(client_connect);
+	}
+    
 	return IKS_OK;
 }
 
@@ -276,32 +301,32 @@ static int send_isSuccess = 1;
 void ICACHE_FLASH_ATTR
 e_tcpclient_sent_cb(void *arg)
 {
-	INFO("TCP: Sent success and over #############\r\n");
+	ec_log("TCP: Sent success and over #############\r\n");
 	send_isSuccess = 1;
 	if (quque_isEmty()) 
 	{
     // TODO: 等待 不做任何处理
-	INFO("send cb idel\r\n");
+	ec_log("send cb idel\r\n");
     } 
 	else 
 	{
 	// TODO: 进行下一跳数据发送 
 	    sint8 ret;
 	 	struct queue_node *t;
-		INFO("send next\r\n");
+		
 
 		t = queue_put();
 
-		// INFO("send next data len  %x %d [%s] ", t, t->len, t->data);
-
+		// ec_log("send next data len  %x %d [%s] ", t, t->len, t->data);
+		ec_log("send next %s\r\n", t->data);
 		ret = espconn_send(client_connect,(uint8 *) t->data,(uint16) t->len);
-		// INFO("\r\n--------------tcp send start-----------------\r\n");
-		// INFO("\r\n%d:[%s]\r\n",t->len,t->data);
-		// INFO("\r\n--------------tcp send end-----------------\r\n\r\n");
+		// ec_log("\r\n--------------tcp send start-----------------\r\n");
+		// ec_log("\r\n%d:[%s]\r\n",t->len,t->data);
+		// ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
 		os_free(t->data);
 		t->len = 0;
 		t->data = NULL;
-		// INFO("#### espconn_send result %d\r\n",ret);
+		// ec_log("#### espconn_send result %d\r\n",ret);
 		if(ESPCONN_OK == ret) {
 		// MARK: 发送成功
 		
@@ -330,17 +355,17 @@ io_send (void *socket, const char *data, size_t len)
 	// my_data = os_malloc(len);
 	// os_memcpy(my_data, data, len);
 	// queue_push(my_data, len)
-	// INFO("io send soc empty  -- %d success --  %d\r\n ", quque_isEmty(),send_isSuccess);
+	// ec_log("io send soc empty  -- %d success --  %d\r\n ", quque_isEmty(),send_isSuccess);
 	if (quque_isEmty() && send_isSuccess == 1) 
 	{
 		// TODO: 进行数据发送 
 		send_isSuccess = 0;
-		// INFO("queu is first send messsage\r\n");
+		// ec_log("queu is first send messsage\r\n");
 		ret = espconn_send(client_connect,(uint8 *) data,(uint16) len);	
-		// INFO("\r\n--------------tcp send start-----------------\r\n");
-		// INFO("\r\n%d:[%s]\r\n",len,data);
-		// INFO("\r\n--------------tcp send end-----------------\r\n\r\n");
-		// INFO("#### espconn_send result %d\r\n",ret);
+		// ec_log("\r\n--------------tcp send start-----------------\r\n");
+		// ec_log("\r\n%d:[%s]\r\n",len,data);
+		// ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
+		// ec_log("#### espconn_send result %d\r\n",ret);
 		
 	
 		if(ESPCONN_OK == ret) {
@@ -361,7 +386,7 @@ io_send (void *socket, const char *data, size_t len)
 	{
 		// TODO: 进行add_queue 
 		char *my_data;
-		INFO("init add queueu \r\n");
+		ec_log("init add queueu \r\n");
 		my_data = os_malloc(len);
 		os_memset(my_data,0x0,len);
 		os_memcpy(my_data, data, len);
@@ -374,28 +399,7 @@ io_send (void *socket, const char *data, size_t len)
 static int ICACHE_FLASH_ATTR
 io_recv (void *socket, char *buffer, size_t buf_len, int timeout)
 {
-	// int sock = (int) socket;
-	// fd_set fds;
-	// struct timeval tv, *tvptr;
-	// int len;
 
-	// tv.tv_sec = 0;
-	// tv.tv_usec = 0;
-
-	// FD_ZERO (&fds);
-	// FD_SET (sock, &fds);
-	// tv.tv_sec = timeout;
-	// if (timeout != -1) tvptr = &tv; else tvptr = NULL;
-	// if (select (sock + 1, &fds, NULL, NULL, tvptr) > 0) {
-	// 	do {
-	// 		len = recv (sock, buffer, buf_len, 0);
-	// 	} while (len == -1 && (errno == EAGAIN || errno == EINTR));
-	// 	if (len > 0) {
-	// 		return len;
-	// 	} else if (len <= 0) {
-	// 		return -1;
-	// 	}
-	// }
 	return 0;
 }
 

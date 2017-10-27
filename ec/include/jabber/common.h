@@ -14,7 +14,7 @@
 #include "os_type.h"
 #include "mem.h"
 
-#include "debug.h"
+#include "user_debug.h"
 #include "user_config.h"
 
 #include "queue.h"
