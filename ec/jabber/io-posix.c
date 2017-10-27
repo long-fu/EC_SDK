@@ -218,7 +218,7 @@ static void ICACHE_FLASH_ATTR
 on_recon_cb(void *arg, sint8 errType)
 {
 	struct espconn *esp = (struct espconn *)arg;
-	ec_log("espconn reconnect error=%d\r\n",errType);
+	ec_log("espconn reconnect error= %d\r\n",errType);
 
 	// espconn_flag = FALSE;
 	// espconn_connect(esp);
@@ -362,9 +362,9 @@ io_send (void *socket, const char *data, size_t len)
 		send_isSuccess = 0;
 		// ec_log("queu is first send messsage\r\n");
 		ret = espconn_send(client_connect,(uint8 *) data,(uint16) len);	
-		// ec_log("\r\n--------------tcp send start-----------------\r\n");
-		// ec_log("\r\n%d:[%s]\r\n",len,data);
-		// ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
+		ec_log("\r\n--------------tcp send start-----------------\r\n");
+		ec_log("\r\n%d:[%s]\r\n",len,data);
+		ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
 		// ec_log("#### espconn_send result %d\r\n",ret);
 		
 	
