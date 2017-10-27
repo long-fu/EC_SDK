@@ -162,7 +162,7 @@ on_connect_cb(void *arg)
 	struct espconn *esp = (struct espconn *)arg;
 	iksparser *prs = (iksparser *)espconn_ptr.reverse;
 	ec_log("espconn connected\r\n");
-	espconn_set_opt(esp,ESPCONN_COPY);
+	// espconn_set_opt(esp,ESPCONN_COPY);
 	espconn_flag = TRUE;
 	espconn_data_len = 0;
 
@@ -195,7 +195,9 @@ io_connect(iksparser *prs,
 	int ret;
 
 	espconn_disconnect(&espconn_ptr);
-
+	espconn_delete(&espconn_ptr);
+	
+	os_memset(&espconn_ptr,0x0,sizeof(espconn_ptr));
 	// espconn_ptr = (struct espconn *)os_zalloc(sizeof(struct espconn));
 	espconn_ptr.type = ESPCONN_TCP;
 	espconn_ptr.state = ESPCONN_NONE;

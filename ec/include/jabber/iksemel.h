@@ -7,6 +7,7 @@
 #ifndef IKSEMEL_H
 #define IKSEMEL_H 1
 #include "c_types.h"
+#define USE_DEFAULT_IO 1
 #ifdef __cplusplus
 // #include <cstddef>	/* size_t for C++ */
 extern "C" {
@@ -240,9 +241,9 @@ int ICACHE_FLASH_ATTR iks_send (iksparser *prs, iks *x);
 int ICACHE_FLASH_ATTR iks_send_raw (iksparser *prs, const char *xmlstr);
 void ICACHE_FLASH_ATTR iks_disconnect (iksparser *prs);
 // int iks_has_tls (void);
-int ICACHE_FLASH_ATTR iks_is_secure (iksparser *prs);
-int ICACHE_FLASH_ATTR iks_start_tls (iksparser *prs);
-int ICACHE_FLASH_ATTR iks_start_sasl (iksparser *prs, enum ikssasltype type, char *username, char *pass);
+// int ICACHE_FLASH_ATTR iks_is_secure (iksparser *prs);
+// int ICACHE_FLASH_ATTR iks_start_tls (iksparser *prs);
+// int ICACHE_FLASH_ATTR iks_start_sasl (iksparser *prs, enum ikssasltype type, char *username, char *pass);
 
 /*****  jabber  *****/
 

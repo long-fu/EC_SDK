@@ -89,33 +89,34 @@ on_stream(struct session *sess, int type, iks *node)
 	switch (type)
 	{
 	case IKS_NODE_START:
-		if (opt_use_tls && !iks_is_secure(sess->prs))
-		{
-			iks_start_tls(sess->prs);
-			break;
-		}
-		if (!opt_use_sasl)
-		{
-			iks *x;
-			char *sid = NULL;
+		// if (opt_use_tls && !iks_is_secure(sess->prs))
+		// {
+		// 	iks_start_tls(sess->prs);
+		// 	break;
+		// }
+		// if (!opt_use_sasl)
+		// {
+		// 	iks *x;
+		// 	char *sid = NULL;
 
-			if (!opt_use_plain)
-				sid = iks_find_attrib(node, "id");
-			x = iks_make_auth(sess->acc, sess->pass, sid);
-			iks_insert_attrib(x, "id", "auth");
-			iks_send(sess->prs, x);
-			iks_delete(x);
-		}
+		// 	if (!opt_use_plain)
+		// 		sid = iks_find_attrib(node, "id");
+		// 	x = iks_make_auth(sess->acc, sess->pass, sid);
+		// 	iks_insert_attrib(x, "id", "auth");
+		// 	iks_send(sess->prs, x);
+		// 	iks_delete(x);
+		// }
 		break;
 
 	case IKS_NODE_NORMAL:
 		if (os_strcmp("stream:features", iks_name(node)) == 0)
 		{
 			sess->features = iks_stream_features(node);
-			if (opt_use_sasl)
+
+			// if (opt_use_sasl)
 			{
-				if (opt_use_tls && !iks_is_secure(sess->prs))
-					break;
+				// if (opt_use_tls && !iks_is_secure(sess->prs))
+				// 	break;
 				if (sess->authorized)
 				{
 					iks *t;
@@ -312,6 +313,7 @@ on_message(struct session *sess, ikspak *pak)
 	char *id, *body, *subject;
 	subject = iks_find_cdata(pak->x, "subject");
 	body = iks_find_cdata(pak->x, "body");
+	ec_log("\r\n ==== on_message ===== \r\n");
 	// TODO: 进行数据解析
 	// TODO: 进行对应操作
 }
