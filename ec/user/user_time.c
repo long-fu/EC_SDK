@@ -1,8 +1,10 @@
 #include "user_config.h"
+#include "os_type.h"
 #include "user_interface.h"
 #include "user_debug.h"
 #include "osapi.h"
 #include "user_time.h"
+
 
 #define SECSPERMIN 60L
 #define MINSPERHOUR 60L
@@ -232,7 +234,7 @@ check_time_func(void *arg)
   // my_sntp_mktm_r(&system_timestamp, &res_buf, -8);
 
   // 发送任务进行对 定时 和 延时 进行判断
-  system_os_post(USER_TASK_PRIO_0, 0, NULL);
+  system_os_post(USER_TASK_PRIO_0, 0, 0);
 }
 
 static os_event_t time_task_queue[1];
@@ -242,7 +244,7 @@ alarm_clock_check(os_event_t *e)
 {
   uint32 t;
   t = ec_get_timestamp();
-  ec_gmtime(t, &system_datetime);
+  ec_gmtime(&t, &system_datetime);
   check_user_alarm(system_datetime.tm_wday, system_datetime.tm_hour, system_datetime.tm_min);
 }
 

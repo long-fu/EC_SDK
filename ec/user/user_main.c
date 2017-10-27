@@ -15,16 +15,18 @@ wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
-        if (user_get_is_regisrer() == 1)
-        {
-            ec_log("===== login ==== \r\n");
-            system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
-        }
-        else
-        {
-            ec_log("===== register  ==== \r\n");
-            system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
-        }
+        // 单独测试XMPP次文件不进行合并
+        system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        // if (user_get_is_regisrer() == 1)
+        // {
+        //     ec_log("===== login ==== \r\n");
+        //     system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        // }
+        // else
+        // {
+        //     ec_log("===== register  ==== \r\n");
+        //     system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
+        // }
     }
     else
     {
@@ -51,6 +53,14 @@ server_recv_data(char *data, int len)
 }
 /////////////////////////////////////
 
+struct jabber_config x_config = {
+    .port = 5222,
+    .username = "18682435851",
+    .password = "18682435851",
+    .domain = "xsxwrd.com",
+    .host_name = "gm.xsxwrd.com"
+};
+
 void ICACHE_FLASH_ATTR
 ec_task(os_event_t *e)
 {
@@ -71,7 +81,8 @@ ec_task(os_event_t *e)
         break;
     case SIG_LG:
     {
-        xmpp_init(&j_config);
+        // 测试代码
+        xmpp_init(&x_config);
     }
     break;
     }
@@ -84,16 +95,18 @@ system_on_done_cb(void)
 
     system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
 
-    if (user_get_is_regisrer() == 1)
-    {
-        ec_log("===== start login ==== \r\n");
-        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
-    }
-    else
-    {
-        ec_log("===== start ec sdk  ==== \r\n");
-        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
-    }
+    // 单独测试XMPP
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    // if (user_get_is_regisrer() == 1)
+    // {
+    //     ec_log("===== start login ==== \r\n");
+    //     system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    // }
+    // else
+    // {
+    //     ec_log("===== start ec sdk  ==== \r\n");
+    //     system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
+    // }
 }
 
 /******************************************************************************

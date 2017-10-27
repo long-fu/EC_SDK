@@ -19,6 +19,7 @@
         "os_type.h": "c",
         "c_types.h": "c",
         "user_json.h": "c",
-        "wifi.h": "c"
+        "wifi.h": "c",
+        "ip_addr.h": "c"
     }
 }
