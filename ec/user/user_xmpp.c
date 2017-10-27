@@ -2,29 +2,6 @@
 #include "common.h"
 #include "iksemel.h"
 
-// #ifdef HAVE_GETOPT_LONG
-// #include <getopt.h>
-// #endif
-
-// #ifdef _WIN32
-// #include <winsock.h>
-// #endif
-
-// #ifdef HAVE_GETOPT_LONG
-// static struct option longopts[] = {
-// 	{ "backup", required_argument, 0, 'b' },
-// 	{ "restore", required_argument, 0, 'r' },
-// 	{ "file", required_argument, 0, 'f' },
-// 	{ "timeout", required_argument, 0, 't' },
-// 	{ "secure", 0, 0, 's' },
-// 	{ "sasl", 0, 0, 'a' },
-// 	{ "plain", 0, 0, 'p' },
-// 	{ "log", 0, 0, 'l' },
-// 	{ "help", 0, 0, 'h' },
-// 	{ "version", 0, 0, 'V' },
-// 	{ 0, 0, 0, 0 }
-// };
-// #endif
 
 /* stuff we keep per session */
 struct session
@@ -49,9 +26,9 @@ iksfilter *my_filter;
 int opt_timeout = 30;
 
 /* connection flags */
-int opt_use_tls;
-int opt_use_sasl;
-int opt_use_plain;
+// int opt_use_tls;
+// int opt_use_sasl;
+// int opt_use_plain;
 // int opt_log;
 
 struct jabber_config j_config;
@@ -63,6 +40,25 @@ j_error(char *msg)
 	// exit (2);
 }
 
+void ICACHE_FLASH_ATTR
+ec_keepalive(void *arg)
+{
+	iks *t;
+	char id[16] = { 0 };
+	// ec_log("---- on_ping --- \r\n");
+	// id = pak->id;
+	get_random_string(12, id);
+	t = iks_new("iq");
+	iks_insert_attrib(t, "type", "get");
+	iks_insert_attrib(t, "id", id);
+	iks_insert_attrib(t, "from", j_sess.acc->full);
+	iks_insert_attrib(t, "to", j_sess.acc->server);
+	iks_insert_attrib(iks_insert(t, "ping"), "xmlns", IKS_NS_XMPP_PING);
+	iks_send(j_sess.prs, t);
+	iks_delete(t);
+}
+
+static os_timer_t ping_time_timer;
 int ICACHE_FLASH_ATTR
 on_result(struct session *sess, ikspak *pak)
 {
@@ -78,6 +74,11 @@ on_result(struct session *sess, ikspak *pak)
 	// 	iks_send (sess->prs, my_roster);
 	// }
 	on_presence();
+	// MARK: 这里表示XMPP连接成功
+	// TODO: 用一个定时器发送pong消息来实现soc保活措施
+	os_timer_disarm(&ping_time_timer);
+	os_timer_setfn(&ping_time_timer, (os_timer_func_t *)ec_keepalive, NULL);
+	os_timer_arm(&ping_time_timer, 60000, 1); // ms 单位
 	return IKS_FILTER_EAT;
 }
 
@@ -192,6 +193,9 @@ on_ping(struct session *sess, ikspak *pak)
 	t = iks_new("iq");
 	iks_insert_attrib(t, "type", "set");
 	iks_insert_attrib(t, "id", id);
+	// iks_insert_attrib(t, "to", id);
+	iks_insert_attrib(t, "from", j_sess.acc->full);
+	iks_insert_attrib(t, "to", j_sess.acc->server);
 	iks_insert_attrib(iks_insert(t, "pong"), "xmlns", IKS_NS_XMPP_PONG);
 	iks_send(sess->prs, t);
 	iks_delete(t);
