@@ -320,13 +320,13 @@ iks_connect_via (iksparser *prs, const char *server, int port, const char *serve
 	return IKS_NET_NOTSUPP;
 #endif
 }
-extern int connect_status;
+// extern int connect_status;
 int ICACHE_FLASH_ATTR
 iks_connect_with (iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans)
 {
 	struct stream_data *data = iks_user_data (prs);
 	int ret;
-	INFO(" iks_connect_with \r\n");
+	// ec_log(" iks_connect_with \r\n");
 	if (!trans->connect) return IKS_NET_NOTSUPP;
 
 	if (!data->buf) {
@@ -338,7 +338,7 @@ iks_connect_with (iksparser *prs, const char *server, int port, const char *serv
  	// MARK: 开始进行连接
 	ret = trans->connect (prs, &data->sock, server, port);
 	
-    connect_status = 10;
+    // connect_status = 10;
 
 	// MARK: 创建连接判断
 	// if (ret != 0) 
@@ -438,7 +438,7 @@ iks_send_header (iksparser *prs, const char *to)
 int ICACHE_FLASH_ATTR
 iks_send (iksparser *prs, iks *x)
 {
-	// INFO("\r\n iks_send =&&&&&&= \r\n");
+	// ec_log("\r\n iks_send =&&&&&&= \r\n");
 	return iks_send_raw (prs, iks_string (iks_stack (x), x));
 }
 
@@ -458,7 +458,7 @@ iks_send_raw (iksparser *prs, const char *xmlstr)
 
 	// TODO: 数据发送
 
-	// INFO("iks_send_raw %x == endclb", data->trans->send);
+	// ec_log("iks_send_raw %x == endclb", data->trans->send);
 	ret = data->trans->send (data->sock, xmlstr, os_strlen (xmlstr));
 	// if (ret) return ret;
 	if (data->logHook) data->logHook (data->user_data, xmlstr, os_strlen (xmlstr), 0);
