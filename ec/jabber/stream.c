@@ -516,7 +516,7 @@ iks_send_header(iksparser *prs, const char *to)
 				 "<stream:stream xmlns:stream='http://etherx.jabber.org/streams' xmlns='"
 				 "%s' to='%s' version='1.0'>",
 			data->name_space, to);
-	ec_log("header [ %s ]\r\n",msg);
+	// ec_log("header [ %s ]\r\n",msg);
 	err = iks_send_raw(prs, msg);
 	iks_free(msg);
 	if (err)
@@ -544,7 +544,7 @@ iks_send_raw(iksparser *prs, const char *xmlstr)
 	}
 	else
 	{
-		ec_log("iks_send_raw soc\r\n");
+		// ec_log("iks_send_raw soc\r\n");
 		ret = data->trans->send(data->sock, xmlstr, os_strlen(xmlstr));
 		if (ret)
 			return ret;

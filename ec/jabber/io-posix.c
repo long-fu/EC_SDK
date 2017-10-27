@@ -20,6 +20,7 @@ static uint8 espconn_buffer[ESPCONN_BUFFER_SIZE];
 static uint32 espconn_data_len = 0;
 static bool espconn_flag = FALSE;
 
+static int reconnect_status = 0;
 
 static void ICACHE_FLASH_ATTR
 on_recon_cb(void *arg, sint8 errType)
@@ -28,7 +29,7 @@ on_recon_cb(void *arg, sint8 errType)
 	ec_log("espconn reconnect\r\n");
 	espconn_flag = FALSE;
 	espconn_connect(&espconn_ptr);
-
+	reconnect_status = 1;
 	// TODO: 标识连接错误 - 可以进行重连
 }
 
@@ -38,7 +39,8 @@ on_discon_cb(void *arg)
 	struct espconn *esp = (struct espconn *)arg;
 	ec_log("espconn disconnected\r\n");
 	espconn_flag = FALSE;
-	// espconn_connect(esp);
+	reconnect_status = 0;
+	espconn_connect(&espconn_ptr);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -67,9 +69,11 @@ on_send_cb(void *arg)
 {
 	struct espconn *esp = (struct espconn *)arg;
 	espconn_flag = TRUE;
+	ec_log("on_send_cb\r\n");
 	if (espconn_data_len)
 	{
 		int ret;
+		ec_log("io send::%s\r\n\r\n", espconn_buffer);
 		ret = espconn_send(&espconn_ptr, espconn_buffer, espconn_data_len);
 		if (ret == 0)
 		{
@@ -87,9 +91,29 @@ on_send_cb(void *arg)
 		{
 			// TODO: 未找到参数 espconn 对应的网络传输
 		}
+		ec_log("espconn_send re %d\r\n", ret);
 	}
 }
 
+struct stream_data
+{
+	iksparser *prs;
+	ikstack *s;
+	ikstransport *trans;
+	char *name_space;
+	void *user_data;
+	const char *server;
+	iksStreamHook *streamHook;
+	iksLogHook *logHook;
+	iks *current;
+	char *buf;
+	void *sock;
+	unsigned int flags;
+	char *auth_username;
+	char *auth_pass;
+	struct ikstls_data *tlsdata;
+};
+static char soc_recv_buffer[2048];
 // MARK: 数据解析入口
 static void ICACHE_FLASH_ATTR
 on_recv(void *arg, char *pusrdata, unsigned short len)
@@ -102,16 +126,23 @@ on_recv(void *arg, char *pusrdata, unsigned short len)
 
 	data = (struct stream_data *)iks_user_data(prs);
 
+	if(len > NET_IO_BUF_SIZE - 1)
+	{
+		ec_log("io recv::buff full\r\n\r\n");	
+	}
+	os_memcpy(data->buf, pusrdata, len);
 	if (len < 0)
 		return;
 	if (len == 0)
 		return;
-	pusrdata[len] = '\0';
+	data->buf[len] = '\0';
 	// if (data->logHook)
 	// {
 	// 	data->logHook(data->user_data, pusrdata, len, 1);
 	// }
-	ret = iks_parse(prs, pusrdata, len, 0);
+	ec_log("io recv::%s\r\n\r\n", data->buf);
+	
+	ret = iks_parse(prs,(char *) data->buf, len, 0);
 	if (ret != IKS_OK)
 	{
 		return;
@@ -140,8 +171,12 @@ on_connect_cb(void *arg)
 	espconn_regist_recvcb(&espconn_ptr, on_recv);
 	espconn_regist_sentcb(&espconn_ptr, on_send_cb);
 
-	// TODO: 可以发送消息 这部分如果是没有断开一次连接可以不进行连接
-	iks_send_header(prs, j_config.domain);
+	// if (reconnect_status == 0)
+	{
+	    // TODO: 可以发送消息 这部分如果是没有断开一次连接可以不进行连接
+	    iks_send_header(prs, j_config.domain);
+	}
+
 	
 }
 
@@ -158,6 +193,9 @@ io_connect(iksparser *prs,
 		   int port)
 {
 	int ret;
+
+	espconn_disconnect(&espconn_ptr);
+
 	// espconn_ptr = (struct espconn *)os_zalloc(sizeof(struct espconn));
 	espconn_ptr.type = ESPCONN_TCP;
 	espconn_ptr.state = ESPCONN_NONE;
@@ -165,7 +203,7 @@ io_connect(iksparser *prs,
 	espconn_ptr.proto.tcp->local_port = espconn_port();
 	espconn_ptr.proto.tcp->remote_port = port;
 	espconn_ptr.reverse = prs;
-    ec_log("start io connent port %d\r\n",port);
+    // ec_log("start io connent port %d\r\n",port);
 	espconn_regist_connectcb(&espconn_ptr, on_connect_cb);
 	espconn_regist_reconcb(&espconn_ptr, on_recon_cb);
 	if (server != NULL)
@@ -174,7 +212,7 @@ io_connect(iksparser *prs,
 	}
 	else
 	{
-		ec_log("xmpp soc ip %d\r\n", j_config.ip.addr);
+		// ec_log("xmpp soc ip %d\r\n", j_config.ip.addr);
 		os_memcpy(espconn_ptr.proto.tcp->remote_ip, &j_config.ip.addr, 4);
 		espconn_connect(&espconn_ptr);
 	}
@@ -197,17 +235,17 @@ static int ICACHE_FLASH_ATTR
 io_send(void *socket, const char *data, size_t len)
 {
 	struct espconn *esp = (struct espconn *)socket;
-    ec_log("io send [ %s ] \r\n", data);
+    
 	if ((data == NULL) || (len == 0))
 	{
 		return -1;
 	}
-    ec_log("io send\r\n");
+    // ec_log("io send\r\n");
 	if (espconn_flag)
 	{
 		int ret;
+		ec_log("io send::%s\r\n\r\n", data);
 		ret = espconn_send(&espconn_ptr, (uint8 *)data, len);
-		ec_log("espconn_send re %d\r\n", ret);
 		if (ret == 0)
 		{
 			espconn_flag = FALSE;
@@ -215,7 +253,7 @@ io_send(void *socket, const char *data, size_t len)
 		}
 		else if (ret == ESPCONN_MEM)
 		{
-			// TODO: 空间不⾜
+			// TODO: 空间不足
 		}
 		else if (ret == ESPCONN_MAXNUM)
 		{
@@ -225,6 +263,7 @@ io_send(void *socket, const char *data, size_t len)
 		{
 			// TODO: 未找到参数 espconn 对应的⽹络传输
 		}
+		ec_log("espconn_send re %d\r\n", ret);
 	}
 	else
 	{
