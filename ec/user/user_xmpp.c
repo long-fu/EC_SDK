@@ -187,7 +187,7 @@ on_ping(struct session *sess, ikspak *pak)
 {
 	iks *t;
 	char *id;
-	// INFO("---- on_ping --- \r\n");
+	// ec_log("---- on_ping --- \r\n");
 	id = pak->id;
 	t = iks_new("iq");
 	iks_insert_attrib(t, "type", "set");
@@ -296,7 +296,7 @@ on_bing(struct session *sess, ikspak *pak)
 {
 	iks *t;
 	char sid[16] = {0};
-	// INFO("---- on_bing --- \r\n");
+	// ec_log("---- on_bing --- \r\n");
 	// MARK: 创建一个新的session
 	get_random_string(12, sid);
 	t = iks_make_session();
