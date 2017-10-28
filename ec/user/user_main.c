@@ -24,9 +24,9 @@ wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
-        xmpp_init(&x_config);
+        // xmpp_init(&x_config);
         // 单独测试XMPP次文件不进行合并
-        // system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
         // if (user_get_is_regisrer() == 1)
         // {
         //     ec_log("===== login ==== \r\n");
@@ -96,10 +96,10 @@ system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
 
-    // system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
-    wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
+    // wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
     // 单独测试XMPP
-    // system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
     // if (user_get_is_regisrer() == 1)
     // {
     //     ec_log("===== start login ==== \r\n");

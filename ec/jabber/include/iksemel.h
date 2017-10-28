@@ -253,12 +253,12 @@ enum ikssasltype {
 };
 
 // MARK: JABBER config
-#define IKS_JABBER_PORT 5222
-#define IKS_JABBER_HOSTNAME "gm.xsxwrd.com"
+// #define IKS_JABBER_PORT 5222
+// #define IKS_JABBER_HOSTNAME "gm.xsxwrd.com"
 
-// MARK:  服务器的域名 资源
-#define IKS_JABBER_DOMAIN "xsxwrd.com"
-#define IKS_JABBER_RESOURCE "junyan"
+// // MARK:  服务器的域名 资源
+// #define IKS_JABBER_DOMAIN "xsxwrd.com"
+// #define IKS_JABBER_RESOURCE "junyan"
 
 typedef int (iksStreamHook)(void *user_data, int type, iks *node);
 typedef void (iksLogHook)(void *user_data, const char *data, size_t size, int is_incoming);
