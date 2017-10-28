@@ -28,7 +28,7 @@ on_recon_cb(void *arg, sint8 errType)
 	struct espconn *esp = (struct espconn *)arg;
 	ec_log("espconn reconnect error=%d\r\n",errType);
 	espconn_flag = FALSE;
-	espconn_connect(esp);
+	espconn_connect(&espconn_ptr);
 	reconnect_status = 1;
 	// TODO: 标识连接错误 - 可以进行重连
 }
@@ -40,7 +40,7 @@ on_discon_cb(void *arg)
 	ec_log("espconn disconnected\r\n");
 	espconn_flag = FALSE;
 	reconnect_status = 0;
-	espconn_connect(esp);
+	espconn_connect(&espconn_ptr);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -74,7 +74,7 @@ on_send_cb(void *arg)
 	{
 		int ret;
 		ec_log("io send::%s\r\n=============================", espconn_buffer);
-		ret = espconn_send(esp, espconn_buffer, espconn_data_len);
+		ret = espconn_send(&espconn_ptr, espconn_buffer, espconn_data_len);
 		ec_log("%d\r\n\rn", ret);
 		if (ret == 0)
 		{
@@ -171,40 +171,27 @@ struct stream_data
 static char soc_recv_buffer[2048];
 // MARK: 数据解析入口
 static void ICACHE_FLASH_ATTR
-on_recv(void *arg, char *pusrdata, unsigned short len)
+on_recv(void *arg, char *pdata, unsigned short len)
 {
 
 	int ret;
-	struct espconn *esp = (struct espconn *)arg;
-	iksparser *prs = (iksparser *)esp->reverse;
-
+	struct espconn *pCon = (struct espconn *)arg;
+	iksparser* prs = (iksparser *)pCon->reverse;
 	struct stream_data *data = iks_user_data (prs);
-	
-	if(len > NET_IO_BUF_SIZE - 1)
-	{
-		ec_log("io recv::buff full\r\n\r\n");	
-	}
-	
-	os_memcpy(data->buf, pusrdata, len);
+
+	ec_log("io recv:: %s\r\n\r\n",pdata);
 
 	if (len < 0) return ;
 	if (len == 0) return ;
-
-	data->buf[len] = '\0';
-	
-	if (data->logHook) data->logHook (data->user_data, pusrdata, len, 1);
-	
-
-	ec_log("io recv::%s\r\n\r\n", data->buf);
-	
-	ret = iks_parse(prs,(char *) data->buf, len, 0);
-
+	// data->buf[len] = '\0';
+	if (data->logHook) data->logHook (data->user_data, pdata, len, 1);
+	ret = iks_parse (prs, pdata, len, 0);
 	if (ret != IKS_OK) return ;
-	
 	if (!data->trans) {
 		/* stream hook called iks_disconnect */
 		// MARK: 这里需要重连
 		ec_log("disconnect\r\n");
+		// return IKS_NET_NOCONN;
 	}
 }
 int keepalive = 10;
@@ -220,16 +207,16 @@ on_connect_cb(void *arg)
 	espconn_data_len = 0;
 
 	// TODO: 标识TCP 连接成功
-	espconn_regist_disconcb(esp, on_discon_cb);
-	espconn_regist_recvcb(esp, on_recv);
-	espconn_regist_sentcb(esp, on_send_cb);
-	espconn_set_keepalive(esp, ESPCONN_KEEPIDLE, &keepalive);
-	ret = espconn_set_keepalive(esp, ESPCONN_KEEPINTVL, &keepalive);
-	// if ()
-	// {
+	espconn_regist_disconcb(&espconn_ptr, on_discon_cb);
+	espconn_regist_recvcb(&espconn_ptr, on_recv);
+	espconn_regist_sentcb(&espconn_ptr, on_send_cb);
+	// espconn_set_keepalive(esp, ESPCONN_KEEPIDLE, &keepalive);
+	// ret = espconn_set_keepalive(esp, ESPCONN_KEEPINTVL, &keepalive);
+	// // if ()
+	// // {
 
-	// }
-	ec_log("ret == %d \r\n",ret);
+	// // }
+	// ec_log("ret == %d \r\n",ret);
 	// if (reconnect_status == 0)
 	{
 	    // TODO: 可以发送消息 这部分如果是没有断开一次连接可以不进行连接
@@ -275,20 +262,21 @@ io_connect(iksparser *prs,
 	{
 		// ec_log("xmpp soc ip %d\r\n", j_config.ip.addr);
 		os_memcpy(espconn_ptr.proto.tcp->remote_ip, &j_config.ip.addr, 4);
-		espconn_connect(&espconn_ptr);
+		ret = espconn_connect(&espconn_ptr);
+		if (ret)
+		{
+		   // TODO: 连接成功
+		   *socketptr = (void*)&espconn_ptr;
+		   return IKS_OK;
+		}
+		else
+		{
+		// TODO: 连接失败
+		}
 	}
 
-	ret = espconn_connect(&espconn_ptr);
-	if (ret)
-	{
-		// TODO: 连接成功
-		*socketptr = (void*)&espconn_ptr;
-		return IKS_OK;
-	}
-	else
-	{
-		// TODO: 连接失败
-	}
+	// ret = espconn_connect(&espconn_ptr);
+
 	return IKS_OK;
 }
 
