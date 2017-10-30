@@ -10,7 +10,6 @@
 char http_register_url[64];
 static os_event_t ec_task_queue[1];
 
-
 struct jabber_config x_config = {
     .port = 5222,
     .username = "18682435851",
