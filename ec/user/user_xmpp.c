@@ -786,12 +786,12 @@ on_ping(struct session *sess, ikspak *pak)
 	// ec_log("---- on_ping --- \r\n");
 	id = pak->id;
 	t = iks_new("iq");
-	iks_insert_attrib(t, "type", "set");
+	iks_insert_attrib(t, "type", "result");
 	iks_insert_attrib(t, "id", id);
 	// iks_insert_attrib(t, "to", id);
 	iks_insert_attrib(t, "from", j_sess.acc->full);
 	iks_insert_attrib(t, "to", j_sess.acc->server);
-	iks_insert_attrib(iks_insert(t, "pong"), "xmlns", IKS_NS_XMPP_PONG);
+	// iks_insert_attrib(iks_insert(t, "pong"), "xmlns", IKS_NS_XMPP_PONG);
 	iks_send(sess->prs, t);
 	iks_delete(t);
 	return IKS_FILTER_EAT;

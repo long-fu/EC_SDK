@@ -60,18 +60,19 @@ quque_isEmty()
 static int ICACHE_FLASH_ATTR
 queue_push(char *data, int len) 
 {
-	int font = 0;
+	// int font = 0;
 	if (queue_count == QUEUE_MAX - 1) 
 	{
 		ec_log("QUEUE MAX");
 		return 0;
 	}
 	queue_count ++ ;
+
+	queue_list[queue_font].len = len;
+	queue_list[queue_font].data = data;
 	queue_font ++ ;
-	font = queue_font % QUEUE_MAX;
-	queue_list[font].len = len;
-	queue_list[font].data = data;
-	queue_font = font;
+	queue_font = queue_font % QUEUE_MAX;
+	// queue_font = font;
 	return 1;
 }
 
@@ -318,7 +319,7 @@ e_tcpclient_sent_cb(void *arg)
 		t = queue_put();
 
 		// ec_log("send next data len  %x %d [%s] ", t, t->len, t->data);
-		ec_log("send next %s\r\n", t->data);
+		ec_log("send next %d::%s\r\n", t->len, t->data);
 		ret = espconn_send(client_connect,(uint8 *) t->data,(uint16) t->len);
 		// ec_log("\r\n--------------tcp send start-----------------\r\n");
 		// ec_log("\r\n%d:[%s]\r\n",t->len,t->data);
@@ -362,9 +363,9 @@ io_send (void *socket, const char *data, size_t len)
 		send_isSuccess = 0;
 		// ec_log("queu is first send messsage\r\n");
 		ret = espconn_send(client_connect,(uint8 *) data,(uint16) len);	
-		ec_log("\r\n--------------tcp send start-----------------\r\n");
-		ec_log("\r\n%d:[%s]\r\n",len,data);
-		ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
+		// ec_log("\r\n--------------tcp send start-----------------\r\n");
+		ec_log("\r\nio_send-%d::%s=%d\r\n",len, data, ret);
+		// ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
 		// ec_log("#### espconn_send result %d\r\n",ret);
 		
 	
@@ -386,10 +387,11 @@ io_send (void *socket, const char *data, size_t len)
 	{
 		// TODO: 进行add_queue 
 		char *my_data;
-		ec_log("init add queueu \r\n");
+
 		my_data = os_malloc(len);
-		os_memset(my_data,0x0,len);
+		os_memset(my_data, 0x0, len);
 		os_memcpy(my_data, data, len);
+		ec_log("add queue::%s \r\n",data);
 		queue_push(my_data, len);
 	}
 
