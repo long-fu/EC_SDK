@@ -143,11 +143,11 @@ e_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 		return;
 	}
 
-	ec_log("DNS: found ip %d.%d.%d.%d\r\n",
-	     *((uint8 *) &ipaddr->addr),
-	     *((uint8 *) &ipaddr->addr + 1),
-	     *((uint8 *) &ipaddr->addr + 2),
-	     *((uint8 *) &ipaddr->addr + 3));
+	// ec_log("DNS: found ip %d.%d.%d.%d\r\n",
+	//      *((uint8 *) &ipaddr->addr),
+	//      *((uint8 *) &ipaddr->addr + 1),
+	//      *((uint8 *) &ipaddr->addr + 2),
+	//      *((uint8 *) &ipaddr->addr + 3));
 
 	if (client_ip.addr == 0 && ipaddr->addr != 0)
 	{
@@ -196,9 +196,9 @@ e_tcpclient_recv(void *arg, char *pdata, unsigned short len)
 	iksparser* prs = (iksparser *)pCon->reverse;
 	struct stream_data *data = iks_user_data (prs);
 
-	ec_log("--------tcp recv start--------\r\n");
-	ec_log("%d:[%s] \r\n",len,pdata);
-	ec_log("--------tcp recv end----------\r\n");
+	// ec_log("--------tcp recv start--------\r\n");
+	ec_log("io recv %d \r\n", len);
+	// ec_log("--------tcp recv end----------\r\n");
 
 	if (len < 0) return ;
 	if (len == 0) return ;
@@ -302,7 +302,7 @@ static int send_isSuccess = 1;
 void ICACHE_FLASH_ATTR
 e_tcpclient_sent_cb(void *arg)
 {
-	ec_log("TCP: Sent success and over #############\r\n");
+	ec_log("TCP: Sent success \r\n");
 	send_isSuccess = 1;
 	if (quque_isEmty()) 
 	{
@@ -319,11 +319,12 @@ e_tcpclient_sent_cb(void *arg)
 		t = queue_put();
 
 		// ec_log("send next data len  %x %d [%s] ", t, t->len, t->data);
-		ec_log("send next %d::%s\r\n", t->len, t->data);
+		
 		ret = espconn_send(client_connect,(uint8 *) t->data,(uint16) t->len);
 		// ec_log("\r\n--------------tcp send start-----------------\r\n");
 		// ec_log("\r\n%d:[%s]\r\n",t->len,t->data);
 		// ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
+		ec_log("send next ret %d len %d \r\n", ret, t->len);
 		os_free(t->data);
 		t->len = 0;
 		t->data = NULL;
@@ -364,7 +365,7 @@ io_send (void *socket, const char *data, size_t len)
 		// ec_log("queu is first send messsage\r\n");
 		ret = espconn_send(client_connect,(uint8 *) data,(uint16) len);	
 		// ec_log("\r\n--------------tcp send start-----------------\r\n");
-		ec_log("\r\nio_send-%d::%s=%d\r\n",len, data, ret);
+		ec_log("\r\n io_send- %d::=%d\r\n",len, ret);
 		// ec_log("\r\n--------------tcp send end-----------------\r\n\r\n");
 		// ec_log("#### espconn_send result %d\r\n",ret);
 		
@@ -374,6 +375,16 @@ io_send (void *socket, const char *data, size_t len)
 		// client->keepAliveTick = 0;
 		// client->connState = MQTT_DATA;
 		// system_os_post(MQTT_TASK_PRIO, 0, (os_param_t)client);
+	    }
+	    else if (ret == ESPCONN_MAXNUM)
+	    {
+		char *my_data;
+
+		my_data = os_malloc(len);
+		os_memset(my_data, 0x0, len);
+		os_memcpy(my_data, data, len);
+		ec_log("add queue::%d \r\n",len);
+		queue_push(my_data, len);
 	    }
 		else 
 		{
@@ -391,7 +402,7 @@ io_send (void *socket, const char *data, size_t len)
 		my_data = os_malloc(len);
 		os_memset(my_data, 0x0, len);
 		os_memcpy(my_data, data, len);
-		ec_log("add queue::%s \r\n",data);
+		ec_log("add queue::%d \r\n",len);
 		queue_push(my_data, len);
 	}
 

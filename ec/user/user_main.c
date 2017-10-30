@@ -180,8 +180,8 @@ response_func(const char *str)
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
-    ec_log("user init ok main ----\r\n");
-#if AT_CUSTOM
+    at_port_print("user_init \r\n");
+#if 1
     // MARK: 注册系统AT指令
     at_init();
     // MARK: 注册自定义AT指令
