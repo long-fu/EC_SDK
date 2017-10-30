@@ -10,13 +10,23 @@
 char http_register_url[64];
 static os_event_t ec_task_queue[1];
 
+
+struct jabber_config x_config = {
+    .port = 5222,
+    .username = "18682435851",
+    .password = "18682435851",
+    .domain = "xsxwrd.com",
+    .host_name = "gm.xsxwrd.com"
+};
+
 static void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
+        xmpp_init(&x_config);
         // 单独测试XMPP次文件不进行合并
-        system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        // system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
         // if (user_get_is_regisrer() == 1)
         // {
         //     ec_log("===== login ==== \r\n");
@@ -53,13 +63,6 @@ server_recv_data(char *data, int len)
 }
 /////////////////////////////////////
 
-struct jabber_config x_config = {
-    .port = 5222,
-    .username = "18682435851",
-    .password = "18682435851",
-    .domain = "xsxwrd.com",
-    .host_name = "gm.xsxwrd.com"
-};
 
 void ICACHE_FLASH_ATTR
 ec_task(os_event_t *e)
@@ -93,10 +96,10 @@ system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
 
-    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
-
+    // system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
+    wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
     // 单独测试XMPP
-    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    // system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
     // if (user_get_is_regisrer() == 1)
     // {
     //     ec_log("===== start login ==== \r\n");

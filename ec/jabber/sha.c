@@ -17,7 +17,7 @@ struct iksha_struct {
 	unsigned int lenhi, lenlo;
 };
 
-iksha *
+iksha * ICACHE_FLASH_ATTR
 iks_sha_new (void)
 {
 	iksha *sha;
@@ -28,7 +28,7 @@ iks_sha_new (void)
 	return sha;
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_sha_reset (iksha *sha)
 {
 	os_memset (sha, 0, sizeof (iksha));
@@ -39,7 +39,7 @@ iks_sha_reset (iksha *sha)
 	sha->hash[4] = 0xc3d2e1f0;
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_sha_hash (iksha *sha, const unsigned char *data, size_t len, int finish)
 {
 	unsigned char pad[8];
@@ -67,7 +67,7 @@ iks_sha_hash (iksha *sha, const unsigned char *data, size_t len, int finish)
 	sha_buffer (sha, pad, 8);
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_sha_print (iksha *sha, char *hash)
 {
 	int i;
@@ -79,13 +79,13 @@ iks_sha_print (iksha *sha, char *hash)
 	}
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_sha_delete (iksha *sha)
 {
 	iks_free (sha);
 }
 
-void
+void ICACHE_FLASH_ATTR
 iks_sha (const char *data, char *hash)
 {
 	iksha *sha;
@@ -96,7 +96,7 @@ iks_sha (const char *data, char *hash)
 	iks_free (sha);
 }
 
-static void
+static void ICACHE_FLASH_ATTR
 sha_buffer (iksha *sha, const unsigned char *data, int len)
 {
 	int i;
@@ -124,7 +124,7 @@ sha_buffer (iksha *sha, const unsigned char *data, int len)
 		A = TMP; \
 	}
 
-static void
+static void ICACHE_FLASH_ATTR
 sha_calculate (iksha *sha)
 {
 	int i;

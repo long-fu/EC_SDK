@@ -73,7 +73,7 @@ struct iksparser_struct {
 	unsigned int uni_char;
 };
 
-iksparser *ICACHE_FLASH_ATTR
+iksparser * ICACHE_FLASH_ATTR
 iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook)
 {
 	iksparser *prs;
@@ -87,7 +87,7 @@ iks_sax_new (void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook)
 	return prs;
 }
 
-iksparser *ICACHE_FLASH_ATTR
+iksparser * ICACHE_FLASH_ATTR
 iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *cdataHook, iksDeleteHook *deleteHook)
 {
 	iksparser *prs;
@@ -103,13 +103,13 @@ iks_sax_extend (ikstack *s, void *user_data, iksTagHook *tagHook, iksCDataHook *
 	return prs;
 }
 
-ikstack *ICACHE_FLASH_ATTR
+ikstack * ICACHE_FLASH_ATTR
 iks_parser_stack (iksparser *prs)
 {
 	return prs->s;
 }
 
-void *ICACHE_FLASH_ATTR
+void * ICACHE_FLASH_ATTR
 iks_user_data (iksparser *prs)
 {
 	return prs->user_data;
@@ -140,11 +140,12 @@ stack_init (iksparser *prs)
 	return 1;
 }
 
+typedef long off_t;
 static int ICACHE_FLASH_ATTR
 stack_expand (iksparser *prs, int len)
 {
 	size_t need;
-	int diff;
+	off_t diff;
 	char *tmp;
 	need = len - (prs->stack_max - prs->stack_pos);
 	if (need < prs->stack_max) {

@@ -97,16 +97,16 @@ espconn_on_connect_cb(void *arg)
     // MARK: 进行后续的注册回调
     
 
-    // INFO("espconn_on_connect_cb 00 %d\r\n",ret);
+    // ec_log("espconn_on_connect_cb 00 %d\r\n",ret);
     // 注册 TCP 连接正常断开成功的回调函数
     ret = espconn_regist_disconcb(espconn_ptr, espconn_on_discon_cb);
-    // INFO("espconn_on_connect_cb 11 %d\r\n",ret);
+    // ec_log("espconn_on_connect_cb 11 %d\r\n",ret);
     // 注册成功接收网络数据的回调函数
     ret = espconn_regist_recvcb(espconn_ptr, espconn_on_recv);
-    // INFO("espconn_on_connect_cb 22 %d\r\n",ret);
+    // ec_log("espconn_on_connect_cb 22 %d\r\n",ret);
     // 注册网络数据发送成功的回调函数
     ret = espconn_regist_sentcb(espconn_ptr, espconn_on_send_cb);
-    // INFO("espconn_on_connect_cb 33 %d\r\n",ret);
+    // ec_log("espconn_on_connect_cb 33 %d\r\n",ret);
     // TODO: 这里可以进行数据的发送
     soc_connect_status_handler(1);
 }
@@ -260,7 +260,7 @@ e_soc_creat(char *host,
     // else
     // {
     //     // MARK: 进行域名解析
-    //     // INFO("on gethostbyname %s\r\n",host);
+    //     // ec_log("on gethostbyname %s\r\n",host);
     //     // MARK: 进行域名解析 - 解析后会回调结果
     //     // TODO: 对返回值进行判断
     //     espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
