@@ -545,23 +545,23 @@ j_error (char *msg)
 int ICACHE_FLASH_ATTR
 on_result (struct session *sess, ikspak *pak)
 {
-	iks *x;
+	// iks *x;
 
-	ec_log("---- on_result --- \r\n");
-	if (sess->set_roster == 0) {
-		ec_log("---- on_result ---0 \r\n");
-		// x = iks_make_iq (IKS_TYPE_GET, IKS_NS_ROSTER);
-		// iks_insert_attrib (x, "id", "roster");
-		// iks_send (sess->prs, x);
-		// iks_delete (x);
+	// // ec_log("---- on_result --- \r\n");
+	// if (sess->set_roster == 0) {
+	// 	// ec_log("---- on_result ---0 \r\n");
+	// 	// x = iks_make_iq (IKS_TYPE_GET, IKS_NS_ROSTER);
+	// 	// iks_insert_attrib (x, "id", "roster");
+	// 	// iks_send (sess->prs, x);
+	// 	// iks_delete (x);
 		
-	} else {
-		ec_log("---- on_result --- 1\r\n");
-		// iks_insert_attrib (my_roster, "type", "set");
-		// iks_send (sess->prs, my_roster);
-		// iks_delete (x);
-	}
-	ec_log("---- on_result --- 2\r\n");
+	// } else {
+	// 	// ec_log("---- on_result --- 1\r\n");
+	// 	// iks_insert_attrib (my_roster, "type", "set");
+	// 	// iks_send (sess->prs, my_roster);
+	// 	// iks_delete (x);
+	// }
+	// // ec_log("---- on_result --- 2\r\n");
 	on_presence();
 	return IKS_FILTER_EAT;
 }
@@ -803,9 +803,43 @@ on_message(struct session *sess, ikspak *pak)
 	char *id, *body, *subject;
 	subject = iks_find_cdata(pak->x, "subject");
 	body = iks_find_cdata(pak->x, "body");
+
 	ec_log("\r\n ==== on_message ===== \r\n");
+
 	// TODO: 进行数据解析
 	// TODO: 进行对应操作
+
+    if (os_strcmp(subject,"switch") == 0)
+    {
+    	// TODO: 服务器下发开关
+    	int ret, t;
+        char linkid[32] = { 0 };
+    	ret = json_parse_switch(body, linkid, &t);
+    	if(t == 1)
+    	{
+    		// TODO: 发送回执
+    	}
+
+    }
+    else if (os_strcmp(subject,"async") == 0)
+    {
+    	// TODO: 服务器请求同步数据
+    	int ret;
+    	// json_parse_switch(body,char *linkid, );
+    }
+    else if (os_strcmp(subject,"commamd") == 0)
+    {
+    	// TODO: 服务器下发操作指令
+    	int ret;
+    	// json_parse_switch(body,char *linkid, );
+    }
+    else if (os_strcmp(subject,"initinfo") == 0)
+    {
+    	// TODO: 服务器下发操作指令
+    	int ret;
+    	// json_parse_switch(body,char *linkid, );
+    }
+    return IKS_FILTER_EAT;
 }
 
 int ICACHE_FLASH_ATTR
@@ -885,7 +919,7 @@ j_setup_filter (struct session *sess)
 
     iks_filter_add_rule(my_filter, (iksFilterHook *)on_message, sess,
 		IKS_RULE_TYPE, IKS_PAK_MESSAGE,
-		IKS_RULE_DONE);		
+		IKS_RULE_DONE);
 
 	ec_log("=========== j_setup_filter end =========== \r\n");
 }

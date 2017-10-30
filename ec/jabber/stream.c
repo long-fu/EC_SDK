@@ -326,18 +326,15 @@ iks_connect_with (iksparser *prs, const char *server, int port, const char *serv
 {
 	struct stream_data *data = iks_user_data (prs);
 	int ret;
-	ec_log(" iks_connect_with \r\n");
+	// ec_log(" iks_connect_with \r\n");
 	if (!trans->connect) return IKS_NET_NOTSUPP;
 
 	if (!data->buf) {
 		data->buf = iks_stack_alloc (data->s, NET_IO_BUF_SIZE);
 		if (NULL == data->buf) return IKS_NOMEM;
 	}
-
-	
  	// MARK: 开始进行连接
 	ret = trans->connect (prs, &data->sock, server, port);
-	
     // connect_status = 10;
 
 	// MARK: 创建连接判断

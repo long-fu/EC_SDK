@@ -19,7 +19,7 @@
 static soc_connect_status_callback soc_connect_status_handler = NULL;
 static soc_recv_callback soc_recv_handler = NULL;
 // static char soc_recv_buffer[512];
-#define  ESPCONN_BUFFER_SIZE (2920)
+#define  ESPCONN_BUFFER_SIZE (2048)
 static uint8 espconn_buffer[ESPCONN_BUFFER_SIZE];
 static uint32 espconn_data_len = 0;
 // FALSE 表示发送的数据追加到发送buffer中
@@ -233,8 +233,8 @@ e_soc_creat(char *host,
     {
         os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ipi, sizeof(ipi));
         // MARK: 进行连接
-        ipi = ipaddr_addr("www.baidu.com");
-        ec_log("test hah %d \r\n",ipi);
+        // ipi = ipaddr_addr("www.baidu.com");
+        // ec_log("test hah %d \r\n",ipi);
         // TODO: 对返回值进行判断
         espconn_connect(espconn_ptr);
     }
@@ -242,27 +242,5 @@ e_soc_creat(char *host,
     {
         espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
     }
-    
-    //   ipi = ipaddr_addr("192.168.11.236");  /// 测试代码
 
-    
-    
-
-    // MARK: 需要对ip地址进行判断
-    // if (ip.addr != 0)
-    // {
-    //     // MARK: 直接进行连接
-    //     os_memcpy(espconn_ptr->proto.tcp->remote_ip, &ip.addr, sizeof(ip.addr));
-    //     // MARK: 进行连接
-    //     // TODO: 对返回值进行判断
-    //     espconn_connect(espconn_ptr);
-    // }
-    // else
-    // {
-    //     // MARK: 进行域名解析
-    //     // ec_log("on gethostbyname %s\r\n",host);
-    //     // MARK: 进行域名解析 - 解析后会回调结果
-    //     // TODO: 对返回值进行判断
-    //     espconn_gethostbyname(espconn_ptr, host, &espconn_ip, espconn_on_dns_cb);
-    // }
 }
