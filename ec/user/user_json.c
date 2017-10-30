@@ -256,7 +256,7 @@ json_parse_config(char *json,
 
 //
 int ICACHE_FLASH_ATTR
-json_parse_switch(char *json)
+json_parse_switch(char *json, char *linkid, int *type)
 {
     int i = 0;
     cJSON *root = NULL, *t = NULL, *list = NULL, *tp = NULL;
@@ -266,6 +266,12 @@ json_parse_switch(char *json)
     stop_all_user_alarm();
     stop_all_user_delay();
 
+    t =  cJSON_GetObjectItem(root, "type");
+    *type = atoi(t->valuestring);
+    
+    t =  cJSON_GetObjectItem(root, "linkid");
+    // linkid = t->valuestring;
+    os_memcpy(linkid, t->valuestring, os_strlen(t->valuestring));
     list = cJSON_GetObjectItem(root, "switchList");
     for (i; i < cJSON_GetArraySize(list); i++)
     {
