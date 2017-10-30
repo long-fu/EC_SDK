@@ -113,7 +113,7 @@ char * ICACHE_FLASH_ATTR iks_find_cdata (iks *x, const char *name);
 char * ICACHE_FLASH_ATTR iks_find_attrib (iks *x, const char *name);
 iks * ICACHE_FLASH_ATTR iks_find_with_attrib (iks *x, const char *tagname, const char *attrname, const char *value);
 ikstack * ICACHE_FLASH_ATTR iks_stack (iks *x);
-enum ikstype  ICACHE_FLASH_ATTR iks_type (iks *x);
+enum ikstype ICACHE_FLASH_ATTR iks_type (iks *x);
 char * ICACHE_FLASH_ATTR iks_name (iks *x);
 char * ICACHE_FLASH_ATTR iks_cdata (iks *x);
 size_t ICACHE_FLASH_ATTR  iks_cdata_size (iks *x);
