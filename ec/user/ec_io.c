@@ -302,7 +302,7 @@ ec_io_connet(const char *host, int port)
 	{
 		return NULL;
 	}
-
+    ec_log("ec_io_connet \r\n");
 	{
 		deinit_queue();
         init_queue();
@@ -323,7 +323,7 @@ ec_io_connet(const char *host, int port)
     ret = espconn_regist_connectcb(&ec_espconn, ec_connect_cb);
     if(ret == 0)
     {
-    	return &ec_espconn;
+    	// return &ec_espconn;
     }
     else
     {
