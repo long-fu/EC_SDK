@@ -70,13 +70,14 @@ queue_push(uint8 *psent, uint16 length)
 		return 0;
 	}
 
-	queue_count ++ ;
-	queue_font ++ ;
+	// queue_count ++ ;
+	// queue_font ++ ;
 	font = queue_font % EC_IO_QUEUE_SIZE;
 	queue_list[font].length = length;
 	queue_list[font].psent = psent;
-	queue_font = font;
-
+	// queue_font = font;
+	queue_count ++ ;
+	queue_font ++ ;
 	return 1;
 }
 
@@ -84,7 +85,7 @@ struct queue_node * ICACHE_FLASH_ATTR
 queue_pop()
 {
 	int head = 0;
-	struct queue_node *t;
+	struct queue_node *t = NULL;
 	if (queue_isEmty())
 	{
 		return NULL;
@@ -128,20 +129,23 @@ static void ICACHE_FLASH_ATTR
 ec_send_cb(void *arg)
 {
 	ec_send_flag = TRUE;
+
 	struct espconn *esp = (struct espconn *)arg;
+
 	if (queue_isEmty() == FALSE)
 	{
 		sint8 ret;
 		ec_send_flag = FALSE;
 		struct queue_node *t = queue_get();
+		ec_log("ec_send_cb send:: %s \r\n\r\n", t->psent);
 		ret = espconn_send(esp, t->psent, t->length);
 	    if (ret == 0)
 	    {
 	    	// 发送成功 删除数据
 			t = queue_pop();
 			os_free(t->psent);
-		    t->length = 0;
-		    t->psent = NULL;
+			t->length = 0;
+			t->psent = NULL;
 	    }
 	    else if (ret == ESPCONN_ARG)
 	    {
@@ -169,6 +173,7 @@ ec_recv_cb(void *arg, char *pdata, unsigned short len)
 	struct espconn *esp = (struct espconn *)arg;
 	if (ec_io_recv_handle)
 	{
+		ec_log("recv:: %s \r\n\r\n", pdata);
 		ec_io_recv_handle(pdata, len);
 	}
 }
@@ -347,8 +352,8 @@ ec_io_connet(const char *host, int port)
 		deinit_queue();
         init_queue();
 
-		// espconn_disconnect(&ec_espconn);
-        // espconn_delete(&ec_espconn);
+		espconn_disconnect(&ec_espconn);
+        espconn_delete(&ec_espconn);
 
 		os_memset(&ec_espconn, 0x0, sizeof(ec_espconn));
 		os_memset(&ec_tcp, 0x0, sizeof(ec_tcp));
@@ -453,6 +458,7 @@ ec_io_send (uint8 *psent, uint16 length)
 	if (queue_isEmty() && ec_send_flag == TRUE)
 	{
 		ec_send_flag = FALSE;
+		ec_log("send:: %s\r\n\r\n",psent);
 		ret = espconn_send(&ec_espconn, psent, length);
 	    if (ret == 0)
 	    {
@@ -475,6 +481,7 @@ ec_io_send (uint8 *psent, uint16 length)
 			os_memset(data, 0x0, length + 1);
 			os_memcpy(data, psent, length);
 			queue_push(data, length);
+			ec_log("+++ %s\r\n\r\n",data);
 	    }
 	    else
 	    {
@@ -488,6 +495,7 @@ ec_io_send (uint8 *psent, uint16 length)
 		os_memset(data, 0x0, length + 1);
 		os_memcpy(data, psent, length);
 		queue_push(data, length);
+		ec_log("+++ %s\r\n\r\n",data);
 	}
 	return ret;
 }
@@ -502,7 +510,6 @@ ec_io_close()
 
     os_memset(&ec_tcp, 0x0, sizeof(ec_tcp));
 	os_memset(&ec_espconn, 0x0, sizeof(ec_espconn));
-
 
     ec_io_recv_handle = NULL;
     ec_io_notify_handle = NULL;

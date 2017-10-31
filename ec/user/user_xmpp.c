@@ -42,6 +42,7 @@ j_error (char *msg)
 static int ICACHE_FLASH_ATTR
 on_result (struct session *sess, ikspak *pak)
 {
+	ec_log(" --------------- on_result --------------- \r\n");
 	on_presence();
 	return IKS_FILTER_EAT;
 }
@@ -251,10 +252,11 @@ on_message(struct session *sess, ikspak *pak)
 {
 	char *id, *from,*body, *subject;
 	id = pak->id;
+
 	subject = iks_find_cdata(pak->x, "subject");
 	body = iks_find_cdata(pak->x, "body");
 
-	ec_log("\r\n ==== on_message ===== \r\n");
+	ec_log("\r\n ---------- on_message ------------ \r\n");
 
     if (os_strcmp(subject,"switch") == 0)
     {
@@ -267,7 +269,6 @@ on_message(struct session *sess, ikspak *pak)
     		// TODO: 发送回执
     		on_receipt(from, id, "switch", linkid, ret);
     	}
-
     }
     else if (os_strcmp(subject,"async") == 0)
     {

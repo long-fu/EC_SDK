@@ -67,15 +67,17 @@ ec_recv(char *pdata, unsigned short len)
 	if (len == 0) return ;
 
 	data->buf[len] = '\0';
-    ec_log("recv:: %s\r\n\r\n",data->buf);
+
+    // ec_log("recv:: %s\r\n\r\n",data->buf);
+
 	if (data->logHook) data->logHook (data->user_data, pdata, len, 1);
 	// 可能需要缓存数据
 	ret = iks_parse (io_prs, data->buf, len, 0);
 	if (ret != IKS_OK) return ;
 	if (!data->trans) {
 		/* stream hook called iks_disconnect */
-		// MARK: 这里需要重连
-		ec_log("disconnect\r\n");
+		// TODO: 这里需要重连
+		// ec_log("disconnect\r\n");
 	}
 }
 
@@ -91,7 +93,7 @@ static int ICACHE_FLASH_ATTR
 io_connect (iksparser *prs, void **socketptr, const char *server, int port)
 {
     io_prs = prs;
-    ec_log("io_connect \r\n");
+    // ec_log("io_connect \r\n");
     {
 	    io_espconn = ec_io_connet(server, port);
 	    ec_io_regist_recvcb(ec_recv);
@@ -104,7 +106,7 @@ io_connect (iksparser *prs, void **socketptr, const char *server, int port)
 static int ICACHE_FLASH_ATTR
 io_send (void *socket, const char *data, size_t len)
 {
-	ec_log("send:: %s \r\n\r\n",data);
+	// ec_log("send:: %s \r\n\r\n",data);
     ec_io_send ((uint8 *)data, (uint16)len);
 	return IKS_OK;
 }
