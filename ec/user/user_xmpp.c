@@ -387,7 +387,9 @@ j_connect (char *jabber_id, char *pass, int set_roster, char *username, char *ho
 	j_sess.pass = pass;
 	j_sess.set_roster = set_roster;
 	j_setup_filter (&j_sess);
-	iks_connect_tcp (j_sess.prs, j_config.host_name, j_config.port);
+
+	iks_connect_tcp (j_sess.prs, host_name, j_config.port);
+	
 	j_sess.counter = opt_timeout;
 }
 
@@ -406,7 +408,7 @@ xmpp_init(struct jabber_config *config)
 		}
 		else
 		{
-			j_connect(full_jid, config->password, 0, config->username, NULL);
+			j_connect(full_jid, config->password, 0, config->username, config->ip);
 		}
 
 		return;
@@ -423,7 +425,7 @@ xmpp_init(struct jabber_config *config)
 		}
 		else
 		{
-			j_connect(full_jid, j_config.password, 0, j_config.username, NULL);
+			j_connect(full_jid, j_config.password, 0, j_config.username, j_config.ip);
 		}
 	}
 	else

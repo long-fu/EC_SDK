@@ -200,15 +200,10 @@ json_parse_config(char *json,
             tmp = t->valuestring;
             if(os_strlen(tmp)>4)
             {
-                ec_log("xmpp ip %s\r\n",tmp);
-                jconfig->ip.addr = ipaddr_addr(tmp);
-                ec_log("xmpp ip %d\r\n", jconfig->ip.addr);
+                char *tmp;
+                tmp = t->valuestring;
+                os_memcpy(jconfig->ip, tmp, os_strlen(tmp));
             }
-            else
-            {
-                jconfig->ip.addr = 0;
-            }
-            
         }
 
         t = cJSON_GetObjectItem(root, "appid");

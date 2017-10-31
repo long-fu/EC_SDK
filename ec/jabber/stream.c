@@ -320,7 +320,7 @@ iks_connect_via (iksparser *prs, const char *server, int port, const char *serve
 	return IKS_NET_NOTSUPP;
 #endif
 }
-extern int connect_status;
+
 int ICACHE_FLASH_ATTR
 iks_connect_with (iksparser *prs, const char *server, int port, const char *server_name, ikstransport *trans)
 {
@@ -334,11 +334,11 @@ iks_connect_with (iksparser *prs, const char *server, int port, const char *serv
 		if (NULL == data->buf) return IKS_NOMEM;
 	}
 
-	
+
  	// MARK: 开始进行连接
 	ret = trans->connect (prs, &data->sock, server, port);
-	
-    connect_status = 10;
+
+
 
 	// MARK: 创建连接判断
 	// if (ret != 0) 

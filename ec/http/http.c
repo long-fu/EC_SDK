@@ -10,7 +10,7 @@ static char recv_buf[1024] = {0};
 static char http_body[1024] = {0};
 static char soc_send_buf[1024] = {0};
 static char http_respons_buf[1024] = {0};
-// static char soc_recv_buf[512] = {0};
+
 static void dump_url(const char *url, const struct http_parser_url *u, int type);
 
 static http_failure_callback http_failure_handler;
@@ -40,10 +40,6 @@ on_message_complete(http_parser *_)
 {
     (void)_;
 
-    // TODO: 关闭连接
-    // e_soc_close();
-
-
     ec_log("\r\n*** http MESSAGE COMPLETE***\r\n\r\n");
     ec_log("\r\n>>> %s <<< \r\n\r\n", http_respons_buf);
 
@@ -53,7 +49,8 @@ on_message_complete(http_parser *_)
         http_success_handler(http_respons_buf, os_strlen(http_respons_buf));
     }
 
-    // e_soc_close();
+    e_soc_close();
+
     return 0;
 }
 
@@ -119,22 +116,9 @@ e_http_init()
 static void ICACHE_FLASH_ATTR
 e_http_recv(char *data, unsigned short len)
 {
-
     size_t parsed;
-    ec_log("e_http_recv [ %s ] \r\n", data);
     os_memcpy(recv_buf, data, len);
     parsed = http_parser_execute(&parser, &settings, recv_buf, len);
-}
-
-static void ICACHE_FLASH_ATTR
-e_http_connet_status(int status)
-{
-    //
-    if (status == 1)
-    {
-        // MARK: 开始发送第一条数据
-        e_soc_send(soc_send_buf, os_strlen(soc_send_buf));
-    }
 }
 
 static void ICACHE_FLASH_ATTR
@@ -219,12 +203,9 @@ dump_url(const char *url, const struct http_parser_url *u, int type)
     {
         os_strcat(soc_send_buf, http_body);
     }
-    // ec_log("http [%s]\r\n", soc_send_buf);
 
-    // kal_prompt_trace(MOD_MMI,"dump_url %s", soc_send_buf);
-    // soc_http_connet(host_url);
-    
-    e_soc_creat(host_url, port, e_http_connet_status, e_http_recv);
+    // 发起连接
+    e_soc_creat(host_url, port, soc_send_buf, e_http_recv);
 }
 
 // 创建连接部分 初始化部分 请求解析部分
@@ -263,7 +244,7 @@ http_request(const char *url,
         }
         return;
     }
-    // MARK: 保存body数据
+    // MARK: 保存body数据 全局数据
     if (body)
     {
         os_strcpy(http_body, body);
