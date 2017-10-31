@@ -73,7 +73,11 @@ ec_task(os_event_t *e)
         break;
     case SIG_ST:
         at_port_print("\r\n--------------- station model ---------------\r\n");
+        #ifdef TEXT_XMPP
+        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+        #else
         wifi_connect(w_config.ssid, w_config.password, wifiConnectCb);
+        #endif
         break;
     case SIG_RG:
         at_port_print("\r\n--------------- register ---------------\r\n");
