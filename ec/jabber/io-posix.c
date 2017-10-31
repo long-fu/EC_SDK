@@ -67,7 +67,7 @@ ec_recv(char *pdata, unsigned short len)
 	if (len == 0) return ;
 
 	data->buf[len] = '\0';
-
+    ec_log("recv:: %s\r\n\r\n",data->buf);
 	if (data->logHook) data->logHook (data->user_data, pdata, len, 1);
 	// 可能需要缓存数据
 	ret = iks_parse (io_prs, data->buf, len, 0);
@@ -91,17 +91,20 @@ static int ICACHE_FLASH_ATTR
 io_connect (iksparser *prs, void **socketptr, const char *server, int port)
 {
     io_prs = prs;
-
-    io_espconn = ec_io_connet(server, port);
-    ec_io_regist_recvcb(ec_recv);
-
-    *socketptr = &io_espconn;
+    ec_log("io_connect \r\n");
+    {
+	    io_espconn = ec_io_connet(server, port);
+	    ec_io_regist_recvcb(ec_recv);
+	    ec_io_regist_notifycb(ec_notify_cb);
+	    *socketptr = &io_espconn;
+    }
 	return IKS_OK;
 }
 
 static int ICACHE_FLASH_ATTR
 io_send (void *socket, const char *data, size_t len)
 {
+	ec_log("send:: %s \r\n\r\n",data);
     ec_io_send ((uint8 *)data, (uint16)len);
 	return IKS_OK;
 }

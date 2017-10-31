@@ -326,7 +326,7 @@ iks_connect_with (iksparser *prs, const char *server, int port, const char *serv
 {
 	struct stream_data *data = iks_user_data (prs);
 	int ret;
-	ec_log(" iks_connect_with \r\n");
+	// ec_log(" iks_connect_with \r\n");
 	if (!trans->connect) return IKS_NET_NOTSUPP;
 
 	if (!data->buf) {

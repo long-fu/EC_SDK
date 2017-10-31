@@ -12,6 +12,7 @@
 #include "ip_addr.h"
 #include "osapi.h"
 
+#include "user_debug.h"
 #include "ec_io.h"
 
 // 网络连接结构体 FALSE 表示数据不能进行发送
@@ -221,6 +222,7 @@ ec_recon_cb(void *arg, sint8 errType)
 {
 	struct espconn *esp = (struct espconn *)arg;
 	ec_send_flag = FALSE;
+	ec_log("ec_recon_cb errType %d \r\n", errType);
     // TODO: 对错误进行详细操作
     // if (errType == ESCONN_TIMEOUT)
     // {
@@ -255,6 +257,38 @@ ec_recon_cb(void *arg, sint8 errType)
     {
     	// FIXME: 此错误非常的严重
     }
+
+    #if 0
+    // 请调用已经封装好的接口
+    {
+    	sint8 ret;
+	    ret = espconn_connect(esp);
+		if(ret == 0)
+	    {
+	    	// 成功
+	    }
+	    else if (ret == ESPCONN_ARG)
+	    {
+	    	// 未找到参数 espconn 对应的 TCP 连接
+	    }
+	    else if (ret == ESPCONN_MEM)
+	    {
+	    	// 空间不⾜
+	    }
+	    else if (ret == ESPCONN_ISCONN)
+	    {
+	    	// 连接已经建⽴
+	    }
+	    else if (ret == ESPCONN_RTE)
+	    {
+	    	// 路由异常
+	    }
+	    else
+	    {
+	    	// FIXME: 未知错误
+	    }
+    }
+    #endif
 }
 
 // TCP 连接正常断开成功的回调函数
@@ -263,6 +297,7 @@ ec_discon_cb(void *arg)
 {
 	struct espconn *esp = (struct espconn *)arg;
 	ec_send_flag = FALSE;
+	ec_log("ec_discon_cb\r\n");
 }
 
 // 成功建⽴ TCP 连接的回调函数，由 espconn_regist_connectcb 注册。
@@ -270,7 +305,9 @@ static void ICACHE_FLASH_ATTR
 ec_connect_cb(void *arg)
 {
 	sint8 ret = -99;
+	ec_log("ec_connect_cb\r\n");
 	struct espconn *esp = (struct espconn *)arg;
+
 	ret = espconn_regist_disconcb(esp, ec_discon_cb);
 	if (ret != 0)
 	{
@@ -289,7 +326,10 @@ ec_connect_cb(void *arg)
 		// FIXME: 错误
 		// TODO: 是否需要进行重连
 	}
-	ec_io_notify_handle(EC_IO_CONNET, esp);
+	if(ec_io_notify_handle)
+	{
+		ec_io_notify_handle(EC_IO_CONNET, esp);
+	}
 }
 
 void *ICACHE_FLASH_ATTR
@@ -302,13 +342,13 @@ ec_io_connet(const char *host, int port)
 	{
 		return NULL;
 	}
-    ec_log("ec_io_connet \r\n");
+    // ec_log("ec_io_connet %s:%d\r\n", host,port);
 	{
 		deinit_queue();
         init_queue();
 
-		espconn_disconnect(&ec_espconn);
-        espconn_delete(&ec_espconn);
+		// espconn_disconnect(&ec_espconn);
+        // espconn_delete(&ec_espconn);
 
 		os_memset(&ec_espconn, 0x0, sizeof(ec_espconn));
 		os_memset(&ec_tcp, 0x0, sizeof(ec_tcp));
@@ -323,7 +363,7 @@ ec_io_connet(const char *host, int port)
     ret = espconn_regist_connectcb(&ec_espconn, ec_connect_cb);
     if(ret == 0)
     {
-    	// return &ec_espconn;
+    	// 成功
     }
     else
     {
@@ -334,7 +374,7 @@ ec_io_connet(const char *host, int port)
     ret = espconn_regist_reconcb(&ec_espconn, ec_recon_cb);
     if(ret == 0)
     {
-    	return &ec_espconn;
+    	// 成功
     }
     else
     {
@@ -345,7 +385,32 @@ ec_io_connet(const char *host, int port)
     ec_send_flag = TRUE;
 
     ip = ipaddr_addr(host);
+    // ec_log("ec_io_connet ipaddr_addr %lu\r\n", ip);
     if (ip > 0)
+    {
+    	// 测试代码 强制进入这里
+    	err_t et = -99;
+        et = espconn_gethostbyname(&ec_espconn, host, &ec_ip, ec_dns_cb);
+        if (ESPCONN_OK == et)
+        {
+            //成功
+        	return &ec_espconn;
+        }
+        else if (ESPCONN_ISCONN == et)
+        {
+			// 已经连接
+			return &ec_espconn;
+        }
+        else if (ESPCONN_ARG == et)
+        {
+        	// 未找到参数 espconn 对应的⽹络传输
+        }
+        else
+        {
+        	// FIXME: 未知错误
+        }
+    }
+    else
     {
         os_memcpy(&ec_espconn.proto.tcp->remote_ip, &ip, sizeof(uint32));
         ret = espconn_connect(&ec_espconn);
@@ -375,29 +440,7 @@ ec_io_connet(const char *host, int port)
         	// FIXME: 未知错误
         }
         return NULL;
-    }
-    else
-    {
-    	err_t et = -99;
-        et = espconn_gethostbyname(&ec_espconn, host, &ec_ip, ec_dns_cb);
-        if (ESPCONN_OK == et)
-        {
-            //成功
-        	return &ec_espconn;
-        }
-        else if (ESPCONN_ISCONN == et)
-        {
-			// 已经连接
-			return &ec_espconn;
-        }
-        else if (ESPCONN_ARG == et)
-        {
-        	// 未找到参数 espconn 对应的⽹络传输
-        }
-        else
-        {
-        	// FIXME: 未知错误
-        }
+
     }
     return NULL;
 }
@@ -429,7 +472,7 @@ ec_io_send (uint8 *psent, uint16 length)
 	    	// 底层发包缓存已满，发包失败
     		uint8 *data;
 			data = os_malloc(length + 1);
-			os_memset(data,0x0,length + 1);
+			os_memset(data, 0x0, length + 1);
 			os_memcpy(data, psent, length);
 			queue_push(data, length);
 	    }
@@ -442,7 +485,7 @@ ec_io_send (uint8 *psent, uint16 length)
 	{
 		uint8 *data;
 		data = os_malloc(length + 1);
-		os_memset(data,0x0,length + 1);
+		os_memset(data, 0x0, length + 1);
 		os_memcpy(data, psent, length);
 		queue_push(data, length);
 	}
@@ -457,8 +500,9 @@ ec_io_close()
     espconn_disconnect(&ec_espconn);
     espconn_delete(&ec_espconn);
 
+    os_memset(&ec_tcp, 0x0, sizeof(ec_tcp));
 	os_memset(&ec_espconn, 0x0, sizeof(ec_espconn));
-	os_memset(&ec_tcp, 0x0, sizeof(ec_tcp));
+
 
     ec_io_recv_handle = NULL;
     ec_io_notify_handle = NULL;

@@ -35,7 +35,7 @@ static void ICACHE_FLASH_ATTR on_presence();
 static void ICACHE_FLASH_ATTR
 j_error (char *msg)
 {
-	ec_log ("iksroster: %s\n", msg);
+	ec_log ("iksroster: %s \r\n", msg);
 	// exit (2);
 }
 
@@ -363,33 +363,44 @@ j_setup_filter (struct session *sess)
 
 
 void ICACHE_FLASH_ATTR
-j_connect (char *jabber_id, char *pass, int set_roster, char *username, char *host_name)
+j_connect (char *jabber_id, 
+	char *pass, 
+	int set_roster, 
+	char *username, 
+	char *host_name)
 {
 
-	int e;
+	ec_log("j_connect %s\r\n",jabber_id);
+
 	os_memset (&j_sess, 0, sizeof (j_sess));
 	j_sess.authorized = 0;
+
 	j_sess.prs = iks_stream_new (IKS_NS_CLIENT, &j_sess, (iksStreamHook *) on_stream);
+
 	if (opt_log) iks_set_log_hook (j_sess.prs, (iksLogHook *) on_log);
+
 	j_sess.acc = iks_id_new (iks_parser_stack (j_sess.prs), jabber_id);
 
-	j_sess.acc->user = j_config.username;
+	j_sess.acc->user = username;
 	j_sess.acc->server = j_config.domain;
 
 	if (NULL == j_sess.acc->resource) {
 		/* user gave no resource name, use the default */
 		char *tmp;
 		tmp = iks_malloc (os_strlen (j_sess.acc->user) + os_strlen (j_sess.acc->server) + 9 + 3);
+
 		os_sprintf (tmp, "%s@%s/%s", j_sess.acc->user, j_sess.acc->server, EC_VERSION);
 		j_sess.acc = iks_id_new (iks_parser_stack (j_sess.prs), tmp);
 		iks_free (tmp);
 	}
 	j_sess.pass = pass;
+
 	j_sess.set_roster = set_roster;
+
 	j_setup_filter (&j_sess);
 
 	iks_connect_tcp (j_sess.prs, host_name, j_config.port);
-	
+
 	j_sess.counter = opt_timeout;
 }
 
@@ -399,16 +410,39 @@ xmpp_init(struct jabber_config *config)
 {
 	if (config != NULL)
 	{
-		char full_jid[32] = {0};
+		char full_jid[64] = { 0 };
 		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, EC_VERSION);
+
+		{
+			// 测试代码
+			os_memset(&j_config,0x0,sizeof(j_config));
+			// 这里必须配置一次
+			j_config.port = 5222;
+			// os_memcpy(j_config.ip, config->ip, os_strlen(config->ip));
+			// os_memcpy(j_config.resources, EC_VERSION, os_strlen(EC_VERSION));
+			os_memcpy(j_config.username, "18682435851", os_strlen("18682435851"));
+			os_memcpy(j_config.password, "18682435851", os_strlen("18682435851"));
+			// os_memcpy(j_config.app_username, config->app_username, os_strlen(config->app_username));
+			os_memcpy(j_config.domain, "xsxwrd.com", os_strlen("xsxwrd.com"));
+			os_memcpy(j_config.host_name, "gm.xsxwrd.com", os_strlen("gm.xsxwrd.com"));
+		}
+		ec_log("j_config ip %s \r\n", j_config.ip);
+		ec_log("j_config port %d \r\n", j_config.port);
+		ec_log("j_config resources %s \r\n", j_config.resources);
+		ec_log("j_config username %s \r\n", j_config.username);
+		ec_log("j_config password %s \r\n", j_config.password);
+		ec_log("j_config app_username %s \r\n", j_config.app_username);
+		ec_log("j_config domain %s \r\n", j_config.domain);
+		ec_log("j_config host_name %s\r\n", j_config.host_name);
+
 		// NOTE: 这里由于host不可能是null 必须要加上长度判断
 		if (os_strlen(config->host_name) > 3)
 		{
-			j_connect(full_jid, config->password, 0, config->username, config->host_name);
+			j_connect(full_jid, j_config.password, 0, j_config.username, j_config.host_name);
 		}
 		else
 		{
-			j_connect(full_jid, config->password, 0, config->username, config->ip);
+			j_connect(full_jid, j_config.password, 0,j_config.username, j_config.ip);
 		}
 
 		return;

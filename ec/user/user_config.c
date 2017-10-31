@@ -8,7 +8,7 @@
 #include "user_debug.h"
 
 // #ifdef HTTP_DEBUG_ON
-char log_buffer[512];
+char log_buffer[1024];
 // #endif
 
 static int user_isRegisrer = 0;
