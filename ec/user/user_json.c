@@ -5,6 +5,8 @@
 #include "user_json.h"
 #include "user_debug.h"
 #include "ip_addr.h"
+#include "user_muc.h"
+
 
 static int ICACHE_FLASH_ATTR 
 parse_data_time(const char *ibuf,
@@ -320,7 +322,6 @@ json_parse_switch(char *json, char *linkid, int *type)
     return 0;
 }
 
-
 int ICACHE_FLASH_ATTR
 json_parse_register(char *json)
 {
@@ -345,4 +346,24 @@ json_parse_register(char *json)
 
     cJSON_Delete(root);
     return -1;
+}
+
+int ICACHE_FLASH_ATTR 
+json_parse_async(char *json)
+{
+    // TODO: 去进行数据解析
+    char *linkid;
+    ec_get_asyncinfo(linkid);
+    return 0;
+}
+
+/**
+ * 返回值 1 表示成功 0 表示设置失败
+ */
+int ICACHE_FLASH_ATTR
+json_parse_commamd(char *json, char *linkid)
+{
+    int b;
+    char cb[4] = { 0 };
+    return ec_switch(b);
 }

@@ -10,5 +10,9 @@ int ICACHE_FLASH_ATTR json_parse_config(char *json,
 
 int ICACHE_FLASH_ATTR json_parse_switch(char *json, char *linkid, int *type);
 int ICACHE_FLASH_ATTR json_parse_register(char *json);
+int ICACHE_FLASH_ATTR 
+json_parse_async(char *json);
+int ICACHE_FLASH_ATTR
+json_parse_commamd(char *json, char *linkid);
 #endif
 

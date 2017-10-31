@@ -23,19 +23,18 @@ wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
-        xmpp_init(&x_config);
-        // 单独测试XMPP次文件不进行合并
-        // system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
-        // if (user_get_is_regisrer() == 1)
-        // {
-        //     ec_log("===== login ==== \r\n");
-        //     system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
-        // }
-        // else
-        // {
-        //     ec_log("===== register  ==== \r\n");
-        //     system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
-        // }
+        // xmpp_init(&x_config);
+        // 单独测试XMPP次文件不进行合并
+        if (user_get_is_regisrer() == 1)
+        {
+            ec_log("===== login ==== \r\n");
+            system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        }
+        else
+        {
+            ec_log("===== register  ==== \r\n");
+            system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
+        }
     }
     else
     {
@@ -56,7 +55,7 @@ server_recv_data(char *data, int len)
     os_memset(&w_config, 0x0, sizeof(w_config));
     // MARK: 这里解析配置数据 WIFI(不做保存 系统会自动进行保存) - XMPP 配置消息
     json_parse_config(json, &j_config, &w_config, http_register_url);
-    ec_log("-----server_recv_data %d \r\n", j_config.port);
+    ec_log("------server_recv_data %d \r\n", j_config.port);
     // MARK: 发送WIFI 状态切换
     system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
 }
@@ -94,21 +93,17 @@ void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
     ec_log("system_on_init_done \r\n");
-
-    // system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
-    wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
-    // 单独测试XMPP
-    // system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
-    // if (user_get_is_regisrer() == 1)
-    // {
-    //     ec_log("===== start login ==== \r\n");
-    //     system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
-    // }
-    // else
-    // {
-    //     ec_log("===== start ec sdk  ==== \r\n");
-    //     system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
-    // }
+    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
+    if (user_get_is_regisrer() == 1)
+    {
+        ec_log("===== start login ==== \r\n");
+        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    }
+    else
+    {
+        ec_log("===== init ec  ==== \r\n");
+        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
+    }
 }
 
 /******************************************************************************
