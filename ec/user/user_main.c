@@ -1,4 +1,3 @@
-
 #include "osapi.h"
 #include "at_custom.h"
 #include "user_interface.h"
@@ -7,11 +6,21 @@
 #include "wifi.h"
 #include "user_at.h"
 
+#define TEXT_XMPP
 
 char http_register_url[64];
 
-static os_event_t ec_task_queue[1];
+#ifdef TEXT_XMPP
+struct jabber_config x_config = {
+    .port = 5222,
+    .username = "18682435851",
+    .password = "18682435851",
+    .domain = "xsxwrd.com",
+    .host_name = "gm.xsxwrd.com"
+};
+#endif
 
+static os_event_t ec_task_queue[1];
 
 static void ICACHE_FLASH_ATTR
 server_recv_data(char *data, int len)
@@ -32,6 +41,9 @@ wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
+        #ifdef TEXT_XMPP
+        system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        #else
         if (user_get_is_regisrer() == 1)
         {
             system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
@@ -40,11 +52,13 @@ wifiConnectCb(uint8_t status)
         {
             system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
         }
+        #endif
     }
     else
     {
         // TODO: 断开网络连接
     }
+
 }
 
 void ICACHE_FLASH_ATTR
@@ -53,21 +67,25 @@ ec_task(os_event_t *e)
     switch (e->sig)
     {
     case SIG_CG:
-        ec_log("\r\n--------------- ap model ---------------\r\n");
+        at_port_print("\r\n--------------- ap model ---------------\r\n");
         wifi_ap_set(NULL, NULL);
         server_init(80, server_recv_data);
         break;
     case SIG_ST:
-        ec_log("\r\n--------------- station model ---------------\r\n");
+        at_port_print("\r\n--------------- station model ---------------\r\n");
         wifi_connect(w_config.ssid, w_config.password, wifiConnectCb);
         break;
     case SIG_RG:
-        ec_log("\r\n--------------- register ---------------\r\n");
+        at_port_print("\r\n--------------- register ---------------\r\n");
         http_register_jab(http_register_url, 0, j_config.app_username);
         break;
     case SIG_LG:
-        ec_log("\r\n--------------- login ---------------\r\n");
+        at_port_print("\r\n--------------- login ---------------\r\n");
+        #ifdef TEXT_XMPP
+        xmpp_init(&x_config);
+        #else
         xmpp_init(&j_config);
+        #endif
     break;
     }
 }
@@ -77,6 +95,9 @@ system_on_done_cb(void)
 {
     at_port_print("system_on_done_cb\r\n");
     system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
+#ifdef TEXT_XMPP
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+#else
     if (user_get_is_regisrer() == 1)
     {
         system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
@@ -85,6 +106,7 @@ system_on_done_cb(void)
     {
         system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
     }
+#endif
 }
 
 /******************************************************************************
@@ -158,6 +180,5 @@ user_init(void)
 
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
-
     system_init_done_cb(system_on_done_cb);
 }

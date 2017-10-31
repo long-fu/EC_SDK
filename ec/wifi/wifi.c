@@ -70,7 +70,6 @@ wifi_connect(uint8_t *ssid, uint8_t *pass, WifiCallback cb)
 {
 	struct station_config stationConf;
 
-	ec_log("WIFI_INIT\r\n");
 	wifi_set_opmode(STATION_MODE);
 	os_memset(&stationConf, 0, sizeof(struct station_config));
 	wifiCb = cb;
