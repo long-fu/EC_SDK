@@ -6,11 +6,11 @@
 bool ICACHE_FLASH_ATTR
 jabber_get_config(struct jabber_config *config)
 {
-	return false;
+	return true;
 }
 
 bool ICACHE_FLASH_ATTR
 jabber_set_config(struct jabber_config *config)
 {
-	return false;
+	return true;
 }

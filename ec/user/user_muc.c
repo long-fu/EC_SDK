@@ -16,6 +16,9 @@ ec_switch(int b)
 	}
 	return 1;
 }
+extern void ICACHE_FLASH_ATTR
+on_asyncinfomation(int power, int totalPower, int co2, int co, 
+	int pm25, int state, char *linkid);
 
 int ICACHE_FLASH_ATTR
 ec_get_asyncinfo(char *linkid)
@@ -26,6 +29,9 @@ ec_get_asyncinfo(char *linkid)
     on_asyncinfomation(20,20,20,20,20,1,linkid);
 	return 1;
 }
+
+void ICACHE_FLASH_ATTR
+on_infomation(int power, int totalPower, int co2, int co, int pm25, int state);
 
 int ICACHE_FLASH_ATTR
 ec_get_info()
