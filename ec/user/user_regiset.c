@@ -19,16 +19,17 @@
 static void ICACHE_FLASH_ATTR
 http_success(char *data, int len)
 {
-    ec_log("\r\n HTTP SUCCESS %d: [%s]\r\n", len, data);
+    // ec_log("\r\n HTTP SUCCESS %d: [%s]\r\n", len, data);
     if (json_parse_register(data) == 1)
     {
         uint32 chipid = 0;
         char sid[16] = {0};
-        ec_log("json_parse_register SUCCESS \r\n");
+        // ec_log("json_parse_register SUCCESS \r\n");
         chipid = system_get_chip_id();
         os_sprintf(sid, "%d", chipid);
         os_memcpy(j_config.username, sid, os_strlen(sid));
         os_memcpy(j_config.password, sid, os_strlen(sid));
+        // MARK: 注册成功保存XMPP配置数据 以及注册成功
         CFG_Save();
         system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
     }
@@ -37,7 +38,7 @@ http_success(char *data, int len)
 static void ICACHE_FLASH_ATTR
 http_failure(int error)
 {
-    ec_log("HTTP ERROR %d \r\n", error);
+    // ec_log("HTTP ERROR %d \r\n", error);
     // FIXME: 发送请求错误
 }
 
@@ -47,15 +48,14 @@ static char body[512] = {0};
 void ICACHE_FLASH_ATTR
 http_register_jab(char *url, int re, char *appid)
 {
-    
+
     char acc[16] = {0}, sig[128] = {0}, mdsig[256] = {0};
     uint32 chipid = 0;
     chipid = system_get_chip_id();
-    
+
     os_sprintf(acc, "%d", chipid);
-    
-    ec_log("clint id %s\r\n", acc);
-    
+
+    // ec_log("clint id %s\r\n", acc);
     os_sprintf(sig, "%sregeditForClient%s%d%s", acc, appid, re, S_CODE);
     iks_md5(sig, mdsig);
     os_memset(register_body, 0x0, sizeof(register_body));

@@ -7,32 +7,37 @@
 #include "wifi.h"
 #include "user_at.h"
 
+
 char http_register_url[64];
+
 static os_event_t ec_task_queue[1];
 
-struct jabber_config x_config = {
-    .port = 5222,
-    .username = "18682435851",
-    .password = "18682435851",
-    .domain = "xsxwrd.com",
-    .host_name = "gm.xsxwrd.com"
-};
+
+static void ICACHE_FLASH_ATTR
+server_recv_data(char *data, int len)
+{
+    char json[512] = { 0 };
+
+    send_codec_decode(data, json);
+
+    os_memset(&j_config, 0x0, sizeof(j_config));
+    os_memset(&w_config, 0x0, sizeof(w_config));
+
+    json_parse_config(json, &j_config, &w_config, http_register_url);
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+}
 
 static void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
-        // xmpp_init(&x_config);
-        // 单独测试XMPP次文件不进行合并
         if (user_get_is_regisrer() == 1)
         {
-            ec_log("===== login ==== \r\n");
             system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
         }
         else
         {
-            ec_log("===== register  ==== \r\n");
             system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
         }
     }
@@ -42,49 +47,27 @@ wifiConnectCb(uint8_t status)
     }
 }
 
-//////////////////////////////////////////////////////////
-void ICACHE_FLASH_ATTR
-server_recv_data(char *data, int len)
-{
-    char json[512] = {0};
-    // ec_log("server_recv_data [%s] \r\n", data);
-    // MARK: 数据解码
-    send_codec_decode(data, json);
-    // ec_log("json_parse_config [%s] \r\n", json);
-    os_memset(&j_config, 0x0, sizeof(j_config));
-    os_memset(&w_config, 0x0, sizeof(w_config));
-    // MARK: 这里解析配置数据 WIFI(不做保存 系统会自动进行保存) - XMPP 配置消息
-    json_parse_config(json, &j_config, &w_config, http_register_url);
-    ec_log("------server_recv_data %d \r\n", j_config.port);
-    // MARK: 发送WIFI 状态切换
-    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
-}
-/////////////////////////////////////
-
-
 void ICACHE_FLASH_ATTR
 ec_task(os_event_t *e)
 {
     switch (e->sig)
     {
     case SIG_CG:
-        ec_log("config ap model\r\n");
+        ec_log("\r\n--------------- ap model ---------------\r\n");
         wifi_ap_set(NULL, NULL);
         server_init(80, server_recv_data);
         break;
     case SIG_ST:
-        ec_log("config station model\r\n");
-        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+        ec_log("\r\n--------------- station model ---------------\r\n");
+        wifi_connect(w_config.ssid, w_config.password, wifiConnectCb);
         break;
     case SIG_RG:
-        ec_log(" register openfari\r\n");
+        ec_log("\r\n--------------- register ---------------\r\n");
         http_register_jab(http_register_url, 0, j_config.app_username);
         break;
     case SIG_LG:
-    {
-        // 测试代码
-        xmpp_init(&x_config);
-    }
+        ec_log("\r\n--------------- login ---------------\r\n");
+        xmpp_init(&j_config);
     break;
     }
 }
@@ -92,16 +75,14 @@ ec_task(os_event_t *e)
 void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
-    ec_log("system_on_init_done \r\n");
+    at_port_print("system_on_done_cb\r\n");
     system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
     if (user_get_is_regisrer() == 1)
     {
-        ec_log("===== start login ==== \r\n");
         system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
     }
     else
     {
-        ec_log("===== init ec  ==== \r\n");
         system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
     }
 }
@@ -164,17 +145,10 @@ user_rf_pre_init(void)
     system_phy_freq_trace_enable(at_get_rf_auto_trace_from_flash());
 }
 
-///// test _At ..
-void ICACHE_FLASH_ATTR
-response_func(const char *str)
-{
-    ec_log("----===test at===--\r\n%s\r\n", str);
-}
-
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
-    ec_log("user init ok main ----\r\n");
+    at_port_print("user_init\r\n");
 #if AT_CUSTOM
     // MARK: 注册系统AT指令
     at_init();
@@ -184,6 +158,6 @@ user_init(void)
 
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
-    // timer_init();
+
     system_init_done_cb(system_on_done_cb);
 }

@@ -1,4 +1,4 @@
-
+#include "user_muc.h"
 #include "osapi.h"
 #include "os_type.h"
 #include "user_switch.h"
@@ -36,12 +36,14 @@ void ICACHE_FLASH_ATTR
 switch_on(void *arg)
 {
 	// TODO: 加上 插座开 接口
+	ec_switch(1);
 }
 
 void ICACHE_FLASH_ATTR
 switch_off(void *arg)
 {
     // TODO: 加上 插座关 接口
+    ec_switch(0);
 }
 
 void ICACHE_FLASH_ATTR

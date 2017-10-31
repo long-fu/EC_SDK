@@ -42,7 +42,6 @@ CFG_Load(void)
 	user_isRegisrer = 0;
 	spi_flash_read((CFG_LOCATION + 0) * SPI_FLASH_SEC_SIZE,
 				   (uint32 *)&user_isRegisrer, sizeof(user_isRegisrer));
-    ec_log("\r\nload -- re   %d ---  \r\n", user_isRegisrer);
 	os_memset(&j_config, 0x0, sizeof(j_config));
 	spi_flash_read((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
 				   (uint32 *)&j_config, sizeof(j_config));
@@ -52,7 +51,6 @@ CFG_Load(void)
 int ICACHE_FLASH_ATTR
 user_get_is_regisrer(void)
 {
-	ec_log("user get register %d\r\n", user_isRegisrer);
 	return user_isRegisrer;
 }
 

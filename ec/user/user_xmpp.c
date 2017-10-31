@@ -28,14 +28,11 @@ int opt_timeout = 30;
 // char j_server[16] = IKS_JABBER_DOMAIN;
 struct session j_sess;
 
-/* connection flags */
-// int opt_use_tls;
-int opt_use_sasl = 1;
-int opt_use_plain;
-int opt_log = 1;
+int opt_log = 0;
+
 struct jabber_config j_config;
-// MARK - extren
-int ICACHE_FLASH_ATTR on_presence();
+
+static void ICACHE_FLASH_ATTR on_presence();
 
 void ICACHE_FLASH_ATTR
 j_error (char *msg)
@@ -47,23 +44,6 @@ j_error (char *msg)
 int ICACHE_FLASH_ATTR
 on_result (struct session *sess, ikspak *pak)
 {
-	// iks *x;
-
-	// // ec_log("---- on_result --- \r\n");
-	// if (sess->set_roster == 0) {
-	// 	// ec_log("---- on_result ---0 \r\n");
-	// 	// x = iks_make_iq (IKS_TYPE_GET, IKS_NS_ROSTER);
-	// 	// iks_insert_attrib (x, "id", "roster");
-	// 	// iks_send (sess->prs, x);
-	// 	// iks_delete (x);
-
-	// } else {
-	// 	// ec_log("---- on_result --- 1\r\n");
-	// 	// iks_insert_attrib (my_roster, "type", "set");
-	// 	// iks_send (sess->prs, my_roster);
-	// 	// iks_delete (x);
-	// }
-	// // ec_log("---- on_result --- 2\r\n");
 	on_presence();
 	return IKS_FILTER_EAT;
 }
@@ -158,25 +138,8 @@ on_stream (struct session *sess, int type, iks *node)
 {
 	sess->counter = opt_timeout;
 
-	ec_log("\r\n---------------------on_stream start --------------------\r\n");
 	switch (type) {
 		case IKS_NODE_START:
-		
-		ec_log("IKS_NODE_START");
-			// if (opt_use_tls && !iks_is_secure (sess->prs)) {
-				// iks_start_tls (sess->prs);
-				// break;
-			// }
-			// if (!opt_use_sasl) {
-			// 	iks *x;
-			// 	char *sid = NULL;
-
-			// 	if (!opt_use_plain) sid = iks_find_attrib (node, "id");
-			// 	x = iks_make_auth (sess->acc, sess->pass, sid);
-			// 	iks_insert_attrib (x, "id", "auth");
-			// 	iks_send (sess->prs, x);
-			// 	iks_delete (x);
-			// }
 			break;
 
 		case IKS_NODE_NORMAL:
@@ -206,7 +169,6 @@ on_stream (struct session *sess, int type, iks *node)
 					// ec_log("IKS_NODE_NORMAL sess->authorized == 0");
 					if (sess->features & IKS_STREAM_SASL_MD5)
 					{
-						
 						iks_start_sasl (sess->prs, IKS_SASL_DIGEST_MD5, sess->acc->user, sess->pass);
 					}
 					else if (sess->features & IKS_STREAM_SASL_PLAIN)
@@ -214,13 +176,7 @@ on_stream (struct session *sess, int type, iks *node)
 						// ec_log("IKS_NODE_NORMAL sess->authorized == 0 IKS_STREAM_SASL_PLAIN");
 						iks_start_sasl (sess->prs, IKS_SASL_PLAIN, sess->acc->user, sess->pass);
 					}
-						
 				}
-
-				// if (opt_use_sasl) {
-				// 	// if (opt_use_tls && !iks_is_secure (sess->prs)) break;
-
-				// }
 			} else if (os_strcmp ("failure", iks_name (node)) == 0) {
 				j_error ("sasl authentication failed");
 			} else if (os_strcmp ("success", iks_name (node)) == 0) {
@@ -228,20 +184,16 @@ on_stream (struct session *sess, int type, iks *node)
 				iks_send_header (sess->prs, sess->acc->server);
 			} else {
 				ikspak *pak;
-
 				pak = iks_packet (node);
 				iks_filter_packet (my_filter, pak);
 				if (sess->job_done == 1) return IKS_HOOK;
 			}
 			break;
-
 		case IKS_NODE_STOP:
 			j_error ("server disconnected");
-
 		case IKS_NODE_ERROR:
 			j_error ("stream error");
 	}
-	ec_log("\r\n---------------------on_stream end --------------------\r\n");
 	if (node) iks_delete (node);
 	return IKS_OK;
 }
@@ -256,7 +208,7 @@ on_error (void *user_data, ikspak *pak)
 int ICACHE_FLASH_ATTR
 on_roster (struct session *sess, ikspak *pak)
 {
-	ec_log("---- on_roster --- \r\n");
+	// ec_log("---- on_roster --- \r\n");
 	my_roster = pak->x;
 	sess->job_done = 1;
 	return IKS_FILTER_EAT;
@@ -267,8 +219,6 @@ ec_keepalive(void *arg)
 {
 	iks *t;
 	char id[16] = { 0 };
-	// ec_log("---- on_ping --- \r\n");
-	// id = pak->id;
 	get_random_string(12, id);
 	t = iks_new("iq");
 	iks_insert_attrib(t, "type", "get");
@@ -278,6 +228,7 @@ ec_keepalive(void *arg)
 	iks_insert_attrib(iks_insert(t, "ping"), "xmlns", IKS_NS_XMPP_PING);
 	iks_send(j_sess.prs, t);
 	iks_delete(t);
+
 }
 
 int ICACHE_FLASH_ATTR
@@ -305,9 +256,6 @@ on_message(struct session *sess, ikspak *pak)
 	body = iks_find_cdata(pak->x, "body");
 
 	ec_log("\r\n ==== on_message ===== \r\n");
-
-	// TODO: 进行数据解析
-	// TODO: 进行对应操作
 
     if (os_strcmp(subject,"switch") == 0)
     {
@@ -346,25 +294,23 @@ on_message(struct session *sess, ikspak *pak)
     return IKS_FILTER_EAT;
 }
 
-int ICACHE_FLASH_ATTR
+static void ICACHE_FLASH_ATTR
 on_presence() {
 	iks *t;
 	t = iks_make_pres(IKS_SHOW_AVAILABLE,"ONLINE");
 	iks_send (j_sess.prs, t);
 	iks_delete (t);
-	return IKS_FILTER_EAT;
 }
 
 int ICACHE_FLASH_ATTR
-on_bing (struct session *sess, ikspak *pak) 
+on_bing (struct session *sess, ikspak *pak)
 {
 	iks *t;
-	ec_log("---- on_bing --- \r\n");
-	// MARK: 创建一个新的session
 	t = iks_make_session ();
-	iks_insert_attrib (t, "id", "sess_1");
+	iks_insert_attrib (t, "id", pak->id);
 	iks_send (sess->prs, t);
 	iks_delete (t);
+
 	on_presence();
 	return IKS_FILTER_EAT;
 }
@@ -459,28 +405,10 @@ j_connect (char *jabber_id, char *pass, int set_roster, char *username, char *ho
 	j_sess.set_roster = set_roster;
 	j_setup_filter (&j_sess);
 	iks_connect_tcp (j_sess.prs, j_config.host_name, j_config.port);
-	
-	// switch (e) {
-	// 	case IKS_OK:
-	// 		break;
-	// 	case IKS_NET_NODNS:
-	// 		j_error ("hostname lookup failed");
-	// 	case IKS_NET_NOCONN:
-	// 		j_error ("connection failed");
-	// 	default:
-	// 		j_error ("io error");
-	// }
+
 
 	j_sess.counter = opt_timeout;
-	// while (1) {
-	// 	e = iks_recv (sess.prs, 1);
-	// 	if (IKS_HOOK == e) break;
-	// 	if (IKS_NET_TLSFAIL == e) j_error ("tls handshake failed");
-	// 	if (IKS_OK != e) j_error ("io error");
-	// 	sess.counter--;
-	// 	if (sess.counter == 0) j_error ("network timeout");
-	// }
-	// iks_parser_delete (sess.prs);
+
 }
 
 
