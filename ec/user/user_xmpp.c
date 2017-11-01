@@ -31,6 +31,7 @@ int opt_log = 0;
 struct jabber_config j_config;
 
 static void ICACHE_FLASH_ATTR on_presence();
+static void ICACHE_FLASH_ATTR xmpp_conneted();
 
 static void ICACHE_FLASH_ATTR
 j_error (char *msg)
@@ -42,8 +43,8 @@ j_error (char *msg)
 static int ICACHE_FLASH_ATTR
 on_result (struct session *sess, ikspak *pak)
 {
-	ec_log(" --------------- on_result --------------- \r\n");
 	on_presence();
+	xmpp_conneted();
 	return IKS_FILTER_EAT;
 }
 
@@ -59,6 +60,9 @@ ec_make_message(char *subject, char *body, char *id, char *to)
 	iks_insert_attrib(m, "id", id);
 	iks_insert_cdata(iks_insert(m, "subject"), subject, 0);
 	iks_insert_cdata(iks_insert(m, "body"), body, 0);
+
+	iks_send(j_sess.prs, m);
+	iks_delete(m);
 	return IKS_FILTER_EAT;
 }
 
@@ -101,13 +105,16 @@ void ICACHE_FLASH_ATTR
 on_infomation(int power, int totalPower, int co2, int co, int pm25, int state)
 {
 
-	char id[16] = {0}, body[256] = {0}, ebody[512] = {0};
+	char id[16] = {0}, to[64] = { 0 }, body[256] = {0}, ebody[512] = {0};
+
+	os_sprintf(to, "%s@%s", j_sess.acc->server, 
+    	j_sess.acc->server);
 	// TODO: 看是在这里直接调用接口 还是
 	os_sprintf(body, INITINFO_M, power, totalPower, co2, co, pm25, state);
 	send_codec_encode(body, os_strlen(body), ebody);
 	// TODO: 这里直接填入fullur;
 	get_random_string(12, id);
-	ec_make_message("initinfo", ebody, id, "to");
+	ec_make_message("initinfo", ebody, id, to);
 }
 
 // MARK: 服务器发起同步数据
@@ -123,13 +130,15 @@ on_infomation(int power, int totalPower, int co2, int co, int pm25, int state)
 void ICACHE_FLASH_ATTR
 on_asyncinfomation(int power, int totalPower, int co2, int co, int pm25, int state, char *linkid)
 {
-	char id[16] = {0}, body[256] = {0}, ebody[512] = {0};
+	char id[16] = {0}, to[64] = { 0 }, body[256] = {0}, ebody[512] = {0};
+	os_sprintf(to, "%s@%s", j_sess.acc->server, 
+    	j_sess.acc->server);
 	// TODO: 看是在这里直接调用接口 还是
 	os_sprintf(body, ASYNCINFO_M, power, totalPower, co2, co, pm25, state, linkid);
 	send_codec_encode(body, os_strlen(body), ebody);
 	// TODO: 这里直接填入服务器地址
 	get_random_string(12, id);
-	ec_make_message("async", ebody, id, "to");
+	ec_make_message("async", ebody, id, to);
 }
 
 
@@ -250,13 +259,22 @@ on_ping(struct session *sess, ikspak *pak)
 static int ICACHE_FLASH_ATTR
 on_message(struct session *sess, ikspak *pak)
 {
-	char *id, *from,*body, *subject;
+
+	char *id,*body, *subject, *from;
 	id = pak->id;
+    from = pak->from->full;
+    char to[64] = { 0 };
+
 
 	subject = iks_find_cdata(pak->x, "subject");
 	body = iks_find_cdata(pak->x, "body");
 
 	ec_log("\r\n ---------- on_message ------------ \r\n");
+
+    if(subject == NULL || body == NULL)
+    {
+    	return;
+    }
 
     if (os_strcmp(subject,"switch") == 0)
     {
@@ -289,15 +307,16 @@ on_message(struct session *sess, ikspak *pak)
     {
     	// TODO: 服务器请求同步 数据信息 直接调用数据上传 不会带上任何回执消息
     	int ret;
-    	ec_get_info();
+    	// ec_get_info(NULL);
     }
+
     return IKS_FILTER_EAT;
 }
 
 static void ICACHE_FLASH_ATTR
 on_presence() {
 	iks *t;
-	t = iks_make_pres(IKS_SHOW_AVAILABLE,"ONLINE");
+	t = iks_make_pres(IKS_SHOW_AVAILABLE, "ONLINE");
 	iks_send (j_sess.prs, t);
 	iks_delete (t);
 }
@@ -358,6 +377,7 @@ j_setup_filter (struct session *sess)
 
     iks_filter_add_rule(my_filter, (iksFilterHook *)on_message, sess,
 		IKS_RULE_TYPE, IKS_PAK_MESSAGE,
+		IKS_RULE_SUBTYPE, IKS_TYPE_NORMAL,
 		IKS_RULE_DONE);
 }
 
@@ -405,6 +425,15 @@ j_connect (char *jabber_id,
 	j_sess.counter = opt_timeout;
 }
 
+static void ICACHE_FLASH_ATTR
+xmpp_conneted()
+{
+	// MARK: XMPP连接成功
+	// TODO: 这里初始化时间
+	timer_init(0);
+	// TODO: 这里初始化数据上传
+	init_info();
+}
 
 void ICACHE_FLASH_ATTR
 xmpp_init(struct jabber_config *config)

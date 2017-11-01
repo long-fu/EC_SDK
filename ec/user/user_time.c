@@ -258,3 +258,4 @@ timer_init(uint32 t)
   os_timer_arm(&system_time_timer, 60000, 1); // ms 单位
   system_os_task(alarm_clock_check, USER_TASK_PRIO_0, time_task_queue, 1);
 }
+

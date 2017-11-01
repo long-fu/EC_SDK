@@ -347,7 +347,12 @@ int ICACHE_FLASH_ATTR
 json_parse_async(char *json)
 {
     // TODO: 去进行数据解析
-    char *linkid;
+    cJSON *root = NULL, *t = NULL;
+    char *linkid = NULL;
+
+    root = cJSON_Parse(json);
+    t = cJSON_GetObjectItem(root, "linkid");
+    linkid = t->valuestring;
     ec_get_asyncinfo(linkid);
     return 0;
 }

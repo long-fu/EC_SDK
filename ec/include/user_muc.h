@@ -10,6 +10,7 @@ int ICACHE_FLASH_ATTR
 ec_get_asyncinfo(char *linkid);
 
 int ICACHE_FLASH_ATTR
-ec_get_info();
+ec_get_info(void * arg);
 
+void ICACHE_FLASH_ATTR init_info();
 #endif
