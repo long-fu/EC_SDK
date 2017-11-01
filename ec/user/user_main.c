@@ -6,7 +6,7 @@
 #include "wifi.h"
 #include "user_at.h"
 
-#define TEXT_XMPP
+// #define TEXT_XMPP
 
 char http_register_url[64];
 

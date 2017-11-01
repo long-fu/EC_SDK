@@ -443,19 +443,20 @@ xmpp_init(struct jabber_config *config)
 		char full_jid[64] = { 0 };
 		os_sprintf(full_jid, "%s@%s/%s", config->username, config->domain, EC_VERSION);
 
-		{
-			// 测试代码
-			os_memset(&j_config,0x0,sizeof(j_config));
-			// 这里必须配置一次
-			j_config.port = 5222;
-			// os_memcpy(j_config.ip, config->ip, os_strlen(config->ip));
-			// os_memcpy(j_config.resources, EC_VERSION, os_strlen(EC_VERSION));
-			os_memcpy(j_config.username, "18682435851", os_strlen("18682435851"));
-			os_memcpy(j_config.password, "18682435851", os_strlen("18682435851"));
-			// os_memcpy(j_config.app_username, config->app_username, os_strlen(config->app_username));
-			os_memcpy(j_config.domain, "xsxwrd.com", os_strlen("xsxwrd.com"));
-			os_memcpy(j_config.host_name, "gm.xsxwrd.com", os_strlen("gm.xsxwrd.com"));
-		}
+		// {
+		// 	// 测试代码
+		// 	os_memset(&j_config,0x0,sizeof(j_config));
+		// 	// 这里必须配置一次
+		// 	j_config.port = 5222;
+		// 	// os_memcpy(j_config.ip, config->ip, os_strlen(config->ip));
+		// 	// os_memcpy(j_config.resources, EC_VERSION, os_strlen(EC_VERSION));
+		// 	os_memcpy(j_config.username, "18682435851", os_strlen("18682435851"));
+		// 	os_memcpy(j_config.password, "18682435851", os_strlen("18682435851"));
+		// 	// os_memcpy(j_config.app_username, config->app_username, os_strlen(config->app_username));
+		// 	os_memcpy(j_config.domain, "xsxwrd.com", os_strlen("xsxwrd.com"));
+		// 	os_memcpy(j_config.host_name, "gm.xsxwrd.com", os_strlen("gm.xsxwrd.com"));
+		// }
+		//
 		ec_log("j_config ip %s \r\n", j_config.ip);
 		ec_log("j_config port %d \r\n", j_config.port);
 		ec_log("j_config resources %s \r\n", j_config.resources);
