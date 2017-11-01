@@ -91,6 +91,8 @@ iks_packet (iks *x)
 				pak->subtype = IKS_TYPE_GROUPCHAT;
 			else if (os_strcmp (tmp, "headline") == 0)
 				pak->subtype = IKS_TYPE_HEADLINE;
+			else if (strcmp (tmp, "normal") == 0)
+				pak->subtype = IKS_TYPE_NORMAL;
 			else if (os_strcmp (tmp, "error") == 0)
 				pak->subtype = IKS_TYPE_ERROR;
 		}
