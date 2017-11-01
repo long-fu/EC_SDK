@@ -26,7 +26,8 @@ SUBDIRS=    \
 	http \
 	jabber \
 	server \
-	wifi
+	wifi \
+	json
 
 ifdef AT_OPEN_SRC
 SUBDIRS +=    \
@@ -58,7 +59,8 @@ COMPONENTS_eagle.app.v6 = \
 	http/libhttp.a \
 	jabber/libjabber.a \
 	server/libserver.a \
-	wifi/libwifi.a
+	wifi/libwifi.a \
+	json/libjson.a
 
 ifdef AT_OPEN_SRC
 COMPONENTS_eagle.app.v6 += \
@@ -154,7 +156,7 @@ DDEFINES +=				\
 # Required for each makefile to inherit from the parent
 #
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/http -I $(PDIR)include/jabber -I $(PDIR)include/server -I $(PDIR)include/wifi
+INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/http -I $(PDIR)include/jabber -I $(PDIR)include/server -I $(PDIR)include/wifi -I $(PDIR)include/json
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile
 

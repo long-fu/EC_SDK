@@ -59,7 +59,7 @@ char *ets_strstr(const char *s1, const char *s2);
 #define os_strcpy ets_strcpy
 #define os_strlen ets_strlen
 #define os_strncmp ets_strncmp
-#define os_strncpy ets_strncpy
+#define  os_strncpy ets_strncpy
 #define os_strstr ets_strstr
 
 void ets_timer_arm_new(os_timer_t *ptimer, uint32_t time, bool repeat_flag, bool ms_flag);

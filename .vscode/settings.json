@@ -11,6 +11,15 @@
         "osapi.h": "c",
         "user_interface.h": "c",
         "queue.h": "c",
-        "jsonparse.h": "c"
+        "jsonparse.h": "c",
+        "cjson.h": "c",
+        "mem.h": "c",
+        "server.h": "c",
+        "user_switch.h": "c",
+        "os_type.h": "c",
+        "c_types.h": "c",
+        "user_json.h": "c",
+        "wifi.h": "c",
+        "ip_addr.h": "c"
     }
 }

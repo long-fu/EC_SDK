@@ -1,160 +1,116 @@
-
 #include "osapi.h"
 #include "at_custom.h"
 #include "user_interface.h"
 #include "user_config.h"
 #include "user_debug.h"
 #include "wifi.h"
+#include "user_at.h"
 
-#if AT_CUSTOM
-/// MAKR: AT测试代码
-// test :AT+TEST=1,"abc"<,3>
-void ICACHE_FLASH_ATTR
-at_setupCmdTest(uint8_t id, char *pPara)
-{
-    int result = 0, err = 0, flag = 0;
-    char buffer[32] = { 0 };
-    pPara++; // skip '='
+#define TEXT_XMPP
 
-    //get the first parameter
-    // digit
-    flag = at_get_next_int_dec(&pPara, &result, &err);
+char http_register_url[64];
 
-    // flag must be ture because there are more parameter
-    if (flag == FALSE)
-    {
-        at_response_error();
-        return;
-    }
-
-    if (*pPara++ != ',')
-    { // skip ','
-        at_response_error();
-        return;
-    }
-
-    ec_log("the first parameter:%d\r\n", result);
-    //get the second parameter
-    // string
-    at_data_str_copy(buffer, &pPara, 10);
-    ec_log("the second parameter:%s\r\n", buffer);
-
-    if (*pPara == ',')
-    {
-        pPara++; // skip ','
-        result = 0;
-        //there is the third parameter
-        // digit
-        flag = at_get_next_int_dec(&pPara, &result, &err);
-        // we donot care of flag
-        ec_log("the third parameter:%d\r\n", result);
-    }
-
-    if (*pPara != '\r')
-    {
-        at_response_error();
-        return;
-    }
-    at_response_ok();
-}
-
-void ICACHE_FLASH_ATTR
-at_testCmdTest(uint8_t id)
-{
-    ec_log("at_testCmdTest\r\n");
-    at_response_ok();
-}
-
-void ICACHE_FLASH_ATTR
-at_queryCmdTest(uint8_t id)
-{
-    ec_log("at_queryCmdTest\r\n");
-    at_response_ok();
-}
-
-void ICACHE_FLASH_ATTR
-at_exeCmdTest(uint8_t id)
-{
-    ec_log("at_exeCmdTest\r\n");
-    at_response_ok();
-}
-
-extern void at_exeCmdCiupdate(uint8_t id);
-at_funcationType at_custom_cmd[] = {
-    {"+TEST", 5, at_testCmdTest, at_queryCmdTest, at_setupCmdTest, at_exeCmdTest},
-};
-#endif
-
-static void ICACHE_FLASH_ATTR
-http_success(char *data, int len)
-{
-    ec_log("HTTP SUCCESS %d: [%s]\r\n", len, data);
-}
-
-static void ICACHE_FLASH_ATTR
-http_failure(int error)
-{
-    ec_log("HTTP ERROR %d \r\n", error);
-}
-
-struct jabber_config config = {
+#ifdef TEXT_XMPP
+struct jabber_config x_config = {
     .port = 5222,
-    .ip.addr = 0,
-    .resources = "ec_0.0.1",
     .username = "18682435851",
     .password = "18682435851",
     .domain = "xsxwrd.com",
     .host_name = "gm.xsxwrd.com"
 };
+#endif
 
-void ICACHE_FLASH_ATTR
+static os_event_t ec_task_queue[1];
+
+static void ICACHE_FLASH_ATTR
+server_recv_data(char *data, int len)
+{
+    char json[512] = { 0 };
+
+    send_codec_decode(data, json);
+
+    os_memset(&j_config, 0x0, sizeof(j_config));
+    os_memset(&w_config, 0x0, sizeof(w_config));
+
+    json_parse_config(json, &j_config, &w_config, http_register_url);
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+}
+
+static void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status)
 {
     if (status == STATION_GOT_IP)
     {
-        // TODO: 发起网络连接
-        // 1. HTTP
-        // 2. XMPP
-        // xmpp_init();
-        
-        // 这部分测试通过
-        // http_request("http://192.168.11.236:80/hello.html", 0, "", http_success, http_failure);
-
-
-        xmpp_init(&config);
+        #ifdef TEXT_XMPP
+        system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        #else
+        if (user_get_is_regisrer() == 1)
+        {
+            system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        }
+        else
+        {
+            system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
+        }
+        #endif
     }
     else
     {
         // TODO: 断开网络连接
+    }
+
+}
+
+void ICACHE_FLASH_ATTR
+ec_task(os_event_t *e)
+{
+    switch (e->sig)
+    {
+    case SIG_CG:
+        at_port_print("\r\n--------------- ap model ---------------\r\n");
+        wifi_ap_set(NULL, NULL);
+        server_init(80, server_recv_data);
+        break;
+    case SIG_ST:
+        at_port_print("\r\n--------------- station model ---------------\r\n");
+        #ifdef TEXT_XMPP
+        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+        #else
+        wifi_connect(w_config.ssid, w_config.password, wifiConnectCb);
+        #endif
+        break;
+    case SIG_RG:
+        at_port_print("\r\n--------------- register ---------------\r\n");
+        http_register_jab(http_register_url, 0, j_config.app_username);
+        break;
+    case SIG_LG:
+        at_port_print("\r\n--------------- login ---------------\r\n");
+        #ifdef TEXT_XMPP
+        xmpp_init(&x_config);
+        #else
+        xmpp_init(&j_config);
+        #endif
+    break;
     }
 }
 
 void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
-    ec_log("system_on_init_done \r\n");
+    at_port_print("system_on_done_cb\r\n");
+    system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
+#ifdef TEXT_XMPP
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+#else
     if (user_get_is_regisrer() == 1)
     {
-        // TODO: 进入XMPP
-        // MARK: station model 连接wifi
-        ec_log("===== start login ==== \r\n");
-        wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
+        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
     }
     else
     {
-        // TODO: 完整的流程
-        ec_log("===== start ec sdk  ==== \r\n");
-        // 1. 获取到配置信息 http xmpp wifi
-        wifi_ap_set(NULL, NULL);
-        server_init(80);
-        
-        // 2. 连接wifi
-        // wifi_connect(NULL, NULL, wifiConnectCb);
-
-        // 2. 通过http 注册xmpp
-        // http_request("",0,"",http_success,http_failure);
-        // 3. 连接xmpp
+        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
     }
+#endif
 }
 
 /******************************************************************************
@@ -218,13 +174,14 @@ user_rf_pre_init(void)
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
-    ec_log("user init ok main ----\r\n");
+    at_port_print("user_init\r\n");
 #if AT_CUSTOM
     // MARK: 注册系统AT指令
     at_init();
     // MARK: 注册自定义AT指令
     at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
 #endif
+
     // MARK: 读取用户配置数据 必须在此处进行读取
     CFG_Load();
     system_init_done_cb(system_on_done_cb);

@@ -2,9 +2,10 @@
 #define __USER_DEBUG_H__
 
 #include "user_config.h"
+#include "osapi.h"
 
-#if DEBUG_ON
-extern char log_buffer[512];
+#ifdef DEBUG_ON
+extern char log_buffer[1024];
 #ifdef HTTP_DEBUG_ON
     // extern char log_buffer[512];
 #define ec_log(format, ...) os_sprintf(log_buffer, format, ##__VA_ARGS__); at_port_print(log_buffer)

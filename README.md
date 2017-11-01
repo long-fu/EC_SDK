@@ -1,3 +1,2 @@
-# ESP8266_NONOS_SDK
-
-All documentations @ http://espressif.com/en/support/download/documents?keys=&field_type_tid%5B%5D=14
+# EC项目代码备份
+> 个人说明: 不支持任何技术说明。

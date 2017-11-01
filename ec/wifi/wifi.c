@@ -8,8 +8,10 @@
 #include "user_debug.h"
 #include "user_config.h"
 
-// TODO: 命名需要调整
 
+struct wifi_config w_config;
+
+// TODO: 命名需要调整
 static ETSTimer WiFiLinker;
 WifiCallback wifiCb = NULL;
 static uint8_t wifiStatus = STATION_IDLE, lastWifiStatus = STATION_IDLE;
@@ -68,7 +70,6 @@ wifi_connect(uint8_t *ssid, uint8_t *pass, WifiCallback cb)
 {
 	struct station_config stationConf;
 
-	ec_log("WIFI_INIT\r\n");
 	wifi_set_opmode(STATION_MODE);
 	os_memset(&stationConf, 0, sizeof(struct station_config));
 	wifiCb = cb;
@@ -89,32 +90,7 @@ wifi_connect(uint8_t *ssid, uint8_t *pass, WifiCallback cb)
 	wifi_station_connect();
 }
 
-int ICACHE_FLASH_ATTR
-get_random_string(int length, char *ouput)
-{
-	int flag, i;
-	// srand((unsigned)time(NULL));
-	for (i = 0; i < length - 1; i++)
-	{
-		flag = os_random() % 3;
-		switch (flag)
-		{
-		case 0:
-			ouput[i] = 'A' + os_random() % 26;
-			break;
-		case 1:
-			ouput[i] = 'a' + os_random() % 26;
-			break;
-		case 2:
-			ouput[i] = '0' + os_random() % 10;
-			break;
-		default:
-			ouput[i] = 'x';
-			break;
-		}
-	}
-	return 0;
-}
+
 
 void ICACHE_FLASH_ATTR
 wifi_ap_set(uint8_t *ssid, uint8_t *pass)
