@@ -305,7 +305,7 @@ on_message(struct session *sess, ikspak *pak)
     }
     else if (os_strcmp(subject,"initinfo") == 0)
     {
-    	// TODO: 服务器请求同步 数据信息 直接调用数据上传 不会带上任何回执消息
+    	// TODO: 服务器返回数据上传的结果 暂不做处理
     	int ret;
     	// ec_get_info(NULL);
     }
