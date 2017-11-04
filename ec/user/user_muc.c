@@ -49,7 +49,8 @@ static os_timer_t up_info_timer;
 void ICACHE_FLASH_ATTR
 init_info()
 {
-  os_timer_disarm(&up_info_timer);
-  os_timer_setfn(&up_info_timer, (os_timer_func_t *)ec_get_info, NULL);
-  os_timer_arm(&up_info_timer, 30000, 1); // ms 单位
+	ec_get_info(NULL);
+  // os_timer_disarm(&up_info_timer);
+  // os_timer_setfn(&up_info_timer, (os_timer_func_t *)ec_get_info, NULL);
+  // os_timer_arm(&up_info_timer, 30000, 1); // ms 单位
 }

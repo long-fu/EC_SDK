@@ -14,7 +14,7 @@ Content-Type: text/html\r\n\r\n%s"
 
 static http_parser parser = { 0 };
 static http_parser_settings settings = { 0 };
-static char http_respons_buf[256] = { 0 };
+static char http_respons_buf[512] = { 0 };
 static server_recv_callback server_recv_handler;
 
 #define TASK_QUEUE_LEN = 4;
@@ -126,7 +126,7 @@ server_recv(void *arg, char *pusrdata, unsigned short length)
            pesp_conn->proto.tcp->remote_ip[1], pesp_conn->proto.tcp->remote_ip[2],
            pesp_conn->proto.tcp->remote_ip[3], pesp_conn->proto.tcp->remote_port);
 
-
+    ec_log("recv data %s \r\n", pusrdata);
     server_parser_init();
 
     // 解析数据

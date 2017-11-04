@@ -6,10 +6,11 @@
 #include "spi_flash.h"
 #include "osapi.h"
 #include "user_debug.h"
+#include "wifi.h"
 
-// #ifdef HTTP_DEBUG_ON
+#ifdef HTTP_DEBUG_ON
 char log_buffer[1024];
-// #endif
+#endif
 
 static int user_isRegisrer = 0;
 
@@ -31,6 +32,9 @@ CFG_Save(void)
 
 		spi_flash_write((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
 						(uint32 *)&j_config, sizeof(j_config));
+
+        spi_flash_write((CFG_LOCATION + 2) * SPI_FLASH_SEC_SIZE,
+						(uint32 *)&w_config, sizeof(w_config));
 	}
 }
 
@@ -45,6 +49,10 @@ CFG_Load(void)
 	os_memset(&j_config, 0x0, sizeof(j_config));
 	spi_flash_read((CFG_LOCATION + 1) * SPI_FLASH_SEC_SIZE,
 				   (uint32 *)&j_config, sizeof(j_config));
+    
+    os_memset(&w_config, 0x0, sizeof(w_config));
+	spi_flash_read((CFG_LOCATION + 2) * SPI_FLASH_SEC_SIZE,
+						(uint32 *)&w_config, sizeof(w_config));
 }
 
 /// 判断客户端是否被用户注册(也就是绑定) - 复位的时候才会发生值的一个变化

@@ -31,9 +31,10 @@ server_recv_data(char *data, int len)
 
     os_memset(&j_config, 0x0, sizeof(j_config));
     os_memset(&w_config, 0x0, sizeof(w_config));
-
+    ec_log("debug %s\r\n", json);
     json_parse_config(json, &j_config, &w_config, http_register_url);
-    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, 0);
 }
 
 static void ICACHE_FLASH_ATTR
@@ -42,15 +43,15 @@ wifiConnectCb(uint8_t status)
     if (status == STATION_GOT_IP)
     {
         #ifdef TEXT_XMPP
-        system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+        system_os_post(USER_TASK_PRIO_2, SIG_LG, 0);
         #else
         if (user_get_is_regisrer() == 1)
         {
-            system_os_post(USER_TASK_PRIO_2, SIG_LG, NULL);
+            system_os_post(USER_TASK_PRIO_2, SIG_LG, 0);
         }
         else
         {
-            system_os_post(USER_TASK_PRIO_2, SIG_RG, NULL);
+            system_os_post(USER_TASK_PRIO_2, SIG_RG, 0);
         }
         #endif
     }
@@ -76,6 +77,7 @@ ec_task(os_event_t *e)
         #ifdef TEXT_XMPP
         wifi_connect("JFF_2.4", "jff83224053", wifiConnectCb);
         #else
+        ec_log("wifi --- %s %s ----\r\n", w_config.ssid , w_config.password);
         wifi_connect(w_config.ssid, w_config.password, wifiConnectCb);
         #endif
         break;
@@ -97,18 +99,20 @@ ec_task(os_event_t *e)
 void ICACHE_FLASH_ATTR
 system_on_done_cb(void)
 {
+    // MARK: 读取用户配置数据 必须在此处进行读取
+    CFG_Load();
     at_port_print("system_on_done_cb\r\n");
     system_os_task(ec_task, USER_TASK_PRIO_2, ec_task_queue, 1);
 #ifdef TEXT_XMPP
-    system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+    system_os_post(USER_TASK_PRIO_2, SIG_ST, 0);
 #else
     if (user_get_is_regisrer() == 1)
     {
-        system_os_post(USER_TASK_PRIO_2, SIG_ST, NULL);
+        system_os_post(USER_TASK_PRIO_2, SIG_ST, 0);
     }
     else
     {
-        system_os_post(USER_TASK_PRIO_2, SIG_CG, NULL);
+        system_os_post(USER_TASK_PRIO_2, SIG_CG, 0);
     }
 #endif
 }
@@ -182,7 +186,6 @@ user_init(void)
     at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd) / sizeof(at_custom_cmd[0]));
 #endif
 
-    // MARK: 读取用户配置数据 必须在此处进行读取
-    CFG_Load();
+
     system_init_done_cb(system_on_done_cb);
 }

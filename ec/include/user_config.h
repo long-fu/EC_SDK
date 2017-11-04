@@ -13,7 +13,7 @@
 #define AT_CUSTOM 1
 
 /// LOG信息输出模式
-#define DEBUG_ON 1
+#define DEBUG_ON 0
 
 #define XMPP_DEBUG_ON 1
 

@@ -150,7 +150,7 @@ json_parse_config(char *json,
                   struct jabber_config *jconfig,
                   struct wifi_config *wconfig, char *register_url)
 {
-
+    ec_log("json json %s \r\n", json);
     if (jconfig != NULL && wconfig != NULL)
     {
         cJSON *root, *t;
@@ -164,6 +164,7 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
+            ec_log("json ssid %s \r\n", tmp);
             os_memcpy(wconfig->ssid, tmp, os_strlen(tmp));
         }
 
@@ -172,6 +173,7 @@ json_parse_config(char *json,
         {
             char *tmp;
             tmp = t->valuestring;
+            ec_log("json pssd %s \r\n", tmp);
             os_memcpy(wconfig->password, tmp, os_strlen(tmp));
         }
 
@@ -235,7 +237,6 @@ json_parse_config(char *json,
             {
                 // jconfig->host_name = NULL;
             }
-            
         }
 
         t = cJSON_GetObjectItem(root, "jres");
@@ -245,7 +246,7 @@ json_parse_config(char *json,
             tmp = t->valuestring;
             os_memcpy(jconfig->resources, tmp, os_strlen(tmp));
         }
-        ec_log("-----json_parse_config %d \r\n", j_config.port);
+        // ec_log("-----json_parse_config %d \r\n", j_config.port);
         cJSON_Delete(root);
     }
     return 0;

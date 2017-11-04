@@ -217,11 +217,19 @@ ec_mktime(int year, int mon, int day, int hour, int min, int sec)
   return ret - SECSPEGMT8;
 }
 
+void ICACHE_FLASH_ATTR 
+ec_set_timestamp(uint32 t)
+{
+  system_timestamp = 0;
+  system_timestamp = t;
+}
+
 uint32 ICACHE_FLASH_ATTR
 ec_get_timestamp()
 {
   // TODO: 返回时间戳
-  return 0;
+  // system_timestamp();
+  return system_timestamp;
 }
 
 void ICACHE_FLASH_ATTR

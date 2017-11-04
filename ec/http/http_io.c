@@ -67,7 +67,7 @@ e_soc_creat(char *host,
 
     soc_recv_handler = recv_handler;
     ec_io_connet(host, port);
-
+    ec_log("http connet %s:%d \r\n",host,port);
     ec_io_regist_recvcb(e_soc_recv);
 
     ec_io_regist_notifycb(io_notify_cb);

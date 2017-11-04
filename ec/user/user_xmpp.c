@@ -1,3 +1,7 @@
+#include "osapi.h"
+#include "user_interface.h"
+#include "user_config.h"
+#include "user_debug.h"
 #include "jabber_config.h"
 #include "common.h"
 #include "iksemel.h"
@@ -37,6 +41,7 @@ static void ICACHE_FLASH_ATTR
 j_error (char *msg)
 {
 	ec_log ("iksroster: %s \r\n", msg);
+	system_os_post(USER_TASK_PRIO_2, SIG_LG, 0);
 	// exit (2);
 }
 
@@ -79,11 +84,11 @@ on_receipt(char *to, char *id, char *subject, char *linkid, int result)
 
 	if (result)
 	{
-		os_sprintf(cresult, "成功");
+		os_sprintf(cresult, "ok");
 	}
 	else
 	{
-		os_sprintf(cresult, "失败");
+		os_sprintf(cresult, "error");
 	}
 	os_sprintf(body, RECEIPT_M, result, cresult, linkid);
 	send_codec_encode(body, os_strlen(body), ebody);
@@ -114,7 +119,7 @@ on_infomation(int power, int totalPower, int co2, int co, int pm25, int state)
 	send_codec_encode(body, os_strlen(body), ebody);
 	// TODO: 这里直接填入fullur;
 	get_random_string(12, id);
-	ec_make_message("initinfo", ebody, id, to);
+	ec_make_message("initinfo_smart", ebody, id, to);
 }
 
 // MARK: 服务器发起同步数据
@@ -138,7 +143,7 @@ on_asyncinfomation(int power, int totalPower, int co2, int co, int pm25, int sta
 	send_codec_encode(body, os_strlen(body), ebody);
 	// TODO: 这里直接填入服务器地址
 	get_random_string(12, id);
-	ec_make_message("async", ebody, id, to);
+	ec_make_message("async_smart", ebody, id, to);
 }
 
 
@@ -210,7 +215,8 @@ on_stream (struct session *sess, int type, iks *node)
 static int ICACHE_FLASH_ATTR
 on_error (void *user_data, ikspak *pak)
 {
-	j_error ("authorization failed");
+	// j_error ("authorization failed");
+	
 	return IKS_FILTER_EAT;
 }
 
@@ -262,13 +268,14 @@ on_message(struct session *sess, ikspak *pak)
 
 	char *id,*body, *subject, *from;
 	id = pak->id;
-    from = pak->from->full;
+
     char to[64] = { 0 };
 
 
 	subject = iks_find_cdata(pak->x, "subject");
 	body = iks_find_cdata(pak->x, "body");
 
+    from = pak->from->full;
 	ec_log("\r\n ---------- on_message ------------ \r\n");
 
     if(subject == NULL || body == NULL)
@@ -276,7 +283,7 @@ on_message(struct session *sess, ikspak *pak)
     	return;
     }
 
-    if (os_strcmp(subject,"switch") == 0)
+    if (os_strcmp(subject,"switch_smart") == 0)
     {
     	// TODO: 服务器下发开关
     	int ret, t;
@@ -285,25 +292,25 @@ on_message(struct session *sess, ikspak *pak)
     	if(t == 1)
     	{
     		// TODO: 发送回执
-    		on_receipt(from, id, "switch", linkid, ret);
+    		on_receipt(from, id, "switch_smart", linkid, ret);
     	}
     }
-    else if (os_strcmp(subject,"async") == 0)
+    else if (os_strcmp(subject,"async_smart") == 0)
     {
     	// TODO: 服务器请求同步数据
     	int ret;
     	char linkid[32] = { 0 };
     	json_parse_async(body);
     }
-    else if (os_strcmp(subject,"commamd") == 0)
+    else if (os_strcmp(subject,"commamd_smart") == 0)
     {
     	int ret;
         char linkid[32] = { 0 };
     	ret = json_parse_commamd(body, linkid);
     	// MARK: 发送回执 返回是否执行成工 需要发送linkid
-    	on_receipt(from, id, "commamd", linkid, ret);
+    	on_receipt(from, id, "commamd_smart", linkid, ret);
     }
-    else if (os_strcmp(subject,"initinfo") == 0)
+    else if (os_strcmp(subject,"initinfo_smart") == 0)
     {
     	// TODO: 服务器返回数据上传的结果 暂不做处理
     	int ret;
@@ -331,6 +338,29 @@ on_bing (struct session *sess, ikspak *pak)
 	iks_delete (t);
 
 	on_presence();
+	return IKS_FILTER_EAT;
+}
+
+static int ICACHE_FLASH_ATTR
+on_time (struct session *sess, ikspak *pak)
+{
+	iks *c,*t;
+	char *y,*mm,*d,*h,*m,*s;
+    uint32 tts;
+    c = iks_find(pak->x,"check");
+	t = iks_find(c,"time");
+
+	y = iks_find_attrib(t, "y");
+	mm = iks_find_attrib(t, "m");
+	d = iks_find_attrib(t, "d");
+	h = iks_find_attrib(t, "h");
+	m = iks_find_attrib(t, "n");
+    s = iks_find_attrib(t, "s");
+
+	ec_log("ttime %s:%s:%s:%s:%s:%s \r\n", y,mm,d,h,m,s);
+	// TODO: 这里初始化时间
+	tts = ec_mktime(atoi(y), atoi(mm), atoi(d), atoi(h), atoi(m), atoi(s));
+	timer_init(tts);
 	return IKS_FILTER_EAT;
 }
 
@@ -373,6 +403,12 @@ j_setup_filter (struct session *sess)
 		IKS_RULE_TYPE, IKS_PAK_IQ,
 		IKS_RULE_SUBTYPE, IKS_TYPE_GET,
 		IKS_RULE_NS, IKS_NS_XMPP_PING,
+		IKS_RULE_DONE);
+
+	iks_filter_add_rule (my_filter, (iksFilterHook *) on_time, sess,
+		IKS_RULE_TYPE, IKS_PAK_IQ,
+		IKS_RULE_SUBTYPE, IKS_TYPE_SET,
+		IKS_RULE_NS, "check:iq:time",
 		IKS_RULE_DONE);
 
     iks_filter_add_rule(my_filter, (iksFilterHook *)on_message, sess,
@@ -429,8 +465,7 @@ static void ICACHE_FLASH_ATTR
 xmpp_conneted()
 {
 	// MARK: XMPP连接成功
-	// TODO: 这里初始化时间
-	timer_init(0);
+
 	// TODO: 这里初始化数据上传
 	init_info();
 }

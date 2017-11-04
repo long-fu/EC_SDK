@@ -337,6 +337,27 @@ ec_connect_cb(void *arg)
 	}
 }
 
+static ICACHE_FLASH_ATTR
+bool ec_io_is_ip(const char *ip)
+{
+	int count_i = 0, i = 0;
+
+
+	for (i ; i < os_strlen(ip); i++ )
+	{
+		if(ip[i] == '.')
+		{
+			count_i++;
+		}
+	}
+	if(count_i == 3)
+	{
+		return TRUE;
+	}
+	return FALSE;
+
+}
+
 void *ICACHE_FLASH_ATTR
 ec_io_connet(const char *host, int port)
 {
@@ -347,7 +368,7 @@ ec_io_connet(const char *host, int port)
 	{
 		return NULL;
 	}
-    // ec_log("ec_io_connet %s:%d\r\n", host,port);
+    ec_log("ec_io_connet %s:%d\r\n", host,port);
 	{
 		deinit_queue();
         init_queue();
@@ -386,12 +407,9 @@ ec_io_connet(const char *host, int port)
     	// 未找到参数 espconn 对应的 TCP 连接
     	return NULL;
     }
-
     ec_send_flag = TRUE;
-
-    ip = ipaddr_addr(host);
-    // ec_log("ec_io_connet ipaddr_addr %lu\r\n", ip);
-    if (ip > 0)
+    ec_log("ec_io_connet ipaddr_addr %lu\r\n", ip);
+    if (ec_io_is_ip(host) == FALSE)
     {
     	// 测试代码 强制进入这里
     	err_t et = -99;
@@ -417,6 +435,7 @@ ec_io_connet(const char *host, int port)
     }
     else
     {
+    	ip = ipaddr_addr(host);
         os_memcpy(&ec_espconn.proto.tcp->remote_ip, &ip, sizeof(uint32));
         ret = espconn_connect(&ec_espconn);
         if(ret == 0)
